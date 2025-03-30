@@ -17,15 +17,9 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Hệ thống',
+                        label: 'Seminar',
                         icon: 'pi pi-fw pi-bookmark',
-                        items: [
-                            {
-                                label: 'Vị trí',
-                                icon: 'pi pi-fw pi-bookmark',
-                                routerLink: ['/staff-position'],
-                            },
-                        ],
+                        routerLink: ['/seminar'],
                     },
                 ],
             },
@@ -33,30 +27,29 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Thông tin nhân sự',
+                        label: 'Đề tài nghiên cứu',
                         icon: 'pi pi-fw pi-bookmark',
-                        items: [
-                            {
-                                label: 'Hồ sơ',
-                                icon: 'pi pi-fw pi-bookmark',
-                                routerLink: ['/5'],
-                            },
-                            {
-                                label: 'Hợp đồng',
-                                icon: 'pi pi-fw pi-bookmark',
-                                routerLink: ['/6'],
-                            },
-                            {
-                                label: 'Nghỉ việc',
-                                icon: 'pi pi-fw pi-bookmark',
-                                routerLink: ['/7'],
-                            },
-                            {
-                                label: 'Khen thưởng',
-                                icon: 'pi pi-fw pi-bookmark',
-                                routerLink: ['/8'],
-                            },
-                        ],
+                        routerLink: ['/research-topic'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Bài báo',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/news'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Báo cáo khoa học',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/scientific-report'],
                     },
                 ],
             },

@@ -1,10 +1,8 @@
-import {
-    DEFAULT_PAGE_INDEX,
-    DEFAULT_PAGE_SIZE,
-} from './../../../../core/configs/paging.config';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
+    DEFAULT_PAGE_INDEX,
+    DEFAULT_PAGE_SIZE,
     DEFAULT_PAGE_SIZE_OPTIONS,
     DEFAULT_PER_PAGE_OPTIONS,
 } from 'src/app/core/configs/paging.config';
@@ -12,18 +10,19 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { SeminarService } from 'src/app/core/services/seminar.service';
 
 @Component({
-    selector: 'app-show',
-    templateUrl: './show.component.html',
-    styleUrls: ['./show.component.css'],
+    selector: 'app-seminar',
+    templateUrl: './seminar.component.html',
+    styleUrls: ['./seminar.component.css'],
 })
-export class ShowComponent implements OnInit {
+export class SeminarComponent implements OnInit {
     items: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private classService: ClassService
+        private seminarService: SeminarService
     ) {}
     public config: any = {
         paging: pagingConfig.default,
@@ -38,7 +37,7 @@ export class ShowComponent implements OnInit {
     };
 
     //Banners
-    public classes: any = [];
+    public seminars: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -75,12 +74,12 @@ export class ShowComponent implements OnInit {
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getClasss(request);
+            this.getSeminar(request);
         });
     }
 
-    public getClasss(request: any): any {
-        this.classService.getPaging(request).subscribe((result: any) => {
+    public getSeminar(request: any): any {
+        this.seminarService.getPaging(request).subscribe((result: any) => {
             if (result.status) {
                 if (request.pageIndex !== 1 && result.data.items.length === 0) {
                     this.route.queryParams.subscribe((params) => {
@@ -96,20 +95,10 @@ export class ShowComponent implements OnInit {
                         });
                     });
                 }
-                this.classes = result.data.items;
 
-                // this.classes = this.classes.map(
-                //     (class: any) => ({
-                //         ...class,
-                //         status:
-                //             this.constant.class.status.find(
-                //                 (status: any) =>
-                //                     status.value === class.status
-                //             )?.label ?? '',
-                //     })
-                // );
-
-                if (this.classes.length === 0) {
+                this.seminars = result.data.items;
+                console.log(this.seminars);
+                if (this.seminars.length === 0) {
                     this.paging.pageIndex = 1;
                 }
 
@@ -120,10 +109,11 @@ export class ShowComponent implements OnInit {
             }
         });
     }
-
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.classes.map((teacher: any) => teacher.id);
+            this.selectedclass = this.seminars.map(
+                (teacher: any) => teacher.id
+            );
         } else {
             this.selectedclass = [];
         }
@@ -192,7 +182,6 @@ export class ShowComponent implements OnInit {
             });
         });
     }
-
     public handleDeleteItem(id: number) {
         // const swalWithBootstrapButtons = Swal.mixin({
         //     customClass: {

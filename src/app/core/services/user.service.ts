@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../models/user.model';
-import { API_CONSTANTS } from '../constants/api.constants';
+// import { API_CONSTANTS } from '../constants/api.constants';
 import { environment } from 'src/environments/environment';
 import { HttpLoadingService } from '../https/http-loading.service';
 
@@ -12,14 +12,14 @@ import { HttpLoadingService } from '../https/http-loading.service';
 export class UserService {
     constructor(private http: HttpLoadingService) {}
 
-    login(email: string, password: string): Observable<User> {
-        const data = { email, password };
-        return this.http.post(API_CONSTANTS.LOGIN, data);
-    }
+    // login(email: string, password: string): Observable<User> {
+    //     const data = { email, password };
+    //     return this.http.post(API_CONSTANTS.LOGIN, data);
+    // }
 
-    register(user: User): Observable<User> {
-        return this.http.post(API_CONSTANTS.REGISTER, user);
-    }
+    // register(user: User): Observable<User> {
+    //     return this.http.post(API_CONSTANTS.REGISTER, user);
+    // }
 
     getFilters(
         PageSize: number,
