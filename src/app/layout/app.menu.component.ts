@@ -17,9 +17,9 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Seminar',
+                        label: 'Quản lý sinh viên',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/seminar'],
+                        routerLink: ['/student'],
                     },
                 ],
             },
@@ -27,9 +27,9 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Đề tài nghiên cứu',
+                        label: 'Quản lý cán bộ',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/research-topic'],
+                        routerLink: ['/student'],
                     },
                 ],
             },
@@ -37,7 +37,7 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Bài báo',
+                        label: 'Bài báo khoa học',
                         icon: 'pi pi-fw pi-bookmark',
                         routerLink: ['/news'],
                     },
@@ -47,9 +47,80 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
+                        label: 'Quản lý chức danh',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/staff-position'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Quản lý phòng ban',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/room'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Quản lý hội thảo',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/seminar'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Đề tài nghiên cứu ',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/research-topic'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Quản lý chức danh',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/staff-position'],
+                    },
+                ],
+            },
+
+            {
+                label: '',
+                items: [
+                    {
                         label: 'Báo cáo khoa học',
                         icon: 'pi pi-fw pi-bookmark',
                         routerLink: ['/scientific-report'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Quản lý viết sách',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/curriculum'],
+                    },
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    {
+                        label: 'Quản lý sở hữu trí tuệ',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/intellectureal-property'],
                     },
                 ],
             },
