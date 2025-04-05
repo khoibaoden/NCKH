@@ -1,25 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { HttpLoadingService } from '../https/http-loading.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
-export class StaffPositionService {
+export class ScienceProjectService {
     constructor(private http: HttpLoadingService) {}
     getPaging(request: any = null): Observable<any> {
-        return this.http.get('staffposition/paging', request);
+        return this.http.get('scienceproject/paging', request);
     }
-
     create(request: FormData): Observable<any> {
-        return this.http.postFormData('staffposition/create', request);
+        return this.http.postFormData('scienceproject/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('staffposition/update', request);
+        return this.http.putFormData('scienceproject/update', request);
     }
 
     delete(request: any): Observable<any> {
-        return this.http.put('staffposition/delete', request);
+        return this.http.put('scienceproject/delete', request);
     }
 }

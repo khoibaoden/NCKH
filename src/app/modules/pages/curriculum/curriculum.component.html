@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách bài báo khoa học</h3>
+                <h3>Danh sách sở hữu trí tuệ</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -21,7 +21,7 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="seminars"
+                [value]="curriculums"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-striped"
                 [paginator]="false"
@@ -75,37 +75,24 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 15%">Mã đề tài</th>
-                        <th style="width: 15%">Tên đề tài</th>
-                        <th style="width: 15%">Chủ nhiệm đề tài</th>
-                        <th style="width: 5%">Số lượng thành viên</th>
-                        <th style="width: 5%">Số năm thực hiện</th>
-                        <th style="width: 6%">Định mức giờ theo công trình</th>
-                        <th style="width: 40%">Trạng thái</th>
+                        <th>STT</th>
+                        <th>Tên sách</th>
+                        <th>Năm xuất bản</th>
+                        <th>Tác giả chủ biên</th>
+                        <th>Số lượng tác giả</th>
+                        <th>Nhà xuất bản</th>
+                        <th>Ghi chú</th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-item>
+                <ng-template pTemplate="body" let-book let-i="rowIndex">
                     <tr>
-                        <td style="width: 5%; min-width: 10rem" class="code">
-                            {{ item.ProjectCode }}
-                        </td>
-                        <td style="width: 15%; min-width: 10rem">
-                            {{ item.ProjectName }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.ProjectManager }}
-                        </td>
-                        <td style="width: 14%; min-width: 8rem">
-                            {{ item.MemberCount }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.DurationInYears }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="truncate-2">
-                                {{ item.WorkHoursPerProject }}
-                            </span>
-                        </td>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ book.name }}</td>
+                        <td>{{ book.publishYear | date : "yyyy" }}</td>
+                        <td>{{ book.isAuthor ? "Có" : "Không" }}</td>
+                        <td>{{ book.memberNumber }}</td>
+                        <td>{{ book.publishingHouse }}</td>
+                        <td>{{ book.note }}</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -121,7 +108,7 @@
                     }}</span>
                     bản ghi
                 </p> -->
-                <div *ngIf="seminars?.length > 0">
+                <div *ngIf="curriculums?.length > 0">
                     <p-paginator
                         [rows]="pageSize"
                         (onPageChange)="onPageChange($event)"

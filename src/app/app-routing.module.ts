@@ -9,6 +9,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
     imports: [
         RouterModule.forRoot(
             [
+                //staff-position
                 {
                     path: '',
                     component: AppLayoutComponent,
@@ -22,6 +23,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                         },
                     ],
                 },
+                //news
                 {
                     path: '',
                     component: AppLayoutComponent,
@@ -35,6 +37,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                         },
                     ],
                 },
+                //seminar
                 {
                     path: '',
                     component: AppLayoutComponent,
@@ -48,6 +51,8 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                         },
                     ],
                 },
+
+                //research-topic
                 {
                     path: '',
                     component: AppLayoutComponent,
@@ -61,16 +66,63 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                         },
                     ],
                 },
+
+                //scientific-report
                 {
                     path: '',
                     component: AppLayoutComponent,
                     children: [
                         {
-                            path: 'scientific-report',
+                            path: 'science-report',
                             loadChildren: () =>
                                 import(
-                                    'src/app/modules/pages/scientific-report/scientific-report.module'
-                                ).then((m) => m.ScientificReportModule),
+                                    'src/app/modules/pages/science-report/science-report.module'
+                                ).then((m) => m.ScienceReportModule),
+                        },
+                    ],
+                },
+
+                //curriculum
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'curriculum',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/curriculum/curriculum.module'
+                                ).then((m) => m.CurriculumModule),
+                        },
+                    ],
+                },
+
+                //curriculum
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'curriculum',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/curriculum/curriculum.module'
+                                ).then((m) => m.CurriculumModule),
+                        },
+                    ],
+                },
+
+                //intellectureal-property
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'intellectureal-property',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/intellectureal-property/intellectureal-property.module'
+                                ).then((m) => m.IntellecturealPropertyModule),
                         },
                     ],
                 },

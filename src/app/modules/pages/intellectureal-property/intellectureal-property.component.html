@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách chức danh</h3>
+                <h3>Danh sách sở hữu trí tuệ</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -21,7 +21,7 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="classes"
+                [value]="news"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-striped"
                 [paginator]="false"
@@ -75,54 +75,30 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 15%">Mã nhập kho</th>
-                        <th style="width: 15%">Người tạo</th>
-                        <th style="width: 5%">Ngày nhập kho</th>
-                        <th style="width: 5%">Số sản phẩm</th>
-                        <th style="width: 6%">Tổng tiền</th>
-                        <th style="width: 40%">Ghi chú</th>
+                        <th>STT</th>
+                        <th>Tên sở hữu trí tuệ</th>
+                        <th>Ngày nghiệm thu</th>
+                        <th>Thành viên</th>
+                        <th>Số lượng tác giả</th>
+                        <th>Cấp độ</th>
+                        <th>Người sở hữu</th>
+                        <th>Giờ công trình</th>
+                        <th>Giờ được tính</th>
+                        <th>Ghi chú</th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-stockInItem>
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
                     <tr>
-                        <td
-                            style="width: 5%; min-width: 10rem"
-                            class="code"
-                            (click)="showStockInDetail(stockInItem)"
-                        >
-                            <span class="p-column-title">Code</span>
-                            {{ stockInItem.code }}
-                        </td>
-                        <td style="width: 15%; min-width: 10rem">
-                            <span class="p-column-title">CreateName</span>
-                            {{ stockInItem.createName }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title"
-                                >ImportStockInDate</span
-                            >
-                            {{
-                                stockInItem.createdAt
-                                    | date : "dd/MM/yyyy HH:mm:ss"
-                            }}
-                        </td>
-                        <td style="width: 14%; min-width: 8rem">
-                            <span class="p-column-title">TotalPoduct</span>
-                            {{ stockInItem.subQuantity }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title">TotalPrice</span>
-                            {{
-                                stockInItem.total
-                                    | currency : "VND" : "symbol" : "1.0-0"
-                            }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title">Note</span>
-                            <span class="truncate-2">
-                                {{ stockInItem.note }}
-                            </span>
-                        </td>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.acceptanceDate | date : "dd/MM/yyyy" }}</td>
+                        <td>{{ item.membersName }}</td>
+                        <td>{{ item.teamNumber }}</td>
+                        <td>{{ item.intellecturalPropertyLevel?.name }}</td>
+                        <td>{{ item.user?.fullName }}</td>
+                        <td>{{ item.workHoursPerProject }}</td>
+                        <td>{{ item.hoursCalculated }}</td>
+                        <td>{{ item.note }}</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -130,15 +106,7 @@
                 class="flex align-items-center"
                 style="justify-content: space-between"
             >
-                <!-- <p>
-                    <span style="font-weight: 500">{{ startRecord }}</span> -
-                    <span style="font-weight: 500">{{ endRecord }}</span> trong
-                    <span style="font-weight: 500">{{
-                        totalRecordsCount
-                    }}</span>
-                    bản ghi
-                </p> -->
-                <div *ngIf="classes?.length > 0">
+                <div *ngIf="news?.length > 0">
                     <p-paginator
                         [rows]="pageSize"
                         (onPageChange)="onPageChange($event)"
