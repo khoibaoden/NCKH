@@ -33,26 +33,7 @@ export class AppMenuComponent implements OnInit {
                     },
                 ],
             },
-            {
-                label: '',
-                items: [
-                    {
-                        label: 'Bài báo khoa học',
-                        icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/news'],
-                    },
-                ],
-            },
-            {
-                label: '',
-                items: [
-                    {
-                        label: 'Quản lý chức danh',
-                        icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/staff-position'],
-                    },
-                ],
-            },
+
             {
                 label: '',
                 items: [
@@ -77,7 +58,7 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     {
-                        label: 'Đề tài nghiên cứu ',
+                        label: 'Đề tài nghiên cứu',
                         icon: 'pi pi-fw pi-bookmark',
                         routerLink: ['/research-topic'],
                     },
@@ -93,14 +74,13 @@ export class AppMenuComponent implements OnInit {
                     },
                 ],
             },
-
             {
                 label: '',
                 items: [
                     {
                         label: 'Báo cáo khoa học',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/scientific-report'],
+                        routerLink: ['/science-report'],
                     },
                 ],
             },

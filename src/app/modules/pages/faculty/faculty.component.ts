@@ -1,29 +1,28 @@
-import {
-    DEFAULT_PAGE_INDEX,
-    DEFAULT_PAGE_SIZE,
-} from './../../../../core/configs/paging.config';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
+    DEFAULT_PAGE_INDEX,
+    DEFAULT_PAGE_SIZE,
     DEFAULT_PAGE_SIZE_OPTIONS,
     DEFAULT_PER_PAGE_OPTIONS,
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
-import { StaffPositionService } from 'src/app/core/services/staff-position.service';
+import { ClassService } from 'src/app/core/services/class.service';
+import { NewsService } from 'src/app/core/services/news.service';
 
 @Component({
-    selector: 'app-show',
-    templateUrl: './show.component.html',
-    styleUrls: ['./show.component.css'],
+    selector: 'app-faculty',
+    templateUrl: './faculty.component.html',
+    styleUrls: ['./faculty.component.css'],
 })
-export class ShowComponent implements OnInit {
+export class FacultyComponent implements OnInit {
     items: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private staffPositionService: StaffPositionService
+        private newsService: NewsService
     ) {}
     public config: any = {
         paging: pagingConfig.default,
@@ -33,12 +32,12 @@ export class ShowComponent implements OnInit {
     };
 
     public constant: any = {
-        class: classConstant,
+        news: classConstant,
         sort: sortConstant,
     };
 
     //Banners
-    public classes: any = [];
+    public Newss: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -48,7 +47,7 @@ export class ShowComponent implements OnInit {
         totalRecords: 0,
         totalPages: 0,
     };
-
+    news: any;
     public selectedclass: any = [];
 
     public queryParameters: any = {
@@ -75,60 +74,44 @@ export class ShowComponent implements OnInit {
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getStaffPosition(request);
+            this.getNews(request);
         });
     }
 
-    public getStaffPosition(request: any): any {
-        this.staffPositionService
-            .getPaging(request)
-            .subscribe((result: any) => {
-                if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
-                        this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
+    public getNews(request: any): any {
+        this.newsService.getPaging(request).subscribe((result: any) => {
+            if (result.status) {
+                if (request.pageIndex !== 1 && result.data.items.length === 0) {
+                    this.route.queryParams.subscribe((params) => {
+                        const request = {
+                            ...params,
+                            pageIndex: 1,
+                        };
 
-                            this.router.navigate([], {
-                                relativeTo: this.route,
-                                queryParams: request,
-                                queryParamsHandling: 'merge',
-                            });
+                        this.router.navigate([], {
+                            relativeTo: this.route,
+                            queryParams: request,
+                            queryParamsHandling: 'merge',
                         });
-                    }
-                    this.classes = result.data.items;
-
-                    // this.classes = this.classes.map(
-                    //     (class: any) => ({
-                    //         ...class,
-                    //         status:
-                    //             this.constant.class.status.find(
-                    //                 (status: any) =>
-                    //                     status.value === class.status
-                    //             )?.label ?? '',
-                    //     })
-                    // );
-
-                    if (this.classes.length === 0) {
-                        this.paging.pageIndex = 1;
-                    }
-
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
-
-                    this.selectedclass = [];
+                    });
                 }
-            });
-    }
 
-    public selectAllStaffPosition(event: any): void {
+                this.news = result.data.items;
+                console.log(this.Newss);
+                if (this.Newss.length === 0) {
+                    this.paging.pageIndex = 1;
+                }
+
+                const { items, ...paging } = result.data;
+                this.paging = paging;
+
+                this.selectedclass = [];
+            }
+        });
+    }
+    public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.classes.map((teacher: any) => teacher.id);
+            this.selectedclass = this.Newss.map((teacher: any) => teacher.id);
         } else {
             this.selectedclass = [];
         }
@@ -197,7 +180,6 @@ export class ShowComponent implements OnInit {
             });
         });
     }
-
     public handleDeleteItem(id: number) {
         // const swalWithBootstrapButtons = Swal.mixin({
         //     customClass: {

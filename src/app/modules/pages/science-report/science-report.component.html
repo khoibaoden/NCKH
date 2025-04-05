@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách chức danh</h3>
+                <h3>Bài báo khoa học</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -21,7 +21,7 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="classes"
+                [value]="scienceReport"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-striped"
                 [paginator]="false"
@@ -75,54 +75,34 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 15%">Mã nhập kho</th>
-                        <th style="width: 15%">Người tạo</th>
-                        <th style="width: 5%">Ngày nhập kho</th>
-                        <th style="width: 5%">Số sản phẩm</th>
-                        <th style="width: 6%">Tổng tiền</th>
-                        <th style="width: 40%">Ghi chú</th>
+                        <th>ID</th>
+                        <th>Tên báo cáo</th>
+                        <th>Số thành viên</th>
+                        <th>Phân loại</th>
+                        <th>Giờ công trình</th>
+                        <th>Giờ được tính</th>
+                        <th>Chủ nhiệm</th>
+                        <th>Tạp chí</th>
+                        <th>ISBN</th>
+                        <th>Địa điểm</th>
+                        <th>Năm xuất bản</th>
+                        <th>Ghi chú</th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-stockInItem>
+                <ng-template pTemplate="body" let-project>
                     <tr>
-                        <td
-                            style="width: 5%; min-width: 10rem"
-                            class="code"
-                            (click)="showStockInDetail(stockInItem)"
-                        >
-                            <span class="p-column-title">Code</span>
-                            {{ stockInItem.code }}
-                        </td>
-                        <td style="width: 15%; min-width: 10rem">
-                            <span class="p-column-title">CreateName</span>
-                            {{ stockInItem.createName }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title"
-                                >ImportStockInDate</span
-                            >
-                            {{
-                                stockInItem.createdAt
-                                    | date : "dd/MM/yyyy HH:mm:ss"
-                            }}
-                        </td>
-                        <td style="width: 14%; min-width: 8rem">
-                            <span class="p-column-title">TotalPoduct</span>
-                            {{ stockInItem.subQuantity }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title">TotalPrice</span>
-                            {{
-                                stockInItem.total
-                                    | currency : "VND" : "symbol" : "1.0-0"
-                            }}
-                        </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            <span class="p-column-title">Note</span>
-                            <span class="truncate-2">
-                                {{ stockInItem.note }}
-                            </span>
-                        </td>
+                        <td>{{ project.id }}</td>
+                        <td>{{ project.reportName }}</td>
+                        <td>{{ project.memberCount }}</td>
+                        <td>{{ project.scienceReportLevel?.name }}</td>
+                        <td>{{ project.workHoursPerProject }}</td>
+                        <td>{{ project.hoursCalculated }}</td>
+                        <td>{{ project.projectManager?.fullName }}</td>
+                        <td>{{ project.conferenceName }}</td>
+                        <td>{{ project.isbn }}</td>
+                        <td>{{ project.address }}</td>
+                        <td>{{ project.publishYear | date : "yyyy" }}</td>
+                        <td>{{ project.notes }}</td>
                     </tr>
                 </ng-template>
             </p-table>
@@ -138,7 +118,7 @@
                     }}</span>
                     bản ghi
                 </p> -->
-                <div *ngIf="classes?.length > 0">
+                <div *ngIf="scienceReport?.length > 0">
                     <p-paginator
                         [rows]="pageSize"
                         (onPageChange)="onPageChange($event)"

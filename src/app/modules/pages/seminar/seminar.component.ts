@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
     DEFAULT_PAGE_SIZE,
@@ -9,21 +10,41 @@ import pagingConfig, {
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
-import { ClassService } from 'src/app/core/services/class.service';
 import { SeminarService } from 'src/app/core/services/seminar.service';
 
 @Component({
     selector: 'app-seminar',
     templateUrl: './seminar.component.html',
     styleUrls: ['./seminar.component.css'],
+    providers: [MessageService, ConfirmationService]
 })
 export class SeminarComponent implements OnInit {
     items: any;
+    editDialogVisible: boolean = false;
+    editingSeminar: any = {};
+    seminarLevels: any[] = [];
+    code: string = '';
+    deadlineRange: any;
+    addDialogVisible: boolean = false;
+    formatdate: string = 'dd/mm/yy';
+
+    newSeminar: any = {
+        seminarName: '',
+        user: { name: '' },
+        eventDate: null,
+        hourCalculated: null,
+        note: '',
+        seminarLevel: null
+    };
+    
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private seminarService: SeminarService
+        private seminarService: SeminarService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
     ) {}
+
     public config: any = {
         paging: pagingConfig.default,
         baseUrl: systemConfig.baseFileSystemUrl,
@@ -76,6 +97,37 @@ export class SeminarComponent implements OnInit {
             };
             this.getSeminar(request);
         });
+
+    }
+
+    openAddDialog() {
+        this.newSeminar = {
+            seminarName: '',
+            user: '',
+            eventDate: null,
+            hourCalculated: null,
+            note: '',
+            seminarLevel: null
+        };
+        this.addDialogVisible = true;
+    }
+
+    saveNewSeminar() {
+        // Giả sử user hiện tại có trong biến currentUser
+        const newItem = {
+            ...this.newSeminar,
+            user: this.newSeminar.user,
+            date: this.newSeminar.eventDate
+        };
+    
+        this.seminars.push(newItem);
+        this.addDialogVisible = false;
+    
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đã thêm hội thảo mới'
+        });
     }
 
     public getSeminar(request: any): any {
@@ -109,6 +161,76 @@ export class SeminarComponent implements OnInit {
             }
         });
     }
+    
+    
+    
+    // Phương thức mở dialog chỉnh sửa
+    openEditDialog(seminar: any) {
+        this.editingSeminar = {...seminar};
+        // Nếu date là chuỗi, chuyển thành đối tượng Date
+        if (typeof this.editingSeminar.date === 'string') {
+            this.editingSeminar.date = new Date(this.editingSeminar.date);
+        }
+        this.editDialogVisible = true;
+    }
+    
+    // Phương thức đóng dialog
+    hideEditDialog() {
+        this.editDialogVisible = false;
+    }
+    
+    // Phương thức lưu thông tin đã chỉnh sửa
+    saveSeminar() {
+        if (this.editingSeminar.seminarName) {
+            // Gọi service để cập nhật thông tin
+            this.seminarService.update(this.editingSeminar).subscribe(
+                (result: any) => {
+                    if (result.status) {
+                        this.messageService.add({severity:'success', summary: 'Thành công', detail:'Cập nhật thông tin hội thảo thành công'});
+                        this.hideEditDialog();
+                        this.getSeminar(this.queryParameters);
+                    } else {
+                        this.messageService.add({severity:'error', summary: 'Lỗi', detail: result.message || 'Cập nhật thất bại'});
+                    }
+                },
+                (error) => {
+                    this.messageService.add({severity:'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi cập nhật'});
+                }
+            );
+        } else {
+            this.messageService.add({severity:'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên hội thảo'});
+        }
+    }
+    
+    // Phương thức xác nhận xóa
+    confirmDelete(seminar: any) {
+        this.confirmationService.confirm({
+            message: `Bạn có chắc muốn xóa hội thảo "${seminar.seminarName}" không?`,
+            header: 'Xác nhận xóa',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.deleteSeminar(seminar.id);
+            }
+        });
+    }
+    
+    // Phương thức xóa seminar
+    deleteSeminar(id: number) {
+        this.seminarService.delete(id).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({severity:'success', summary: 'Thành công', detail: 'Đã xóa hội thảo'});
+                    this.getSeminar(this.queryParameters);
+                } else {
+                    this.messageService.add({severity:'error', summary: 'Lỗi', detail: result.message || 'Xóa thất bại'});
+                }
+            },
+            (error) => {
+                this.messageService.add({severity:'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi xóa'});
+            }
+        );
+    }
+    
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
             this.selectedclass = this.seminars.map(
@@ -152,7 +274,7 @@ export class SeminarComponent implements OnInit {
     public handleSelectItem(id: number): void {
         if (this.isSelected(id)) {
             this.selectedclass = this.selectedclass.filter(
-                (id: any) => id !== id
+                (classId: any) => classId !== id
             );
         } else {
             this.selectedclass.push(id);
@@ -182,61 +304,6 @@ export class SeminarComponent implements OnInit {
             });
         });
     }
-    public handleDeleteItem(id: number) {
-        // const swalWithBootstrapButtons = Swal.mixin({
-        //     customClass: {
-        //         cancelButton: 'btn btn-danger ml-2',
-        //         confirmButton: 'btn btn-success',
-        //     },
-        //     buttonsStyling: false,
-        // });
-        // swalWithBootstrapButtons
-        //     .fire({
-        //         title: `Bạn có chắc muốn xoá banner có Id ${id}?`,
-        //         text: 'Sau khi xoá bản sẽ không thể khôi phục dữ liệu!',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Xác nhận',
-        //         cancelButtonText: 'Bỏ qua',
-        //         reverseButtons: false,
-        //     })
-        //     .then((result) => {
-        //         if (result.isConfirmed) {
-        //             const request = {
-        //                 id: id,
-        //             };
-        //         }
-        //     });
-    }
-
-    public handleOnDeleteMultiple() {
-        // const swalWithBootstrapButtons = Swal.mixin({
-        //     customClass: {
-        //         cancelButton: 'btn btn-danger ml-2',
-        //         confirmButton: 'btn btn-success',
-        //     },
-        //     buttonsStyling: false,
-        // });
-        // swalWithBootstrapButtons
-        //     .fire({
-        //         title: `Bạn có muốn xoá các bản ghi có Id: ${this.selectedBanners.join(
-        //             ', '
-        //         )} không?`,
-        //         text: 'Sau khi xoá bản sẽ không thể khôi phục dữ liệu!',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Xác nhận',
-        //         cancelButtonText: 'Bỏ qua',
-        //         reverseButtons: false,
-        //     })
-        //     .then((result) => {
-        //         if (result.isConfirmed) {
-        //             const request = {
-        //                 ids: this.selectedBanners,
-        //             };
-        //         }
-        //     });
-    }
 
     onPageChange(event: any) {
         this.paging.pageIndex = event.page + 1;
@@ -254,5 +321,33 @@ export class SeminarComponent implements OnInit {
                 queryParamsHandling: 'merge',
             });
         });
+    }
+    
+    // Phương thức lọc theo ngày
+    blurDateRange() {
+        // Logic xử lý khi blur date range (có thể thêm nếu cần)
+    }
+    
+    // Phương thức lọc
+    EvenFilter() {
+        // Logic xử lý khi nhấn nút lọc
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+                ...this.queryParameters,
+                creator: this.code ? this.code : null,
+                fromDate: this.deadlineRange && this.deadlineRange[0] ? this.formatDate(this.deadlineRange[0]) : null,
+                toDate: this.deadlineRange && this.deadlineRange[1] ? this.formatDate(this.deadlineRange[1]) : null,
+            },
+            queryParamsHandling: 'merge',
+        });
+    }
+    
+    // Hàm hỗ trợ định dạng ngày
+    formatDate(date: Date): string {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 }

@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ScientificReportComponent } from './scientific-report.component';
+import { ScienceReportComponent } from './science-report.component';
 
 @NgModule({
     imports: [
         RouterModule.forChild([
-            { path: '', component: ScientificReportComponent },
+            { path: '', component: ScienceReportComponent },
         ]),
     ],
     exports: [RouterModule],
 })
-export class ScientificReportRoutingModule {}
+export class ScienceReportRoutingModule {}

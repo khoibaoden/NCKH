@@ -10,19 +10,19 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
-import { SeminarService } from 'src/app/core/services/seminar.service';
+import { NewsService } from 'src/app/core/services/news.service';
 
 @Component({
-    selector: 'app-scientific-report',
-    templateUrl: './scientific-report.component.html',
-    styleUrls: ['./scientific-report.component.css'],
+    selector: 'app-intellectureal-property',
+    templateUrl: './intellectureal-property.component.html',
+    styleUrls: ['./intellectureal-property.component.css'],
 })
-export class ScientificReportComponent implements OnInit {
+export class IntellecturealPropertyComponent implements OnInit {
     items: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private seminarService: SeminarService
+        private newsService: NewsService
     ) {}
     public config: any = {
         paging: pagingConfig.default,
@@ -32,12 +32,12 @@ export class ScientificReportComponent implements OnInit {
     };
 
     public constant: any = {
-        class: classConstant,
+        news: classConstant,
         sort: sortConstant,
     };
 
     //Banners
-    public seminars: any = [];
+    public Newss: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -47,7 +47,7 @@ export class ScientificReportComponent implements OnInit {
         totalRecords: 0,
         totalPages: 0,
     };
-
+    news: any;
     public selectedclass: any = [];
 
     public queryParameters: any = {
@@ -74,12 +74,12 @@ export class ScientificReportComponent implements OnInit {
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getSeminar(request);
+            this.getNews(request);
         });
     }
 
-    public getSeminar(request: any): any {
-        this.seminarService.getPaging(request).subscribe((result: any) => {
+    public getNews(request: any): any {
+        this.newsService.getPaging(request).subscribe((result: any) => {
             if (result.status) {
                 if (request.pageIndex !== 1 && result.data.items.length === 0) {
                     this.route.queryParams.subscribe((params) => {
@@ -96,9 +96,9 @@ export class ScientificReportComponent implements OnInit {
                     });
                 }
 
-                this.seminars = result.data.items;
-                console.log(this.seminars);
-                if (this.seminars.length === 0) {
+                this.news = result.data.items;
+                console.log(this.Newss);
+                if (this.Newss.length === 0) {
                     this.paging.pageIndex = 1;
                 }
 
@@ -109,12 +109,9 @@ export class ScientificReportComponent implements OnInit {
             }
         });
     }
-
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.seminars.map(
-                (teacher: any) => teacher.id
-            );
+            this.selectedclass = this.Newss.map((teacher: any) => teacher.id);
         } else {
             this.selectedclass = [];
         }
@@ -183,7 +180,6 @@ export class ScientificReportComponent implements OnInit {
             });
         });
     }
-
     public handleDeleteItem(id: number) {
         // const swalWithBootstrapButtons = Swal.mixin({
         //     customClass: {

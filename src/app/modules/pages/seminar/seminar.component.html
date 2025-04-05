@@ -14,7 +14,7 @@
                     pRipple
                     icon="pi pi-plus"
                     label="Thêm"
-                    [routerLink]="['/pages/warehouse/stock-in/create']"
+                    (click)="openAddDialog()"
                 ></button>
             </ng-template>
         </p-toolbar>
@@ -35,7 +35,10 @@
                     <div
                         class="flex flex-column gap-3 align-items-end md:flex-row md:"
                     >
-                        <div class="flex flex-column" style="margin-left: -12px;">
+                        <div
+                            class="flex flex-column"
+                            style="margin-left: -12px"
+                        >
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
@@ -80,41 +83,280 @@
                 <!-- Header của bảng -->
                 <ng-template pTemplate="header">
                     <tr>
-                        <th pSortableColumn="seminarName" style="width: 20%">
+                        <th
+                            class="text-center"
+                            pSortableColumn="seminarName"
+                            style="width: 18%"
+                        >
                             Tên hội thảo
                             <p-sortIcon field="seminarName"></p-sortIcon>
                         </th>
-                        <th pSortableColumn="user.name" style="width: 20%">
+                        <th
+                            class="text-center"
+                            pSortableColumn="user.name"
+                            style="width: 18%"
+                        >
                             Người tạo
                             <p-sortIcon field="user.name"></p-sortIcon>
                         </th>
-                        <th pSortableColumn="date" style="width: 20%">
+                        <th
+                            class="text-center"
+                            pSortableColumn="date"
+                            style="width: 15%"
+                        >
                             Ngày tổ chức
                             <p-sortIcon field="date"></p-sortIcon>
                         </th>
-                        <th style="width: 15%">Số giờ</th>
-                        <th style="width: 15%">Ghi chú</th>
-                        <th style="width: 10%">Mức độ</th>
+                        <th class="text-center" style="width: 12%">Số giờ</th>
+                        <th class="text-center" style="width: 15%">Ghi chú</th>
+                        <th class="text-center" style="width: 10%">Mức độ</th>
+                        <th class="text-center" style="width: 12%">Thao tác</th>
                     </tr>
                 </ng-template>
                 <!-- Body của bảng -->
                 <ng-template pTemplate="body" let-item>
                     <tr>
-                        <td style="width: 20%">{{ item.seminarName || 'Chưa có thông tin' }}</td>
-                        <td style="width: 20%">{{ item.user?.name || 'Chưa có thông tin' }}</td>
-                        <td style="width: 20%">{{ item.date ? (item.date | date: 'dd/MM/yyyy') : 'Chưa có thông tin' }}</td>
-                        <td style="width: 15%">{{ item.hourCalculated || item.hourCalculated === 0 ? item.hourCalculated : 'Chưa có thông tin' }}</td>
-                        <td style="width: 15%" class="truncate-text" title="{{ item.note || 'Chưa có thông tin' }}">{{ item.note || 'Chưa có thông tin' }}</td>
-                        <td style="width: 10%">{{ item.seminarLevel?.name || 'Chưa có thông tin' }}</td>
+                        <td style="width: 18%">
+                            {{ item.seminarName || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 18%">
+                            {{ item.user?.name || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 15%">
+                            {{
+                                item.date
+                                    ? (item.date | date : "dd/MM/yyyy")
+                                    : "Chưa có thông tin"
+                            }}
+                        </td>
+                        <td class="text-center" style="width: 12%">
+                            {{
+                                item.hourCalculated || item.hourCalculated === 0
+                                    ? item.hourCalculated
+                                    : "Chưa có thông tin"
+                            }}
+                        </td>
+                        <td
+                            style="width: 15%"
+                            class="truncate-text text-center"
+                            title="{{ item.note || 'Chưa có thông tin' }}"
+                        >
+                            {{ item.note || "Chưa có thông tin" }}
+                        </td>
+                        <td style="width: 10%">
+                            {{ item.seminarLevel?.description || "Chưa có thông tin" }}
+                        </td>
+                        <td style="width: 12%">
+                            <div class="flex gap-2 justify-content-center">
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-info p-button-sm"
+                                    (click)="openEditDialog(item)"
+                                    pTooltip="Sửa"
+                                    tooltipPosition="top"
+                                ></button>
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm"
+                                    (click)="confirmDelete(item)"
+                                    pTooltip="Xóa"
+                                    tooltipPosition="top"
+                                ></button>
+                            </div>
+                        </td>
                     </tr>
                 </ng-template>
                 <!-- Thông báo khi không có dữ liệu -->
                 <ng-template pTemplate="emptymessage">
                     <tr>
-                        <td colspan="6" class="text-center">Không có dữ liệu hội thảo.</td>
+                        <td colspan="7" class="text-center">
+                            Không có dữ liệu hội thảo.
+                        </td>
                     </tr>
                 </ng-template>
             </p-table>
         </div>
     </div>
 </div>
+
+<!-- Dialog để sửa thông tin seminar -->
+<p-dialog
+    [(visible)]="editDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Chỉnh sửa thông tin hội thảo"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="seminarName">Tên hội thảo</label>
+            <input
+                type="text"
+                pInputText
+                id="seminarName"
+                [(ngModel)]="editingSeminar.seminarName"
+                required
+                autofocus
+            />
+        </div>
+        <div class="field">
+            <label for="creator">Người tạo</label>
+            <input
+                type="text"
+                pInputText
+                id="creator"
+                [(ngModel)]="editingSeminar.name"
+                disabled
+            />
+        </div>
+        <div class="field">
+            <label for="date">Ngày tổ chức</label>
+            <p-calendar
+                [(ngModel)]="editingSeminar.eventDate"
+                appendTo="body"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                placeholder="Chọn ngày"
+            >
+            </p-calendar>
+        </div>
+        <div class="field">
+            <label for="hourCalculated">Số giờ</label>
+            <p-inputNumber
+                id="hourCalculated"
+                [(ngModel)]="editingSeminar.hourCalculated"
+            ></p-inputNumber>
+        </div>
+        <div class="field">
+            <label for="note">Ghi chú</label>
+            <textarea
+                id="note"
+                pInputTextarea
+                [(ngModel)]="editingSeminar.note"
+                rows="3"
+            ></textarea>
+        </div>
+        <div class="field">
+            <label for="seminarLevel">Mức độ</label>
+            <p-dropdown
+                id="seminarLevel"
+                [options]="seminarLevels"
+                [(ngModel)]="editingSeminar.seminarLevel"
+                optionLabel="name"
+                placeholder="Chọn mức độ"
+            ></p-dropdown>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideEditDialog()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Lưu"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveSeminar()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog xác nhận xóa -->
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
+
+
+
+<!-- Dialog thêm mới hội thảo -->
+<p-dialog
+    [(visible)]="addDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Thêm hội thảo mới"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="seminarName">Tên hội thảo</label>
+            <input
+                type="text"
+                pInputText
+                id="seminarName"
+                [(ngModel)]="newSeminar.seminarName"
+                required
+            />
+        </div>
+        <div class="field">
+            <label for="eventDate">Ngày tổ chức</label>
+            <p-calendar
+                [(ngModel)]="newSeminar.eventDate"
+                appendTo="body"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                placeholder="Chọn ngày"
+            ></p-calendar>
+        </div>
+        <div class="field">
+            <label for="hourCalculated">Số giờ</label>
+            <p-inputNumber
+                id="hourCalculated"
+                [(ngModel)]="newSeminar.hourCalculated"
+            ></p-inputNumber>
+        </div>
+        <div class="field">
+            <label for="note">Ghi chú</label>
+            <textarea
+                id="note"
+                pInputTextarea
+                [(ngModel)]="newSeminar.note"
+                rows="3"
+            ></textarea>
+        </div>
+        <div class="field">
+            <label for="seminarLevel">Mức độ</label>
+            <p-dropdown
+                id="seminarLevel"
+                [options]="seminarLevels"
+                [(ngModel)]="newSeminar.seminarLevel"
+                optionLabel="name"
+                placeholder="Chọn mức độ"
+            ></p-dropdown>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="addDialogVisible = false"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Thêm"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveNewSeminar()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Thông báo Toast -->
+<p-toast></p-toast>
