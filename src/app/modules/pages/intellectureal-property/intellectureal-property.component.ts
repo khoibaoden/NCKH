@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
@@ -10,6 +11,7 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { UserService } from 'src/app/core/services/identity/user.service';
 import { NewsService } from 'src/app/core/services/news.service';
 
 @Component({
@@ -18,12 +20,29 @@ import { NewsService } from 'src/app/core/services/news.service';
     styleUrls: ['./intellectureal-property.component.css'],
 })
 export class IntellecturealPropertyComponent implements OnInit {
+    createIntellecturealForm: FormGroup;
     items: any;
+    filteredItems: any;
+    search: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private newsService: NewsService
-    ) {}
+        private newsService: NewsService,
+        private formBuilder: FormBuilder,
+        private userService: UserService
+    ) {
+        this.createIntellecturealForm = this.formBuilder.group({
+            code: ['', [Validators.required]],
+            name: ['', Validators.required],
+            acceptanceDate: [null],
+            membersName: [''],
+            teamNumber: [null],
+            intellecturalPropertyLevelId: [null, Validators.required],
+            workHoursPerProject: [null],
+            hoursCalculated: [null],
+            note: [''],
+        });
+    }
     public config: any = {
         paging: pagingConfig.default,
         baseUrl: systemConfig.baseFileSystemUrl,
@@ -56,6 +75,8 @@ export class IntellecturealPropertyComponent implements OnInit {
         keyWord: '',
     };
 
+    visibleIntellectureal: boolean = false;
+
     ngOnInit() {
         this.items = [{ label: 'Vị trí nhân sự' }];
         this.route.queryParams.subscribe((params) => {
@@ -76,6 +97,28 @@ export class IntellecturealPropertyComponent implements OnInit {
             };
             this.getNews(request);
         });
+
+        this.handleOnSearch();
+    }
+
+    public handleOnSearch(event: any = null): void {
+        // this.search = event.target.value;
+        // this.filteredItems = this.items.filter((item: any) =>
+        //     item.name.toLowerCase().includes(this.search.toLowerCase())
+        // );
+
+        this.userService.getPaging(this.search).subscribe((result: any) => {
+            if (result.status) {
+                console.log(result);
+                this.items = result.data.items;
+                const { items, ...paging } = result.data;
+                this.paging = paging;
+            }
+        });
+    }
+
+    showDialogIntellectureal() {
+        this.visibleIntellectureal = true;
     }
 
     public getNews(request: any): any {
@@ -109,6 +152,7 @@ export class IntellecturealPropertyComponent implements OnInit {
             }
         });
     }
+
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
             this.selectedclass = this.Newss.map((teacher: any) => teacher.id);
@@ -180,6 +224,7 @@ export class IntellecturealPropertyComponent implements OnInit {
             });
         });
     }
+
     public handleDeleteItem(id: number) {
         // const swalWithBootstrapButtons = Swal.mixin({
         //     customClass: {

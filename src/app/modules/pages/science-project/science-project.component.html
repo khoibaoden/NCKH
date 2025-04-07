@@ -13,8 +13,8 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Nhập kho"
-                    [routerLink]="['/pages/warehouse/stock-in/create']"
+                    label="Thêm mới"
+                    (click)="visibleScienceProject = true"
                 ></button>
             </ng-template>
         </p-toolbar>
@@ -127,3 +127,198 @@
         </div>
     </div>
 </div>
+
+<p-dialog
+    header="Thêm mới"
+    [modal]="true"
+    [(visible)]="visibleScienceProject"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createScienceProjectForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectName">Tên đề tài NCKH</label>
+                    <input
+                        type="text"
+                        id="projectName"
+                        pInputText
+                        formControlName="projectName"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="scienceProjectLevelId">Cấp đề tài</label>
+                    <input
+                        type="number"
+                        id="scienceProjectLevelId"
+                        pInputText
+                        formControlName="scienceProjectLevelId"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="startYear">Năm bắt đầu</label>
+                    <input
+                        type="date"
+                        id="startYear"
+                        pInputText
+                        formControlName="startYear"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="endYear">Năm kết thúc</label>
+                    <input
+                        type="date"
+                        id="endYear"
+                        pInputText
+                        formControlName="endYear"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectLeader">Chủ nhiệm đề tài</label>
+                    <input
+                        type="text"
+                        id="projectLeader"
+                        pInputText
+                        formControlName="projectLeader"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="memberCount">Số lượng thành viên</label>
+                    <input
+                        type="number"
+                        id="memberCount"
+                        pInputText
+                        formControlName="memberCount"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectCode">Mã số đề tài</label>
+                    <input
+                        type="text"
+                        id="projectCode"
+                        pInputText
+                        formControlName="projectCode"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="durationInYears">Số năm thực hiện</label>
+                    <input
+                        type="number"
+                        id="durationInYears"
+                        pInputText
+                        formControlName="durationInYears"
+                        step="0.1"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Định mức giờ theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        id="workHoursPerProject"
+                        pInputText
+                        formControlName="workHoursPerProject"
+                        step="0.1"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        id="hoursCalculated"
+                        pInputText
+                        formControlName="hoursCalculated"
+                        step="0.1"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectManagerId">ID Chủ nhiệm</label>
+                    <input
+                        type="number"
+                        id="projectManagerId"
+                        pInputText
+                        formControlName="projectManagerId"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="managingAgency">Cơ quan quản lý</label>
+                    <input
+                        type="text"
+                        id="managingAgency"
+                        pInputText
+                        formControlName="managingAgency"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="scienceProjecStatus">Tình trạng đề tài</label>
+                    <p-dropdown
+                        [options]="statusOptions"
+                        formControlName="scienceProjecStatus"
+                        placeholder="Chọn tình trạng"
+                    >
+                    </p-dropdown>
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="notes">Ghi chú</label>
+                    <textarea
+                        id="notes"
+                        rows="3"
+                        pInputTextarea
+                        formControlName="notes"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường trước đó -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <input
+                        type="date"
+                        pInputText
+                        id="acceptanceDate"
+                        formControlName="acceptanceDate"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="membersName">Tên các thành viên</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="membersName"
+                        formControlName="membersName"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleScienceProject = false"
+        ></p-button>
+        <p-button icon="pi pi-plus" label="Thêm mới"></p-button>
+    </div>
+</p-dialog>

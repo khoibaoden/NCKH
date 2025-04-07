@@ -2,7 +2,7 @@ export enum Page {
     Login = '/auth/login',
     Home = '/',
     AdminLogin = '/admin/auth/login',
-    Dashboard = '/admin/dashboard',
+    Dashboard = '',
     Register = '/auth/register',
     Forget = '/auth/forget',
     SetPassword = '/auth/set-password',

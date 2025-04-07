@@ -38,6 +38,10 @@ export class UserService {
         return this.http.get('user/paging', params);
     }
 
+    getPaging(request: any = null): Observable<any> {
+        return this.http.get('user/paging', request);
+    }
+
     createUser(userData: any): Observable<any> {
         return this.http.post('user/create', userData);
     }

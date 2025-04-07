@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IntellecturealPropertyComponent } from './intellectureal-property.component';
 import { IntellecturealPropertyRoutingModule } from './intellectureal-routing.module';
 import { SharedModule } from 'src/app/shared/modules/shared.module';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 @NgModule({
     imports: [CommonModule, IntellecturealPropertyRoutingModule, SharedModule],

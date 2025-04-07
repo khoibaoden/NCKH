@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
@@ -20,14 +21,36 @@ export class ScienceProjectComponent implements OnInit {
     // constructor() {}
 
     // ngOnInit() {}
-
+    visibleScienceProject: boolean = false;
+    createScienceProjectForm: FormGroup;
     items: any;
     scienceProjects: any;
+    statusOptions: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private classService: ClassService
-    ) {}
+        private classService: ClassService,
+        private fb: FormBuilder
+    ) {
+        this.createScienceProjectForm = this.fb.group({
+            projectName: ['', Validators.required],
+            scienceProjectLevelId: [null, Validators.required],
+            startYear: [null],
+            endYear: [null],
+            projectLeader: [''],
+            memberCount: [null],
+            projectCode: [''],
+            durationInYears: [null],
+            workHoursPerProject: [null],
+            hoursCalculated: [null],
+            projectManagerId: [null],
+            managingAgency: [''],
+            scienceProjecStatus: [0],
+            notes: [''],
+            acceptanceDate: [null],
+            membersName: [''],
+        });
+    }
 
     public config: any = {
         paging: pagingConfig.default,

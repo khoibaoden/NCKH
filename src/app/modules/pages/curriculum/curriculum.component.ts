@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
@@ -20,11 +21,31 @@ import { ScienceReportService } from 'src/app/core/services/science-report.servi
 export class CurriculumComponent implements OnInit {
     items: any;
     curriculums: any;
+    visibleCurriculum: boolean = false;
+    createCurriculumForm: FormGroup;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private scienceReportService: ScienceReportService
-    ) {}
+        private scienceReportService: ScienceReportService,
+        private fb: FormBuilder
+    ) {
+        this.createCurriculumForm = this.fb.group({
+            projectName: [''],
+            scienceProjectLevelId: [null],
+            userId: [null],
+            name: [''],
+            publishYear: [null],
+            isAuthor: [false],
+            memberNumber: [null],
+            isAuthorWrite: [false],
+            isbn: [''],
+            publishingHouse: [''],
+            curriculumLevelId: [null],
+            workHoursPerProject: [null],
+            hoursCalculated: [null],
+            note: [''],
+        });
+    }
 
     public config: any = {
         paging: pagingConfig.default,

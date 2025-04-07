@@ -132,3 +132,35 @@
         </div>
     </div>
 </div>
+
+<p-dialog
+    header="Thêm mới"
+    [modal]="true"
+    [(visible)]="visibleScienceReport"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createScienceReportForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectName">Tên đề tài NCKH</label>
+                    <input
+                        type="text"
+                        id="projectName"
+                        pInputText
+                        formControlName="projectName"
+                    />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleScienceReport = false"
+        ></p-button>
+        <p-button icon="pi pi-plus" label="Thêm mới"></p-button>
+    </div>
+</p-dialog>

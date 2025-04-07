@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách sở hữu trí tuệ</h3>
+                <h3>Danh sách viết sách</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -13,8 +13,8 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Nhập kho"
-                    [routerLink]="['/pages/warehouse/stock-in/create']"
+                    label="Thêm mới"
+                    (click)="visibleCurriculum = true"
                 ></button>
             </ng-template>
         </p-toolbar>
@@ -122,3 +122,171 @@
         </div>
     </div>
 </div>
+
+<p-dialog
+    header="Thêm mới"
+    [modal]="true"
+    [(visible)]="visibleCurriculum"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createCurriculumForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectName">Tên đề tài NCKH</label>
+                    <input
+                        type="text"
+                        id="projectName"
+                        pInputText
+                        formControlName="projectName"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="scienceProjectLevelId">Cấp đề tài</label>
+                    <input
+                        type="number"
+                        id="scienceProjectLevelId"
+                        pInputText
+                        formControlName="scienceProjectLevelId"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Bổ sung các trường mới -->
+                <div class="field col mb-0">
+                    <label for="userId">ID Cán bộ</label>
+                    <input
+                        type="number"
+                        id="userId"
+                        pInputText
+                        formControlName="userId"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="name">Tên sách/giáo trình</label>
+                    <input
+                        type="text"
+                        id="name"
+                        pInputText
+                        formControlName="name"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="publishYear">Năm xuất bản</label>
+                    <input
+                        type="date"
+                        id="publishYear"
+                        pInputText
+                        formControlName="publishYear"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="isAuthor">Tác giả chủ biên</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthor"
+                        inputId="isAuthor"
+                    ></p-checkbox>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="memberNumber">Số lượng tác giả</label>
+                    <input
+                        type="number"
+                        id="memberNumber"
+                        pInputText
+                        formControlName="memberNumber"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="isAuthorWrite">Chủ biên tham gia viết</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthorWrite"
+                        inputId="isAuthorWrite"
+                    ></p-checkbox>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="isbn">ISBN</label>
+                    <input
+                        type="text"
+                        id="isbn"
+                        pInputText
+                        formControlName="isbn"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="publishingHouse">Nhà xuất bản</label>
+                    <input
+                        type="text"
+                        id="publishingHouse"
+                        pInputText
+                        formControlName="publishingHouse"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="curriculumLevelId">Cấp giáo trình</label>
+                    <input
+                        type="number"
+                        id="curriculumLevelId"
+                        pInputText
+                        formControlName="curriculumLevelId"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject">Định mức giờ</label>
+                    <input
+                        type="number"
+                        id="workHoursPerProject"
+                        pInputText
+                        formControlName="workHoursPerProject"
+                        step="0.1"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        id="hoursCalculated"
+                        pInputText
+                        formControlName="hoursCalculated"
+                        step="0.1"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        rows="3"
+                        id="note"
+                        pInputTextarea
+                        formControlName="note"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleCurriculum = false"
+        ></p-button>
+        <p-button icon="pi pi-plus" label="Thêm mới"></p-button>
+    </div>
+</p-dialog>
