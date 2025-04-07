@@ -1,20 +1,62 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { LayoutService } from "./service/app.layout.service";
+import { LayoutService } from './service/app.layout.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../core/services/identity/auth.service';
 
 @Component({
     selector: 'app-topbar',
-    templateUrl: './app.topbar.component.html'
+    templateUrl: './app.topbar.component.html',
 })
 export class AppTopBarComponent {
+    @ViewChild('menu') menu!: ElementRef;
+    @ViewChild('menubutton', { static: false }) menuButton!: ElementRef;
+    @ViewChild('topbarmenubutton', { static: false })
+    topbarMenuButton!: ElementRef;
 
-    items!: MenuItem[];
+    menuItems: MenuItem[] = [];
+    userInfo: any = null;
+    showProfileModal: boolean = false;
 
-    @ViewChild('menubutton') menuButton!: ElementRef;
+    constructor(
+        public layoutService: LayoutService,
+        private authService: AuthService,
+        private router: Router
+    ) {}
 
-    @ViewChild('topbarmenubutton') topbarMenuButton!: ElementRef;
+    ngOnInit() {
+        this.menuItems = [
+            {
+                label: 'Tài khoản',
+                icon: 'pi pi-user',
+                command: () => this.goToProfile(),
+            },
+            {
+                label: 'Đăng xuất',
+                icon: 'pi pi-sign-out',
+                command: () => this.logout(),
+            },
+        ];
+        this.authService.getUserCurrentApi().subscribe((response) => {
+            if (response.status) {
+                this.userInfo = response.data;
+            }
+        });
+    }
 
-    @ViewChild('topbarmenu') menu!: ElementRef;
+    goToProfile() {
+        this.router.navigate(['/profile']);
+    }
 
-    constructor(public layoutService: LayoutService) { }
+    logout() {
+        this.router.navigate(['/auth/login']);
+    }
+
+    openProfileModal() {
+        this.showProfileModal = true;
+    }
+
+    closeProfileModal() {
+        this.showProfileModal = false;
+    }
 }

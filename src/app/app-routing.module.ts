@@ -52,21 +52,6 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                     ],
                 },
 
-                //research-topic
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
-                        {
-                            path: 'research-topic',
-                            loadChildren: () =>
-                                import(
-                                    'src/app/modules/pages/research-topic/research-topic.module'
-                                ).then((m) => m.ResearchTopicModule),
-                        },
-                    ],
-                },
-
                 //scientific-report
                 {
                     path: '',
@@ -97,17 +82,17 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                     ],
                 },
 
-                //curriculum
+                //science-project
                 {
                     path: '',
                     component: AppLayoutComponent,
                     children: [
                         {
-                            path: 'curriculum',
+                            path: 'science-project',
                             loadChildren: () =>
                                 import(
-                                    'src/app/modules/pages/curriculum/curriculum.module'
-                                ).then((m) => m.CurriculumModule),
+                                    'src/app/modules/pages/science-project/science-project.module'
+                                ).then((m) => m.ScienceProjectModule),
                         },
                     ],
                 },

@@ -34,7 +34,7 @@ export class AuthService {
     // tny add
     login(request: any): Observable<any> {
         return this.httpLoadingService
-            .post(`auth/login-by-email`, request)
+            .post(`auth/login-by-username`, request)
             .pipe(catchError(this.handleError));
     }
 
@@ -68,16 +68,20 @@ export class AuthService {
     }
 
     getUserCurrentApi(): Observable<ApiResult<UserCurrent>> {
+        console.log(1);
         return this.http.get<ApiResult<UserCurrent>>(
-            `${this.url}'/api/user/user-info'`
+            `${this.url}'/user/user-info'`
         );
     }
 
     fetchUserCurrent(): Observable<ApiResult<UserCurrent>> {
         let headers = this.httpService.addSkipLoadingHeader();
-        return this.http.get<ApiResult<UserCurrent>>(`/user/user-info`, {
-            headers,
-        });
+        return this.http.get<ApiResult<UserCurrent>>(
+            `https://localhost:7115/api/user/user-info`,
+            {
+                headers,
+            }
+        );
     }
 
     refreshToken(

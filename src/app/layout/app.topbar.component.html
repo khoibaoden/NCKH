@@ -1,14 +1,7 @@
 <div class="layout-topbar">
     <a class="layout-topbar-logo" routerLink="">
-        <img
-            src="assets/layout/images/{{
-                layoutService.config().colorScheme === 'light'
-                    ? 'logo-dark'
-                    : 'logo-white'
-            }}.svg"
-            alt="logo"
-        />
-        <span>SAKAI</span>
+        <img src="assets/layout/images/hungyen.png" />
+        <span>SPKTHY</span>
     </a>
 
     <button
@@ -39,16 +32,66 @@
             <i class="pi pi-calendar"></i>
             <span>Calendar</span>
         </button>
-        <button class="p-link layout-topbar-button">
+
+        <button
+            class="p-link layout-topbar-button"
+            (click)="openProfileModal()"
+        >
             <i class="pi pi-user"></i>
             <span>Profile</span>
         </button>
+
+        <!-- Nút Settings có menu -->
         <button
             class="p-link layout-topbar-button"
-            [routerLink]="'/documentation'"
+            (click)="menu.toggle($event)"
         >
             <i class="pi pi-cog"></i>
             <span>Settings</span>
         </button>
+
+        <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
     </div>
 </div>
+
+<!-- Modal hiển thị thông tin người dùng -->
+<p-dialog
+    [(visible)]="showProfileModal"
+    modal="true"
+    header="Thông tin người dùng"
+    [closable]="true"
+    (onHide)="closeProfileModal()"
+>
+    <div *ngIf="userInfo">
+        <div class="user-profile">
+            <img
+                *ngIf="userInfo.avatarUrl"
+                [src]="userInfo.avatarUrl"
+                alt="Avatar"
+                class="avatar"
+            />
+            <img
+                *ngIf="!userInfo.avatarUrl"
+                src="https://thumb.ac-illust.com/41/414d4c146aff5f40b35a6780d9c67a54_t.jpeg"
+                alt="Default Avatar"
+                class="avatar"
+            />
+            <h3>{{ userInfo.name }}</h3>
+            <p><strong>Tài khoản:</strong> {{ userInfo.userName }}</p>
+            <p>
+                <strong>Email:</strong> {{ userInfo.email || "Chưa cập nhật" }}
+            </p>
+            <p>
+                <strong>Số điện thoại:</strong>
+                {{ userInfo.phoneNumber || "Chưa cập nhật" }}
+            </p>
+            <p>
+                <strong>Vai trò:</strong> {{ userInfo.roleNames?.join(", ") }}
+            </p>
+            <p>
+                <strong>Địa chỉ:</strong>
+                {{ userInfo.address || "Chưa cập nhật" }}
+            </p>
+        </div>
+    </div>
+</p-dialog>

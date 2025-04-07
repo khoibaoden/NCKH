@@ -60,7 +60,7 @@ export class AppMenuComponent implements OnInit {
                     {
                         label: 'Đề tài nghiên cứu',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/research-topic'],
+                        routerLink: ['/science-project'],
                     },
                 ],
             },
