@@ -144,7 +144,10 @@
                             {{ item.note || "Chưa có thông tin" }}
                         </td>
                         <td style="width: 10%">
-                            {{ item.seminarLevel?.description || "Chưa có thông tin" }}
+                            {{
+                                item.seminarLevel?.description ||
+                                    "Chưa có thông tin"
+                            }}
                         </td>
                         <td style="width: 12%">
                             <div class="flex gap-2 justify-content-center">
@@ -279,8 +282,6 @@
     icon="pi pi-exclamation-triangle"
 ></p-confirmDialog>
 
-
-
 <!-- Dialog thêm mới hội thảo -->
 <p-dialog
     [(visible)]="addDialogVisible"
@@ -291,31 +292,66 @@
 >
     <ng-template pTemplate="content">
         <div class="field">
-            <label for="seminarName">Tên hội thảo</label>
+            <label for="seminarName"
+                >Tên hội thảo <span class="text-danger">*</span></label
+            >
             <input
                 type="text"
                 pInputText
                 id="seminarName"
                 [(ngModel)]="newSeminar.seminarName"
                 required
+                autofocus
+            />
+            <small *ngIf="submitted && !newSeminar.seminarName" class="p-error"
+                >Tên hội thảo là bắt buộc</small
+            >
+        </div>
+
+        <div class="field">
+            <label for="name"
+                >Người tạo<span class="text-danger"></span></label
+            >
+            <p-dropdown
+                [options]="Userinfo"
+                [(ngModel)]="selectedUser"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Chọn người tạo"
             />
         </div>
+
         <div class="field">
-            <label for="eventDate">Ngày tổ chức</label>
+            <label for="eventDate"
+                >Ngày tổ chức <span class="text-danger"></span></label
+            >
             <p-calendar
                 [(ngModel)]="newSeminar.eventDate"
                 appendTo="body"
                 [showIcon]="true"
                 dateFormat="dd/mm/yy"
                 placeholder="Chọn ngày"
+                [required]="true"
             ></p-calendar>
+            <small *ngIf="submitted && !newSeminar.eventDate" class="p-error"
+                >Ngày tổ chức là bắt buộc</small
+            >
         </div>
         <div class="field">
-            <label for="hourCalculated">Số giờ</label>
+            <label for="hourCalculated"
+                >Số giờ <span class="text-danger"></span></label
+            >
             <p-inputNumber
                 id="hourCalculated"
                 [(ngModel)]="newSeminar.hourCalculated"
+                [min]="0"
+                [required]="true"
             ></p-inputNumber>
+            <small
+                *ngIf="submitted && newSeminar.hourCalculated === null"
+                class="p-error"
+                >Số giờ là bắt buộc</small
+            >
         </div>
         <div class="field">
             <label for="note">Ghi chú</label>
@@ -327,14 +363,20 @@
             ></textarea>
         </div>
         <div class="field">
-            <label for="seminarLevel">Mức độ</label>
+            <label for="seminarLevel"
+                >Mức độ <span class="text-danger"></span></label
+            >
             <p-dropdown
                 id="seminarLevel"
                 [options]="seminarLevels"
                 [(ngModel)]="newSeminar.seminarLevel"
                 optionLabel="name"
                 placeholder="Chọn mức độ"
+                [required]="true"
             ></p-dropdown>
+            <small *ngIf="submitted && !newSeminar.seminarLevel" class="p-error"
+                >Mức độ là bắt buộc</small
+            >
         </div>
     </ng-template>
 
@@ -345,7 +387,7 @@
             label="Hủy"
             icon="pi pi-times"
             class="p-button-text"
-            (click)="addDialogVisible = false"
+            (click)="addDialogVisible = false; submitted = false"
         ></button>
         <button
             pButton
