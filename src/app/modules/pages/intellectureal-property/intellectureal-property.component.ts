@@ -12,7 +12,8 @@ import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
 import { UserService } from 'src/app/core/services/identity/user.service';
-import { NewsService } from 'src/app/core/services/news.service';
+import { IntellecturalPropertyLevelService } from 'src/app/core/services/intellectural-property-level.service';
+import { IntellecturealPropertyService } from 'src/app/core/services/intellectureal-property.service';
 
 @Component({
     selector: 'app-intellectureal-property',
@@ -24,12 +25,14 @@ export class IntellecturealPropertyComponent implements OnInit {
     items: any;
     filteredItems: any;
     search: any;
+    intellectualPropertyLevels: any = [];
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private newsService: NewsService,
         private formBuilder: FormBuilder,
-        private userService: UserService
+        private userService: UserService,
+        private intellecturealPropertyService: IntellecturealPropertyService,
+        private intellecturalPropertyLevelService: IntellecturalPropertyLevelService
     ) {
         this.createIntellecturealForm = this.formBuilder.group({
             code: ['', [Validators.required]],
@@ -51,12 +54,12 @@ export class IntellecturealPropertyComponent implements OnInit {
     };
 
     public constant: any = {
-        news: classConstant,
+        IntellecturealProperty: classConstant,
         sort: sortConstant,
     };
 
     //Banners
-    public Newss: any = [];
+    public intellecturealPropertys: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -66,7 +69,7 @@ export class IntellecturealPropertyComponent implements OnInit {
         totalRecords: 0,
         totalPages: 0,
     };
-    news: any;
+    IntellecturealProperty: any;
     public selectedclass: any = [];
 
     public queryParameters: any = {
@@ -95,10 +98,22 @@ export class IntellecturealPropertyComponent implements OnInit {
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getNews(request);
+            this.getIntellecturealProperty(request);
         });
 
-        this.handleOnSearch();
+        this.loadIntellecturealPropertyLevel();
+    }
+
+    loadIntellecturealPropertyLevel() {
+        this.intellecturalPropertyLevelService
+            .getPaging()
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.intellectualPropertyLevels = result.data.items;
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
     }
 
     public handleOnSearch(event: any = null): void {
@@ -121,41 +136,48 @@ export class IntellecturealPropertyComponent implements OnInit {
         this.visibleIntellectureal = true;
     }
 
-    public getNews(request: any): any {
-        this.newsService.getPaging(request).subscribe((result: any) => {
-            if (result.status) {
-                if (request.pageIndex !== 1 && result.data.items.length === 0) {
-                    this.route.queryParams.subscribe((params) => {
-                        const request = {
-                            ...params,
-                            pageIndex: 1,
-                        };
+    public getIntellecturealProperty(request: any): any {
+        this.intellecturealPropertyService
+            .getPaging(request)
+            .subscribe((result: any) => {
+                if (result.status) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
+                        this.route.queryParams.subscribe((params) => {
+                            const request = {
+                                ...params,
+                                pageIndex: 1,
+                            };
 
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
+                            this.router.navigate([], {
+                                relativeTo: this.route,
+                                queryParams: request,
+                                queryParamsHandling: 'merge',
+                            });
                         });
-                    });
+                    }
+
+                    this.IntellecturealProperty = result.data.items;
+                    console.log(this.intellecturealPropertys);
+                    if (this.intellecturealPropertys.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
+
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+
+                    this.selectedclass = [];
                 }
-
-                this.news = result.data.items;
-                console.log(this.Newss);
-                if (this.Newss.length === 0) {
-                    this.paging.pageIndex = 1;
-                }
-
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-
-                this.selectedclass = [];
-            }
-        });
+            });
     }
 
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.Newss.map((teacher: any) => teacher.id);
+            this.selectedclass = this.intellecturealPropertys.map(
+                (teacher: any) => teacher.id
+            );
         } else {
             this.selectedclass = [];
         }
@@ -225,31 +247,19 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
     }
 
-    public handleDeleteItem(id: number) {
-        // const swalWithBootstrapButtons = Swal.mixin({
-        //     customClass: {
-        //         cancelButton: 'btn btn-danger ml-2',
-        //         confirmButton: 'btn btn-success',
-        //     },
-        //     buttonsStyling: false,
-        // });
-        // swalWithBootstrapButtons
-        //     .fire({
-        //         title: `Bạn có chắc muốn xoá banner có Id ${id}?`,
-        //         text: 'Sau khi xoá bản sẽ không thể khôi phục dữ liệu!',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Xác nhận',
-        //         cancelButtonText: 'Bỏ qua',
-        //         reverseButtons: false,
-        //     })
-        //     .then((result) => {
-        //         if (result.isConfirmed) {
-        //             const request = {
-        //                 id: id,
-        //             };
-        //         }
-        //     });
+    public handleDeleteItem(id: number) {}
+
+    public handleCreateItem() {
+        console.log(this.createIntellecturealForm.value);
+        this.intellecturealPropertyService
+            .create(this.createIntellecturealForm.value)
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleIntellectureal = false;
+                    this.createIntellecturealForm.reset();
+                    this.getIntellecturealProperty(this.queryParameters);
+                }
+            });
     }
 
     public handleOnDeleteMultiple() {

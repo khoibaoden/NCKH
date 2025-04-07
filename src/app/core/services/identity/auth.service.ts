@@ -70,12 +70,13 @@ export class AuthService {
     getUserCurrentApi(): Observable<ApiResult<UserCurrent>> {
         console.log(1);
         return this.http.get<ApiResult<UserCurrent>>(
-            `${this.url}'/user/user-info'`
+            `${this.url}/user/user-info`
         );
     }
 
     fetchUserCurrent(): Observable<ApiResult<UserCurrent>> {
         let headers = this.httpService.addSkipLoadingHeader();
+        console.log(headers);
         return this.http.get<ApiResult<UserCurrent>>(
             `https://localhost:7115/api/user/user-info`,
             {

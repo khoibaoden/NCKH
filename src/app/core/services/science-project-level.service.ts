@@ -5,20 +5,20 @@ import { Observable } from 'rxjs';
 @Injectable({
     providedIn: 'root',
 })
-export class IntellecturealPropertyService {
+export class ScienceProjectLevelService {
     constructor(private http: HttpLoadingService) {}
     getPaging(request: any = null): Observable<any> {
-        return this.http.get('intellecturalproperty/paging', request);
+        return this.http.get('scienceprojectlevel/paging', request);
     }
     create(request: FormData): Observable<any> {
-        return this.http.postFormData('intellecturalproperty/create', request);
+        return this.http.postFormData('scienceprojectlevel/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('intellecturalproperty/update', request);
+        return this.http.putFormData('scienceprojectlevel/update', request);
     }
 
     delete(request: any): Observable<any> {
-        return this.http.put('intellecturalproperty/delete', request);
+        return this.http.put('scienceprojectlevel/delete', request);
     }
 }

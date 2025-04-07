@@ -26,6 +26,7 @@ export class ScienceProjectComponent implements OnInit {
     items: any;
     scienceProjects: any;
     statusOptions: any;
+    scienceProjectLevels: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -101,6 +102,14 @@ export class ScienceProjectComponent implements OnInit {
             };
 
             this.getScience(request);
+        });
+    }
+
+    loadScienceProjectLevel() {
+        this.scienceProjectLevels.getPaging().subscribe((result: any) => {
+            if (result.status) {
+                this.scienceProjectLevels = result.data.items;
+            }
         });
     }
 

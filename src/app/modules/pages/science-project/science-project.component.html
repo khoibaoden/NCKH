@@ -149,12 +149,14 @@
 
                 <div class="field col mb-0">
                     <label for="scienceProjectLevelId">Cấp đề tài</label>
-                    <input
-                        type="number"
-                        id="scienceProjectLevelId"
-                        pInputText
+                    <p-dropdown
+                        [options]="scienceProjectLevels"
+                        optionLabel="name"
+                        optionValue="id"
                         formControlName="scienceProjectLevelId"
-                    />
+                        placeholder="Chọn cấp"
+                        inputId="scienceProjectLevelId"
+                    ></p-dropdown>
                 </div>
             </div>
             <div class="p-formgrid grid">
