@@ -22,4 +22,12 @@ export class SeminarService {
     delete(request: any): Observable<any> {
         return this.http.put('seminar/delete', request);
     }
+
+    getPaingProcess(request: any = null): Observable<any> {
+        return this.http.get('user/paging-info', request);
+    }
+
+    getPaingBM(request: any = null): Observable<any> {
+        return this.http.get('seminarlevel/paging', request);
+    }
 }
