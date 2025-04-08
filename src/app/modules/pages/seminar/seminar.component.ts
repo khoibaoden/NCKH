@@ -40,7 +40,8 @@ export class SeminarComponent implements OnInit {
 
     Userinfo: any[] = [];  
     selectedUser: any;
-
+    Bomon: any[] = [];
+    selectedBomon: any;
 
     constructor(
         private route: ActivatedRoute,
@@ -62,8 +63,8 @@ export class SeminarComponent implements OnInit {
         sort: sortConstant,
     };
 
-    //Banners
     public seminars: any = [];
+    public filteredSeminars: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -87,14 +88,9 @@ export class SeminarComponent implements OnInit {
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
-                pageIndex: params['pageIndex']
-                    ? params['pageIndex']
-                    : this.config.paging.pageIndex,
-                pageSize: params['pageSize']
-                    ? params['pageSize']
-                    : this.config.paging.pageSize,
+                pageIndex: params['pageIndex'] ? params['pageIndex'] : this.config.paging.pageIndex,
+                pageSize: params['pageSize'] ? params['pageSize'] : this.config.paging.pageSize,
             };
-
             this.queryParameters = {
                 ...params,
                 status: params['status'] ? params['status'] : 0,
@@ -104,12 +100,24 @@ export class SeminarComponent implements OnInit {
         });
 
         this.getUserInfor();
+        this.getBomon();
     }
 
-    getUserInfor(){
-        this.seminarService.getPaingProcess({}).subscribe((response: any)=> {
+    getUserInfor() {
+        this.seminarService.getPaingProcess({}).subscribe((response: any) => {
             if (response.status && response.data) {
                 this.Userinfo = response.data.items.map((item: any) => ({
+                    label: item.name,
+                    value: item.id,
+                }));
+            }
+        });
+    }
+
+    getBomon() {
+        this.seminarService.getPaingBM({}).subscribe((response: any) => {
+            if (response.status && response.data) {
+                this.Bomon = response.data.items.map((item: any) => ({
                     label: item.name,
                     value: item.id,
                 }));
@@ -121,99 +129,62 @@ export class SeminarComponent implements OnInit {
         this.submitted = false;
         this.newSeminar = {
             seminarName: '',
-            user: '',
             eventDate: null,
             hourCalculated: null,
             note: '',
-            seminarLevel: null
         };
+        this.selectedUser = null;
+        this.selectedBomon = null;
         this.addDialogVisible = true;
+    }
+
+    validateSeminarForm(): boolean {
+        let isValid = true;
+        if (!this.newSeminar.seminarName) {
+            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên hội thảo' });
+            isValid = false;
+        }
+        if (!this.newSeminar.eventDate) {
+            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng chọn ngày tổ chức' });
+            isValid = false;
+        }
+        if (this.newSeminar.hourCalculated === null) {
+            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập số giờ' });
+            isValid = false;
+        }
+        if (!this.selectedBomon) {
+            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng chọn mức độ' });
+            isValid = false;
+        }
+        return isValid;
     }
 
     saveNewSeminar() {
         this.submitted = true;
-
-        if (!this.newSeminar.seminarName || !this.newSeminar.eventDate || 
-            this.newSeminar.hourCalculated === null || !this.newSeminar.seminarLevel) {
+        if (!this.validateSeminarForm()) {
             return;
         }
-        // Kiểm tra dữ liệu
-        if (!this.newSeminar.seminarName) {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Cảnh báo',
-                detail: 'Vui lòng nhập tên hội thảo'
-            });
-            return;
-        }
-        
-        // Tạo FormData để gửi đến API
-        const formData = new FormData();
-        
-        // Thêm dữ liệu từ newSeminar vào FormData
-        formData.append('seminarName', this.newSeminar.seminarName);
-        
-        // Xử lý ngày tổ chức
-        if (this.newSeminar.eventDate) {
-            formData.append('date', this.formatDateForApi(this.newSeminar.eventDate));
-        } else {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Cảnh báo',
-                detail: 'Vui lòng chọn ngày tổ chức'
-            });
-            return;
-        }
-        
-        // Thêm các thông tin khác
-        if (this.newSeminar.hourCalculated !== null) {
-            formData.append('hourCalculated', this.newSeminar.hourCalculated.toString());
-        }
-        
-        if (this.newSeminar.note) {
-            formData.append('note', this.newSeminar.note);
-        }
-        
-        if (this.newSeminar.seminarLevel) {
-            formData.append('seminarLevelId', this.newSeminar.seminarLevel.id.toString());
-        } else {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Cảnh báo',
-                detail: 'Vui lòng chọn mức độ'
-            });
-            return;
-        }
-        
-        // Gọi API thêm mới
-        this.seminarService.create(formData).subscribe(
+        const jsonRequest = {
+            seminarName: this.newSeminar.seminarName,
+            date: this.formatDateForApi(this.newSeminar.eventDate),
+            hourCalculated: this.newSeminar.hourCalculated,
+            note: this.newSeminar.note || null,
+            userId: this.selectedUser || null,
+            seminarLevelId: this.selectedBomon
+        };
+        this.seminarService.create(jsonRequest).subscribe(
             (result: any) => {
                 if (result.status) {
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Thành công',
-                        detail: 'Đã thêm hội thảo mới'
-                    });
-                    
-                    // Đóng dialog thêm mới
+                    this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã thêm hội thảo mới' });
                     this.addDialogVisible = false;
-                    
-                    // Làm mới danh sách seminar để hiển thị dữ liệu vừa thêm
+                    this.submitted = false;
                     this.getSeminar(this.queryParameters);
                 } else {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Lỗi',
-                        detail: result.message || 'Thêm hội thảo thất bại'
-                    });
+                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Thêm hội thảo thất bại' });
                 }
             },
             (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Lỗi',
-                    detail: 'Có lỗi xảy ra khi thêm hội thảo'
-                });
+                this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi thêm hội thảo' });
                 console.error('Error creating seminar:', error);
             }
         );
@@ -224,133 +195,114 @@ export class SeminarComponent implements OnInit {
             if (result.status) {
                 if (request.pageIndex !== 1 && result.data.items.length === 0) {
                     this.route.queryParams.subscribe((params) => {
-                        const request = {
-                            ...params,
-                            pageIndex: 1,
-                        };
-
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
-                        });
+                        const request = { ...params, pageIndex: 1 };
+                        this.router.navigate([], { relativeTo: this.route, queryParams: request, queryParamsHandling: 'merge' });
                     });
                 }
-
                 this.seminars = result.data.items;
+                this.filteredSeminars = [...this.seminars];
                 console.log(this.seminars);
                 if (this.seminars.length === 0) {
                     this.paging.pageIndex = 1;
                 }
-
                 const { items, ...paging } = result.data;
                 this.paging = paging;
-
+                this.paging.totalRecords = this.filteredSeminars.length;
                 this.selectedclass = [];
             }
         });
     }
 
-    // Phương thức mở dialog chỉnh sửa
     openEditDialog(seminar: any) {
+        // Sao chép dữ liệu seminar vào editingSeminar
         this.editingSeminar = { ...seminar };
-        // Nếu date là chuỗi, chuyển thành đối tượng Date
-        if (typeof this.editingSeminar.date === 'string') {
+        
+        // Chuyển đổi date từ chuỗi sang Date object nếu cần
+        if (this.editingSeminar.date && typeof this.editingSeminar.date === 'string') {
             this.editingSeminar.date = new Date(this.editingSeminar.date);
         }
+        
+        // Đảm bảo các trường khác được ánh xạ đúng
+        this.editingSeminar.seminarName = seminar.seminarName || '';
+        this.editingSeminar.hourCalculated = seminar.hourCalculated || 0;
+        this.editingSeminar.note = seminar.note || '';
+        this.selectedUser = seminar.user?.id || null; // Dùng cho dropdown người tạo
+        this.selectedBomon = seminar.seminarLevel?.id || null; // Dùng cho dropdown mức độ
+        
+        // Hiển thị dialog
         this.editDialogVisible = true;
     }
 
-    // Phương thức đóng dialog
     hideEditDialog() {
         this.editDialogVisible = false;
     }
 
-    // Phương thức lưu thông tin đã chỉnh sửa
     saveSeminar() {
         if (this.editingSeminar.seminarName) {
-            // Gọi service để cập nhật thông tin
-            this.seminarService.update(this.editingSeminar).subscribe(
+            const updateRequest = {
+                id: this.editingSeminar.id,
+                seminarName: this.editingSeminar.seminarName,
+                date: this.formatDateForApi(this.editingSeminar.date),
+                hourCalculated: this.editingSeminar.hourCalculated,
+                note: this.editingSeminar.note || null,
+                userId: this.selectedUser || null,
+                seminarLevelId: this.selectedBomon || null
+            };
+            this.seminarService.update(updateRequest).subscribe(
                 (result: any) => {
                     if (result.status) {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Thành công',
-                            detail: 'Cập nhật thông tin hội thảo thành công',
-                        });
+                        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật thông tin hội thảo thành công' });
                         this.hideEditDialog();
                         this.getSeminar(this.queryParameters);
                     } else {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Lỗi',
-                            detail: result.message || 'Cập nhật thất bại',
-                        });
+                        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Cập nhật thất bại' });
                     }
                 },
                 (error) => {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Lỗi',
-                        detail: 'Có lỗi xảy ra khi cập nhật',
-                    });
+                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi cập nhật' });
                 }
             );
         } else {
-            this.messageService.add({
-                severity: 'warn',
-                summary: 'Cảnh báo',
-                detail: 'Vui lòng nhập tên hội thảo',
-            });
+            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên hội thảo' });
         }
     }
 
-    // Phương thức xác nhận xóa
     confirmDelete(seminar: any) {
         this.confirmationService.confirm({
             message: `Bạn có chắc muốn xóa hội thảo "${seminar.seminarName}" không?`,
             header: 'Xác nhận xóa',
             icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Có',
+            rejectLabel: 'Không',
             accept: () => {
                 this.deleteSeminar(seminar.id);
             },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Hủy bỏ', detail: 'Đã hủy thao tác xóa' });
+            }
         });
     }
 
-    // Phương thức xóa seminar
     deleteSeminar(id: number) {
         this.seminarService.delete(id).subscribe(
             (result: any) => {
                 if (result.status) {
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Thành công',
-                        detail: 'Đã xóa hội thảo',
-                    });
+                    this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã xóa hội thảo thành công' });
                     this.getSeminar(this.queryParameters);
                 } else {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Lỗi',
-                        detail: result.message || 'Xóa thất bại',
-                    });
+                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Xóa hội thảo thất bại' });
                 }
             },
             (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Lỗi',
-                    detail: 'Có lỗi xảy ra khi xóa',
-                });
+                this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi xóa hội thảo' });
+                console.error('Error deleting seminar:', error);
             }
         );
     }
 
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.seminars.map(
-                (teacher: any) => teacher.id
-            );
+            this.selectedclass = this.filteredSeminars.map((teacher: any) => teacher.id);
         } else {
             this.selectedclass = [];
         }
@@ -358,39 +310,29 @@ export class SeminarComponent implements OnInit {
 
     public handleOnSortAndOrderChange(orderBy: string): void {
         if (this.paging.orderBy === orderBy) {
-            this.paging.sortBy =
-                this.paging.sortBy === this.constant.sort.asc
-                    ? this.constant.sort.desc
-                    : this.constant.sort.asc;
+            this.paging.sortBy = this.paging.sortBy === this.constant.sort.asc ? this.constant.sort.desc : this.constant.sort.asc;
         } else {
             this.paging.sortBy = sortConstant.desc;
         }
+        this.paging = { orderBy: orderBy, sortBy: this.paging.sortBy };
+        this.applySort();
+    }
 
-        this.paging = {
-            orderBy: orderBy,
-            sortBy: this.paging.sortBy,
-        };
-
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                orderBy: this.paging.orderBy,
-                sortBy: this.paging.sortBy,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
+    private applySort() {
+        this.filteredSeminars.sort((a: any, b: any) => {
+            const valueafsir = a[this.paging.orderBy];
+            const valueB = b[this.paging.orderBy];
+            if (this.paging.sortBy === this.constant.sort.asc) {
+                return valueB > valueB ? 1 : -1;
+            } else {
+                return valueB < valueB ? 1 : -1;
+            }
         });
     }
 
     public handleSelectItem(id: number): void {
         if (this.isSelected(id)) {
-            this.selectedclass = this.selectedclass.filter(
-                (classId: any) => classId !== id
-            );
+            this.selectedclass = this.selectedclass.filter((classId: any) => classId !== id);
         } else {
             this.selectedclass.push(id);
         }
@@ -401,70 +343,50 @@ export class SeminarComponent implements OnInit {
     }
 
     public handleSearchclass() {
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                status: this.queryParameters.status
-                    ? this.queryParameters.status
-                    : null,
-                keyWord: this.queryParameters.keyWord
-                    ? this.queryParameters.keyWord
-                    : null,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
+        this.applyFilter();
     }
 
     onPageChange(event: any) {
         this.paging.pageIndex = event.page + 1;
         this.paging.pageSize = event.rows;
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: event.page + 1,
-                pageSize: event.rows,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
     }
 
-    // Phương thức lọc theo ngày
-    blurDateRange() {
-        // Logic xử lý khi blur date range (có thể thêm nếu cần)
-    }
+    blurDateRange() {}
 
-    // Phương thức lọc
     EvenFilter() {
-        // Logic xử lý khi nhấn nút lọc
-        this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: {
-                ...this.queryParameters,
-                creator: this.code ? this.code : null,
-                fromDate:
-                    this.deadlineRange && this.deadlineRange[0]
-                        ? this.formatDate(this.deadlineRange[0])
-                        : null,
-                toDate:
-                    this.deadlineRange && this.deadlineRange[1]
-                        ? this.formatDate(this.deadlineRange[1])
-                        : null,
-            },
-            queryParamsHandling: 'merge',
-        });
+        this.applyFilter();
     }
 
-    // Hàm hỗ trợ định dạng ngày
+    private applyFilter() {
+        this.filteredSeminars = [...this.seminars];
+        
+        if (this.code) {
+            this.filteredSeminars = this.filteredSeminars.filter((seminar: any) =>
+                seminar.user?.name?.toLowerCase().includes(this.code.toLowerCase())
+            );
+        }
+
+        if (this.deadlineRange && (this.deadlineRange[0] || this.deadlineRange[1])) {
+            const fromDate = this.deadlineRange[0] ? new Date(this.deadlineRange[0]) : null;
+            const toDate = this.deadlineRange[1] ? new Date(this.deadlineRange[1]) : null;
+
+            this.filteredSeminars = this.filteredSeminars.filter((seminar: any) => {
+                const seminarDate = new Date(seminar.date);
+                if (fromDate && toDate) {
+                    return seminarDate >= fromDate && seminarDate <= toDate;
+                } else if (fromDate) {
+                    return seminarDate >= fromDate;
+                } else if (toDate) {
+                    return seminarDate <= toDate;
+                }
+                return true;
+            });
+        }
+
+        this.paging.totalRecords = this.filteredSeminars.length;
+        this.paging.pageIndex = 1;
+    }
+
     formatDate(date: Date): string {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -472,13 +394,10 @@ export class SeminarComponent implements OnInit {
         return `${day}/${month}/${year}`;
     }
 
-    // Hàm hỗ trợ định dạng ngày cho API
     formatDateForApi(date: Date): string {
-        // Tùy thuộc vào định dạng mà API của bạn yêu cầu
-        // Ví dụ: yyyy-MM-dd
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        return `${year}-${month}-${day}`; // Định dạng yyyy-MM-dd cho API
+        return `${year}-${month}-${day}`;
     }
 }

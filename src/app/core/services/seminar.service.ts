@@ -11,16 +11,17 @@ export class SeminarService {
         return this.http.get('seminar/paging', request);
     }
 
-    create(request: FormData): Observable<any> {
-        return this.http.postFormData('seminar/create', request);
+    create(request: any): Observable<any> {
+        return this.http.post('seminar/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('seminar/update', request);
+        const seminarId = request.id;
+        return this.http.put(`seminar/update/${seminarId}`, request);
     }
 
-    delete(request: any): Observable<any> {
-        return this.http.put('seminar/delete', request);
+    delete(id: number): Observable<any> {
+        return this.http.put('seminar/delete?id=' + id, null);
     }
 
     getPaingProcess(request: any = null): Observable<any> {

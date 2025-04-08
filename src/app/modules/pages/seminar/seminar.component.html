@@ -21,7 +21,7 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="seminars"
+                [value]="filteredSeminars"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-gridlines p-datatable-striped"
                 [paginator]="true"
@@ -60,7 +60,7 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
+                                >Ngày tạo:</label
                             >
                             <p-calendar
                                 placeholder="Từ ngày - Đến ngày"
@@ -143,9 +143,9 @@
                         >
                             {{ item.note || "Chưa có thông tin" }}
                         </td>
-                        <td style="width: 10%">
+                        <td style="width: 10%" class="text-center">
                             {{
-                                item.seminarLevel?.description ||
+                                item.seminarLevel?.name ||
                                     "Chưa có thông tin"
                             }}
                         </td>
@@ -196,7 +196,7 @@
 >
     <ng-template pTemplate="content">
         <div class="field">
-            <label for="seminarName">Tên hội thảo</label>
+            <label for="seminarName">Tên hội thảo <span class="text-danger">*</span></label>
             <input
                 type="text"
                 pInputText
@@ -207,31 +207,32 @@
             />
         </div>
         <div class="field">
-            <label for="creator">Người tạo</label>
-            <input
-                type="text"
-                pInputText
-                id="creator"
-                [(ngModel)]="editingSeminar.name"
-                disabled
-            />
+            <label for="user">Người tạo</label>
+            <p-dropdown
+                id="user"
+                [options]="Userinfo"
+                [(ngModel)]="selectedUser"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Chọn người tạo"
+            ></p-dropdown>
         </div>
         <div class="field">
             <label for="date">Ngày tổ chức</label>
             <p-calendar
-                [(ngModel)]="editingSeminar.eventDate"
+                [(ngModel)]="editingSeminar.date"
                 appendTo="body"
                 [showIcon]="true"
                 dateFormat="dd/mm/yy"
                 placeholder="Chọn ngày"
-            >
-            </p-calendar>
+            ></p-calendar>
         </div>
         <div class="field">
             <label for="hourCalculated">Số giờ</label>
             <p-inputNumber
                 id="hourCalculated"
                 [(ngModel)]="editingSeminar.hourCalculated"
+                [min]="0"
             ></p-inputNumber>
         </div>
         <div class="field">
@@ -247,9 +248,10 @@
             <label for="seminarLevel">Mức độ</label>
             <p-dropdown
                 id="seminarLevel"
-                [options]="seminarLevels"
-                [(ngModel)]="editingSeminar.seminarLevel"
-                optionLabel="name"
+                [options]="Bomon"
+                [(ngModel)]="selectedBomon"
+                optionLabel="label"
+                optionValue="value"
                 placeholder="Chọn mức độ"
             ></p-dropdown>
         </div>
@@ -367,16 +369,12 @@
                 >Mức độ <span class="text-danger"></span></label
             >
             <p-dropdown
-                id="seminarLevel"
-                [options]="seminarLevels"
-                [(ngModel)]="newSeminar.seminarLevel"
-                optionLabel="name"
-                placeholder="Chọn mức độ"
-                [required]="true"
-            ></p-dropdown>
-            <small *ngIf="submitted && !newSeminar.seminarLevel" class="p-error"
-                >Mức độ là bắt buộc</small
-            >
+                [options]="Bomon"
+                [(ngModel)]="selectedBomon"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Chọn người tạo"
+            />
         </div>
     </ng-template>
 

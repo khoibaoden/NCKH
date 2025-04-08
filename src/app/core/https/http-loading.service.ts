@@ -183,6 +183,7 @@ export class HttpLoadingService {
     private createHeadersForFormData() {
         return new HttpHeaders({
             Authorization: `Bearer ${this.getToken()}`,
+            'Content-Type': 'application/json'  // rất quan trọng!
         });
     }
 
