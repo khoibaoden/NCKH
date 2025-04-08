@@ -21,7 +21,7 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="news"
+                [value]="intellecturealPropertys"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-striped"
                 [paginator]="false"
@@ -106,7 +106,7 @@
                 class="flex align-items-center"
                 style="justify-content: space-between"
             >
-                <div *ngIf="news?.length > 0">
+                <div *ngIf="intellecturealPropertys?.length > 0">
                     <p-paginator
                         [rows]="pageSize"
                         (onPageChange)="onPageChange($event)"
@@ -231,12 +231,14 @@
                     <label for="intellecturalPropertyLevelId"
                         >Cấp sở hữu trí tuệ</label
                     >
-                    <input
-                        type="number"
-                        pInputText
-                        id="intellecturalPropertyLevelId"
+                    <p-dropdown
+                        [options]="intellectualPropertyLevels"
+                        optionLabel="name"
+                        optionValue="id"
                         formControlName="intellecturalPropertyLevelId"
-                    />
+                        placeholder="Chọn cấp"
+                        inputId="intellecturalPropertyLevelId"
+                    ></p-dropdown>
                 </div>
             </div>
             <div class="p-formgrid grid">
@@ -285,6 +287,10 @@
             severity="secondary"
             (onClick)="visibleIntellectureal = false"
         ></p-button>
-        <p-button icon="pi pi-plus" label="Thêm mới"></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Thêm mới"
+            (click)="handleCreateItem()"
+        ></p-button>
     </div>
 </p-dialog>

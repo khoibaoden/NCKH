@@ -185,16 +185,6 @@
                 </div>
 
                 <div class="field col mb-0">
-                    <label for="isAuthor">Tác giả chủ biên</label>
-                    <p-checkbox
-                        binary="true"
-                        formControlName="isAuthor"
-                        inputId="isAuthor"
-                    ></p-checkbox>
-                </div>
-            </div>
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
                     <label for="memberNumber">Số lượng tác giả</label>
                     <input
                         type="number"
@@ -202,15 +192,6 @@
                         pInputText
                         formControlName="memberNumber"
                     />
-                </div>
-
-                <div class="field col mb-0">
-                    <label for="isAuthorWrite">Chủ biên tham gia viết</label>
-                    <p-checkbox
-                        binary="true"
-                        formControlName="isAuthorWrite"
-                        inputId="isAuthorWrite"
-                    ></p-checkbox>
                 </div>
             </div>
             <div class="p-formgrid grid">
@@ -276,6 +257,24 @@
                         pInputTextarea
                         formControlName="note"
                     ></textarea>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="isAuthorWrite">Chủ biên tham gia viết</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthorWrite"
+                        inputId="isAuthorWrite"
+                    ></p-checkbox>
+                </div>
+                <div class="field col mb-0">
+                    <label for="isAuthor">Tác giả chủ biên</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthor"
+                        inputId="isAuthor"
+                    ></p-checkbox>
                 </div>
             </div>
         </div>
