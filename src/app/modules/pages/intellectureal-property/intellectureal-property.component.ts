@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, Form } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
@@ -25,7 +25,16 @@ export class IntellecturealPropertyComponent implements OnInit {
     items: any;
     filteredItems: any;
     search: any;
+    users: any;
     intellectualPropertyLevels: any = [];
+    updateIntellecturealForm: FormGroup;
+    membersList = [
+        { name: 'Nguyễn Văn A', id: 1 },
+        { name: 'Trần Thị B', id: 2 },
+        { name: 'Lê Văn C', id: 3 },
+        // thêm thành viên tùy ý
+    ];
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -38,13 +47,27 @@ export class IntellecturealPropertyComponent implements OnInit {
             code: ['', [Validators.required]],
             name: ['', Validators.required],
             acceptanceDate: [null],
-            membersName: [''],
+            membersName: [''], // Đã đúng rồi nè
             teamNumber: [null],
             intellecturalPropertyLevelId: [null, Validators.required],
             workHoursPerProject: [null],
             hoursCalculated: [null],
             note: [''],
         });
+
+        this.updateIntellecturealForm = this.formBuilder.group({
+            code: ['', [Validators.required]],
+            name: ['', Validators.required],
+            acceptanceDate: [null],
+            membersName: [''], // Đã đúng rồi nè
+            teamNumber: [null],
+            intellecturalPropertyLevelId: [null, Validators.required],
+            workHoursPerProject: [null],
+            hoursCalculated: [null],
+            note: [''],
+        });
+        this.loadUser();
+        this.loadIntellecturealPropertyLevel();
     }
     public config: any = {
         paging: pagingConfig.default,
@@ -77,7 +100,7 @@ export class IntellecturealPropertyComponent implements OnInit {
         status: 0,
         keyWord: '',
     };
-
+    canbos: any;
     visibleIntellectureal: boolean = false;
 
     ngOnInit() {
@@ -122,14 +145,15 @@ export class IntellecturealPropertyComponent implements OnInit {
         //     item.name.toLowerCase().includes(this.search.toLowerCase())
         // );
 
-        this.userService.getPaging(this.search).subscribe((result: any) => {
-            if (result.status) {
-                console.log(result);
-                this.items = result.data.items;
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-            }
-        });
+        this.userService
+            .getPaging({ name: this.search })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.canbos = result.data.items;
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
     }
 
     showDialogIntellectureal() {
@@ -291,6 +315,17 @@ export class IntellecturealPropertyComponent implements OnInit {
         //     });
     }
 
+    loadUser() {
+        this.userService.getPaging({}).subscribe((result: any) => {
+            console.log(result);
+            if (result.status) {
+                this.users = result.data.items;
+                const { items, ...paging } = result.data;
+                this.paging = paging;
+            }
+        });
+    }
+
     onPageChange(event: any) {
         this.paging.pageIndex = event.page + 1;
         this.paging.pageSize = event.rows;
@@ -307,5 +342,16 @@ export class IntellecturealPropertyComponent implements OnInit {
                 queryParamsHandling: 'merge',
             });
         });
+    }
+
+    handleShowUpdateIntellectureal(id: any) {
+        this.intellecturealPropertyService
+            .getById({ id: id })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.updateIntellecturealForm.patchValue(result.data);
+                    this.visibleIntellectureal = true;
+                }
+            });
     }
 }

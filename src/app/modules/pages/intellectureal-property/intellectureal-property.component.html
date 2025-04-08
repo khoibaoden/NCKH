@@ -135,8 +135,8 @@
                     <label htmlFor="code">Cán bộ giáo viên</label>
                     <p-autoComplete
                         formControlName="code"
-                        [suggestions]="filteredItems"
-                        (completeMethod)="search($event)"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
                         field="name"
                         [dropdown]="true"
                         [minLength]="1"
@@ -233,8 +233,182 @@
                     >
                     <p-dropdown
                         [options]="intellectualPropertyLevels"
-                        optionLabel="name"
-                        optionValue="id"
+                        optionLabel="key"
+                        optionValue="value"
+                        formControlName="intellecturalPropertyLevelId"
+                        placeholder="Chọn cấp"
+                        inputId="intellecturalPropertyLevelId"
+                    ></p-dropdown>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Giờ định mức theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="workHoursPerProject"
+                        placeholder="Nhập số giờ định mức"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="hoursCalculated"
+                        formControlName="hoursCalculated"
+                        placeholder="Nhập số giờ được tính"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        pInputTextarea
+                        id="note"
+                        formControlName="note"
+                        rows="3"
+                        placeholder="Nhập ghi chú (nếu có)"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleIntellectureal = false"
+        ></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Thêm mới"
+            (click)="handleCreateItem()"
+        ></p-button>
+    </div>
+</p-dialog>
+
+<p-dialog
+    header="Chỉnh sửa"
+    [modal]="true"
+    [(visible)]="visibleIntellectureal"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createIntellecturealForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <!-- Mã -->
+                <div class="field col mb-0">
+                    <label htmlFor="code">Cán bộ giáo viên</label>
+                    <p-autoComplete
+                        formControlName="code"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập cán bộ giáo viên"
+                    >
+                    </p-autoComplete>
+
+                    <div
+                        *ngIf="
+                            createIntellecturealForm.get('code')?.invalid &&
+                            (createIntellecturealForm.get('code')?.dirty ||
+                                createIntellecturealForm.get('code')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createIntellecturealForm.get('code')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập mã sở hữu trí tuệ
+                        </div>
+                        <div
+                            *ngIf="!createIntellecturealForm.get('code')?.errors?.['required'] && createIntellecturealForm.get('code')?.errors?.['whitespace']"
+                            class="error-message"
+                        >
+                            Mã không được chứa khoảng trắng
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tên -->
+                <div class="field col mb-0">
+                    <label htmlFor="name">Tên sở hữu trí tuệ</label>
+                    <input
+                        pInputText
+                        id="name"
+                        placeholder="Nhập tên sở hữu trí tuệ"
+                        formControlName="name"
+                        spellcheck="false"
+                        type="text"
+                    />
+                    <div
+                        *ngIf="
+                            createIntellecturealForm.get('name')?.invalid &&
+                            (createIntellecturealForm.get('name')?.dirty ||
+                                createIntellecturealForm.get('name')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createIntellecturealForm.get('name')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập tên sở hữu trí tuệ
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường mới -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <input
+                        type="date"
+                        pInputText
+                        id="acceptanceDate"
+                        formControlName="acceptanceDate"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="membersName">Tên các thành viên</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="membersName"
+                        formControlName="membersName"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="teamNumber">Số lượng tác giả</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="teamNumber"
+                        formControlName="teamNumber"
+                        placeholder="Nhập số lượng tác giả"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="intellecturalPropertyLevelId"
+                        >Cấp sở hữu trí tuệ</label
+                    >
+                    <p-dropdown
+                        [options]="intellectualPropertyLevels"
+                        optionLabel="key"
+                        optionValue="value"
                         formControlName="intellecturalPropertyLevelId"
                         placeholder="Chọn cấp"
                         inputId="intellecturalPropertyLevelId"
