@@ -144,10 +144,7 @@
                             {{ item.note || "Chưa có thông tin" }}
                         </td>
                         <td style="width: 10%" class="text-center">
-                            {{
-                                item.seminarLevel?.name ||
-                                    "Chưa có thông tin"
-                            }}
+                            {{ item.seminarLevel?.name || "Chưa có thông tin" }}
                         </td>
                         <td style="width: 12%">
                             <div class="flex gap-2 justify-content-center">
@@ -196,7 +193,9 @@
 >
     <ng-template pTemplate="content">
         <div class="field">
-            <label for="seminarName">Tên hội thảo <span class="text-danger">*</span></label>
+            <label for="seminarName"
+                >Tên hội thảo <span class="text-danger">*</span></label
+            >
             <input
                 type="text"
                 pInputText
@@ -311,9 +310,7 @@
         </div>
 
         <div class="field">
-            <label for="name"
-                >Người tạo<span class="text-danger"></span></label
-            >
+            <label for="name">Người tạo<span class="text-danger"></span></label>
             <p-dropdown
                 [options]="Userinfo"
                 [(ngModel)]="selectedUser"
@@ -325,8 +322,8 @@
 
         <div class="field">
             <label for="eventDate"
-                >Ngày tổ chức <span class="text-danger"></span></label
-            >
+                >Ngày tổ chức <span class="text-danger"></span
+            ></label>
             <p-calendar
                 [(ngModel)]="newSeminar.eventDate"
                 appendTo="body"
@@ -341,8 +338,8 @@
         </div>
         <div class="field">
             <label for="hourCalculated"
-                >Số giờ <span class="text-danger"></span></label
-            >
+                >Số giờ <span class="text-danger"></span
+            ></label>
             <p-inputNumber
                 id="hourCalculated"
                 [(ngModel)]="newSeminar.hourCalculated"
@@ -366,10 +363,10 @@
         </div>
         <div class="field">
             <label for="seminarLevel"
-                >Mức độ <span class="text-danger"></span></label
-            >
+                >Mức độ <span class="text-danger"></span
+            ></label>
             <p-dropdown
-                [options]="Bomon"
+                [options]="bomon"
                 [(ngModel)]="selectedBomon"
                 optionLabel="label"
                 optionValue="value"

@@ -13,23 +13,23 @@ export class AppMenuComponent implements OnInit {
 
     ngOnInit() {
         this.model = [
-            {
-                label: '',
-                items: [
-                    {
-                        label: 'Quản lý sinh viên',
-                        icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/student'],
-                    },
-                ],
-            },
+            // {
+            //     label: '',
+            //     items: [
+            //         {
+            //             label: 'Quản lý sinh viên',
+            //             icon: 'pi pi-fw pi-bookmark',
+            //             routerLink: ['/student'],
+            //         },
+            //     ],
+            // },
             {
                 label: '',
                 items: [
                     {
                         label: 'Quản lý cán bộ',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/student'],
+                        routerLink: ['/officer'],
                     },
                 ],
             },
@@ -40,7 +40,7 @@ export class AppMenuComponent implements OnInit {
                     {
                         label: 'Quản lý phòng ban',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/room'],
+                        routerLink: ['/departments'],
                     },
                 ],
             },

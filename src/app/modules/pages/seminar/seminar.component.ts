@@ -28,6 +28,7 @@ export class SeminarComponent implements OnInit {
     addDialogVisible: boolean = false;
     formatdate: string = 'dd/mm/yy';
     submitted: boolean = false;
+    bomon: any;
 
     newSeminar: any = {
         seminarName: '',
@@ -38,7 +39,7 @@ export class SeminarComponent implements OnInit {
         seminarLevel: null,
     };
 
-    Userinfo: any[] = [];  
+    Userinfo: any[] = [];
     selectedUser: any;
     Bomon: any[] = [];
     selectedBomon: any;
@@ -88,8 +89,12 @@ export class SeminarComponent implements OnInit {
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
-                pageIndex: params['pageIndex'] ? params['pageIndex'] : this.config.paging.pageIndex,
-                pageSize: params['pageSize'] ? params['pageSize'] : this.config.paging.pageSize,
+                pageIndex: params['pageIndex']
+                    ? params['pageIndex']
+                    : this.config.paging.pageIndex,
+                pageSize: params['pageSize']
+                    ? params['pageSize']
+                    : this.config.paging.pageSize,
             };
             this.queryParameters = {
                 ...params,
@@ -141,19 +146,35 @@ export class SeminarComponent implements OnInit {
     validateSeminarForm(): boolean {
         let isValid = true;
         if (!this.newSeminar.seminarName) {
-            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên hội thảo' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập tên hội thảo',
+            });
             isValid = false;
         }
         if (!this.newSeminar.eventDate) {
-            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng chọn ngày tổ chức' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng chọn ngày tổ chức',
+            });
             isValid = false;
         }
         if (this.newSeminar.hourCalculated === null) {
-            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập số giờ' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập số giờ',
+            });
             isValid = false;
         }
         if (!this.selectedBomon) {
-            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng chọn mức độ' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng chọn mức độ',
+            });
             isValid = false;
         }
         return isValid;
@@ -170,21 +191,33 @@ export class SeminarComponent implements OnInit {
             hourCalculated: this.newSeminar.hourCalculated,
             note: this.newSeminar.note || null,
             userId: this.selectedUser || null,
-            seminarLevelId: this.selectedBomon
+            seminarLevelId: this.selectedBomon,
         };
         this.seminarService.create(jsonRequest).subscribe(
             (result: any) => {
                 if (result.status) {
-                    this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã thêm hội thảo mới' });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm hội thảo mới',
+                    });
                     this.addDialogVisible = false;
                     this.submitted = false;
                     this.getSeminar(this.queryParameters);
                 } else {
-                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Thêm hội thảo thất bại' });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Thêm hội thảo thất bại',
+                    });
                 }
             },
             (error) => {
-                this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi thêm hội thảo' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi thêm hội thảo',
+                });
                 console.error('Error creating seminar:', error);
             }
         );
@@ -196,7 +229,11 @@ export class SeminarComponent implements OnInit {
                 if (request.pageIndex !== 1 && result.data.items.length === 0) {
                     this.route.queryParams.subscribe((params) => {
                         const request = { ...params, pageIndex: 1 };
-                        this.router.navigate([], { relativeTo: this.route, queryParams: request, queryParamsHandling: 'merge' });
+                        this.router.navigate([], {
+                            relativeTo: this.route,
+                            queryParams: request,
+                            queryParamsHandling: 'merge',
+                        });
                     });
                 }
                 this.seminars = result.data.items;
@@ -216,19 +253,22 @@ export class SeminarComponent implements OnInit {
     openEditDialog(seminar: any) {
         // Sao chép dữ liệu seminar vào editingSeminar
         this.editingSeminar = { ...seminar };
-        
+
         // Chuyển đổi date từ chuỗi sang Date object nếu cần
-        if (this.editingSeminar.date && typeof this.editingSeminar.date === 'string') {
+        if (
+            this.editingSeminar.date &&
+            typeof this.editingSeminar.date === 'string'
+        ) {
             this.editingSeminar.date = new Date(this.editingSeminar.date);
         }
-        
+
         // Đảm bảo các trường khác được ánh xạ đúng
         this.editingSeminar.seminarName = seminar.seminarName || '';
         this.editingSeminar.hourCalculated = seminar.hourCalculated || 0;
         this.editingSeminar.note = seminar.note || '';
         this.selectedUser = seminar.user?.id || null; // Dùng cho dropdown người tạo
         this.selectedBomon = seminar.seminarLevel?.id || null; // Dùng cho dropdown mức độ
-        
+
         // Hiển thị dialog
         this.editDialogVisible = true;
     }
@@ -246,24 +286,40 @@ export class SeminarComponent implements OnInit {
                 hourCalculated: this.editingSeminar.hourCalculated,
                 note: this.editingSeminar.note || null,
                 userId: this.selectedUser || null,
-                seminarLevelId: this.selectedBomon || null
+                seminarLevelId: this.selectedBomon || null,
             };
             this.seminarService.update(updateRequest).subscribe(
                 (result: any) => {
                     if (result.status) {
-                        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật thông tin hội thảo thành công' });
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Thành công',
+                            detail: 'Cập nhật thông tin hội thảo thành công',
+                        });
                         this.hideEditDialog();
                         this.getSeminar(this.queryParameters);
                     } else {
-                        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Cập nhật thất bại' });
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Lỗi',
+                            detail: result.message || 'Cập nhật thất bại',
+                        });
                     }
                 },
                 (error) => {
-                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi cập nhật' });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: 'Có lỗi xảy ra khi cập nhật',
+                    });
                 }
             );
         } else {
-            this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập tên hội thảo' });
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập tên hội thảo',
+            });
         }
     }
 
@@ -278,8 +334,12 @@ export class SeminarComponent implements OnInit {
                 this.deleteSeminar(seminar.id);
             },
             reject: () => {
-                this.messageService.add({ severity: 'info', summary: 'Hủy bỏ', detail: 'Đã hủy thao tác xóa' });
-            }
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Hủy bỏ',
+                    detail: 'Đã hủy thao tác xóa',
+                });
+            },
         });
     }
 
@@ -287,14 +347,26 @@ export class SeminarComponent implements OnInit {
         this.seminarService.delete(id).subscribe(
             (result: any) => {
                 if (result.status) {
-                    this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Đã xóa hội thảo thành công' });
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã xóa hội thảo thành công',
+                    });
                     this.getSeminar(this.queryParameters);
                 } else {
-                    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: result.message || 'Xóa hội thảo thất bại' });
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Xóa hội thảo thất bại',
+                    });
                 }
             },
             (error) => {
-                this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Có lỗi xảy ra khi xóa hội thảo' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi xóa hội thảo',
+                });
                 console.error('Error deleting seminar:', error);
             }
         );
@@ -302,7 +374,9 @@ export class SeminarComponent implements OnInit {
 
     public selectAllclasss(event: any): void {
         if (event.target.checked) {
-            this.selectedclass = this.filteredSeminars.map((teacher: any) => teacher.id);
+            this.selectedclass = this.filteredSeminars.map(
+                (teacher: any) => teacher.id
+            );
         } else {
             this.selectedclass = [];
         }
@@ -310,7 +384,10 @@ export class SeminarComponent implements OnInit {
 
     public handleOnSortAndOrderChange(orderBy: string): void {
         if (this.paging.orderBy === orderBy) {
-            this.paging.sortBy = this.paging.sortBy === this.constant.sort.asc ? this.constant.sort.desc : this.constant.sort.asc;
+            this.paging.sortBy =
+                this.paging.sortBy === this.constant.sort.asc
+                    ? this.constant.sort.desc
+                    : this.constant.sort.asc;
         } else {
             this.paging.sortBy = sortConstant.desc;
         }
@@ -332,7 +409,9 @@ export class SeminarComponent implements OnInit {
 
     public handleSelectItem(id: number): void {
         if (this.isSelected(id)) {
-            this.selectedclass = this.selectedclass.filter((classId: any) => classId !== id);
+            this.selectedclass = this.selectedclass.filter(
+                (classId: any) => classId !== id
+            );
         } else {
             this.selectedclass.push(id);
         }
@@ -359,28 +438,40 @@ export class SeminarComponent implements OnInit {
 
     private applyFilter() {
         this.filteredSeminars = [...this.seminars];
-        
+
         if (this.code) {
-            this.filteredSeminars = this.filteredSeminars.filter((seminar: any) =>
-                seminar.user?.name?.toLowerCase().includes(this.code.toLowerCase())
+            this.filteredSeminars = this.filteredSeminars.filter(
+                (seminar: any) =>
+                    seminar.user?.name
+                        ?.toLowerCase()
+                        .includes(this.code.toLowerCase())
             );
         }
 
-        if (this.deadlineRange && (this.deadlineRange[0] || this.deadlineRange[1])) {
-            const fromDate = this.deadlineRange[0] ? new Date(this.deadlineRange[0]) : null;
-            const toDate = this.deadlineRange[1] ? new Date(this.deadlineRange[1]) : null;
+        if (
+            this.deadlineRange &&
+            (this.deadlineRange[0] || this.deadlineRange[1])
+        ) {
+            const fromDate = this.deadlineRange[0]
+                ? new Date(this.deadlineRange[0])
+                : null;
+            const toDate = this.deadlineRange[1]
+                ? new Date(this.deadlineRange[1])
+                : null;
 
-            this.filteredSeminars = this.filteredSeminars.filter((seminar: any) => {
-                const seminarDate = new Date(seminar.date);
-                if (fromDate && toDate) {
-                    return seminarDate >= fromDate && seminarDate <= toDate;
-                } else if (fromDate) {
-                    return seminarDate >= fromDate;
-                } else if (toDate) {
-                    return seminarDate <= toDate;
+            this.filteredSeminars = this.filteredSeminars.filter(
+                (seminar: any) => {
+                    const seminarDate = new Date(seminar.date);
+                    if (fromDate && toDate) {
+                        return seminarDate >= fromDate && seminarDate <= toDate;
+                    } else if (fromDate) {
+                        return seminarDate >= fromDate;
+                    } else if (toDate) {
+                        return seminarDate <= toDate;
+                    }
+                    return true;
                 }
-                return true;
-            });
+            );
         }
 
         this.paging.totalRecords = this.filteredSeminars.length;
