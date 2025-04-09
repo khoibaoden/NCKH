@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from 'src/app/shared/modules/shared.module';
-import { DepartmentsComponent } from './departments.component';
+import { DepartmentComponent } from './departments.component';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DepartmentsRoutingModule } from './departments-routing.module';
 
 @NgModule({
-    imports: [CommonModule, SharedModule],
-    declarations: [DepartmentsComponent],
+    imports: [CommonModule, SharedModule, ConfirmDialogModule, DepartmentsRoutingModule],
+    declarations: [DepartmentComponent],
 })
 export class DepartmentsModule {}
