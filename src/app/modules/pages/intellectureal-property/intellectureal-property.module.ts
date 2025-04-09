@@ -4,12 +4,14 @@ import { IntellecturealPropertyComponent } from './intellectureal-property.compo
 import { IntellecturealPropertyRoutingModule } from './intellectureal-routing.module';
 import { SharedModule } from 'src/app/shared/modules/shared.module';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ReactiveFormsModule } from '@angular/forms';
 @NgModule({
     imports: [
         CommonModule,
         IntellecturealPropertyRoutingModule,
         SharedModule,
         MultiSelectModule,
+        ReactiveFormsModule,
     ],
     declarations: [IntellecturealPropertyComponent],
 })

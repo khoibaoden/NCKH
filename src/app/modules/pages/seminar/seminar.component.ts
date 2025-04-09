@@ -251,10 +251,8 @@ export class SeminarComponent implements OnInit {
     }
 
     openEditDialog(seminar: any) {
-        // Sao chép dữ liệu seminar vào editingSeminar
         this.editingSeminar = { ...seminar };
 
-        // Chuyển đổi date từ chuỗi sang Date object nếu cần
         if (
             this.editingSeminar.date &&
             typeof this.editingSeminar.date === 'string'

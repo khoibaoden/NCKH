@@ -1,3 +1,5 @@
+import { MessageService } from 'primeng/api';
+import { ScienceProjectService } from 'src/app/core/services/science-project.service';
 import { Component, OnInit } from '@angular/core';
 import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +12,7 @@ import pagingConfig, {
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { ScienceProjectLevelService } from 'src/app/core/services/science-project-level.service';
 
 @Component({
     selector: 'app-science-project',
@@ -22,7 +25,9 @@ export class ScienceProjectComponent implements OnInit {
 
     // ngOnInit() {}
     visibleScienceProject: boolean = false;
+    visibleUpdateScienceProject: boolean = false;
     createScienceProjectForm: FormGroup;
+    updateScienceProjectForm: FormGroup;
     items: any;
     scienceProjects: any;
     statusOptions: any;
@@ -31,7 +36,10 @@ export class ScienceProjectComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private classService: ClassService,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private scienceProjectService: ScienceProjectService,
+        private messageService: MessageService,
+        private scienceProjectLevelService: ScienceProjectLevelService
     ) {
         this.createScienceProjectForm = this.fb.group({
             projectName: ['', Validators.required],
@@ -205,5 +213,58 @@ export class ScienceProjectComponent implements OnInit {
                 queryParamsHandling: 'merge',
             });
         });
+    }
+
+    handleShowUpdateCurriculum(item: any) {
+        this.visibleUpdateScienceProject = true;
+        this.scienceProjectService
+            .getById({ id: item.id })
+            .subscribe((result: any) => {
+                if (result.status) {
+                }
+            });
+    }
+
+    public handleDeleteItem(id: number) {}
+
+    public handleCreateItem() {
+        this.scienceProjectService
+            .create({
+                ...this.updateScienceProjectForm.value,
+                intellecturalPropertyLevelId:
+                    this.updateScienceProjectForm.value
+                        .intellecturalPropertyLevelId.value,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleScienceProject = false;
+                    this.updateScienceProjectForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm hội thảo mới',
+                    });
+                    this.getScience(this.queryParameters);
+                }
+            });
+    }
+
+    public handleUpdateItem() {
+        this.scienceProjectService
+            .update({
+                ...this.updateScienceProjectForm.value,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleUpdateScienceProject = false;
+                    this.updateScienceProjectForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã cập nhật hội thảo',
+                    });
+                    this.getScience(this.queryParameters);
+                }
+            });
     }
 }

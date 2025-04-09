@@ -1,6 +1,8 @@
+import { CurriculumLevelService } from './../../../core/services/curriculum-level.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
     DEFAULT_PAGE_SIZE,
@@ -10,6 +12,7 @@ import pagingConfig, {
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { CurriculumService } from 'src/app/core/services/curriculum.service';
 import { ScienceProjectService } from 'src/app/core/services/science-project.service';
 import { ScienceReportService } from 'src/app/core/services/science-report.service';
 
@@ -17,19 +20,45 @@ import { ScienceReportService } from 'src/app/core/services/science-report.servi
     selector: 'app-curriculum',
     templateUrl: './curriculum.component.html',
     styleUrls: ['./curriculum.component.css'],
+    providers: [MessageService, ConfirmationService],
 })
 export class CurriculumComponent implements OnInit {
     items: any;
     curriculums: any;
     visibleCurriculum: boolean = false;
+    visibleUpdateCurriculum: boolean = false;
     createCurriculumForm: FormGroup;
+    updateCurriculumForm: FormGroup;
+
+    curriculumLevels: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
+        private formBuilder: FormBuilder,
         private scienceReportService: ScienceReportService,
-        private fb: FormBuilder
+        private curriculumService: CurriculumService,
+        private curriculumLevelService: CurriculumLevelService,
+        private fb: FormBuilder,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
     ) {
         this.createCurriculumForm = this.fb.group({
+            projectName: [''],
+            scienceProjectLevelId: [null],
+            userId: [null],
+            name: [''],
+            publishYear: [null],
+            isAuthor: [false],
+            memberNumber: [null],
+            isAuthorWrite: [false],
+            isbn: [''],
+            publishingHouse: [''],
+            curriculumLevelId: [null],
+            workHoursPerProject: [null],
+            hoursCalculated: [null],
+            note: [''],
+        });
+        this.updateCurriculumForm = this.fb.group({
             projectName: [''],
             scienceProjectLevelId: [null],
             userId: [null],
@@ -94,11 +123,12 @@ export class CurriculumComponent implements OnInit {
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getScienceReport(request);
+            this.getCurriculum(request);
         });
+        this.loadCurriculumLevel();
     }
 
-    public getScienceReport(request: any): any {
+    public getCurriculum(request: any): any {
         this.scienceReportService
             .getPaging(request)
             .subscribe((result: any) => {
@@ -169,6 +199,77 @@ export class CurriculumComponent implements OnInit {
         return this.selectedScienceReport.includes(id);
     }
 
+    onPageChange(event: any) {
+        this.paging.pageIndex = event.page + 1;
+        this.paging.pageSize = event.rows;
+        this.route.queryParams.subscribe((params) => {
+            const request = {
+                ...params,
+                pageIndex: event.page + 1,
+                pageSize: event.rows,
+            };
+
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: request,
+                queryParamsHandling: 'merge',
+            });
+        });
+    }
+
+    handleShowUpdateCurriculum(item: any) {
+        this.visibleUpdateCurriculum = true;
+        this.curriculumService
+            .getById({ id: item.id })
+            .subscribe((result: any) => {
+                if (result.status) {
+                }
+            });
+    }
+
+    public handleDeleteItem(id: number) {}
+
+    public handleCreateItem() {
+        this.curriculumService
+            .create({
+                ...this.createCurriculumForm.value,
+                intellecturalPropertyLevelId:
+                    this.createCurriculumForm.value.intellecturalPropertyLevelId
+                        .value,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleCurriculum = false;
+                    this.createCurriculumForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm hội thảo mới',
+                    });
+                    this.getCurriculum(this.queryParameters);
+                }
+            });
+    }
+
+    public handleUpdateItem() {
+        this.curriculumService
+            .update({
+                ...this.updateCurriculumForm.value,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleUpdateCurriculum = false;
+                    this.updateCurriculumForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã cập nhật hội thảo',
+                    });
+                    this.getCurriculum(this.queryParameters);
+                }
+            });
+    }
+
     public handleSearchclass() {
         this.route.queryParams.subscribe((params) => {
             const request = {
@@ -189,21 +290,11 @@ export class CurriculumComponent implements OnInit {
         });
     }
 
-    onPageChange(event: any) {
-        this.paging.pageIndex = event.page + 1;
-        this.paging.pageSize = event.rows;
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: event.page + 1,
-                pageSize: event.rows,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
+    loadCurriculumLevel() {
+        this.curriculumLevelService.getPaging({}).subscribe((result: any) => {
+            if (result.status) {
+                this.curriculumLevels = result.data.items;
+            }
         });
     }
 }

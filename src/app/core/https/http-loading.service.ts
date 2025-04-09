@@ -28,7 +28,6 @@ export class HttpLoadingService {
     get(endpoint: string, data: any): Observable<any> {
         const headers = this.createHeaders();
         const queryParams = this.buildQueryParams(data);
-        console.log(queryParams);
         // this.loadingUi.show();
         return this.http
             .get(
@@ -183,7 +182,7 @@ export class HttpLoadingService {
     private createHeadersForFormData() {
         return new HttpHeaders({
             Authorization: `Bearer ${this.getToken()}`,
-            'Content-Type': 'application/json'  // rất quan trọng!
+            'Content-Type': 'application/json', // rất quan trọng!
         });
     }
 
