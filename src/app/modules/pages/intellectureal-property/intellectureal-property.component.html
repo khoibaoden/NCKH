@@ -1,3 +1,6 @@
+<!-- Thông báo Toast -->
+<p-toast></p-toast>
+
 <div class="grid">
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
@@ -128,18 +131,34 @@
                 </ng-template>
             </p-table>
             <div
-                class="flex align-items-center"
+                class="flex align-items-center mt-3"
                 style="justify-content: space-between"
             >
+                <p>
+                    <span style="font-weight: 500">{{
+                        1 + (paging.pageIndex - 1) * paging.pageSize
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        1 +
+                            (paging.pageIndex - 1) * paging.pageSize +
+                            (paging.pageSize - 1)
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
+                    }}</span>
+                    bản ghi
+                </p>
                 <div *ngIf="intellecturealPropertys?.length > 0">
                     <p-paginator
-                        [rows]="pageSize"
+                        class="custum-paging"
                         (onPageChange)="onPageChange($event)"
-                        [totalRecords]="
-                            totalRecordsCount > 0 ? totalRecordsCount : 1
-                        "
-                        [rowsPerPageOptions]="[10, 20, 30]"
-                    ></p-paginator>
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    />
                 </div>
             </div>
         </div>
