@@ -9,6 +9,34 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
     imports: [
         RouterModule.forRoot(
             [
+                //Departments
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'departments',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/departments/departments.module'
+                                ).then((m) => m.DepartmentsModule),
+                        },
+                    ],
+                },
+                //Officer
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'officer',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/officer/officer.module'
+                                ).then((m) => m.officerModule),
+                        },
+                    ],
+                },
                 //staff-position
                 {
                     path: '',

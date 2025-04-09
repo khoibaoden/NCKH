@@ -1,0 +1,13 @@
+.action-buttons {
+    display: flex;
+    flex-direction: row; /* Hiển thị hàng ngang */
+    gap: 8px; /* Khoảng cách giữa các nút */
+    justify-content: center; /* Căn giữa các nút */
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+
+.action-buttons button {
+    width: 36px; /* Kích thước nút */
+    height: 36px;
+}
+

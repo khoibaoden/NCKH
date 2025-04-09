@@ -1,0 +1,286 @@
+<div class="grid">
+    <div class="col-12">
+        <p-toolbar styleClass="mb-2">
+            <div class="">
+                <h3>Danh sách phòng ban</h3>
+                <p-breadcrumb
+                    [model]="items"
+                    [home]="{ icon: 'pi pi-home' }"
+                ></p-breadcrumb>
+            </div>
+            <ng-template pTemplate="right">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-plus"
+                    label="Thêm"
+                    (click)="openAddDialog()"
+                ></button>
+            </ng-template>
+        </p-toolbar>
+        <div class="card">
+            <p-table
+                #dt
+                [value]="filteredDepartments"
+                responsiveLayout="scroll"
+                styleClass="p-datatable-gridlines p-datatable-striped"
+                [paginator]="true"
+                [rows]="paging.pageSize"
+                [totalRecords]="paging.totalRecords"
+                [rowsPerPageOptions]="config.pageSizeOptions"
+                (onPage)="onPageChange($event)"
+                [rowHover]="true"
+            >
+                <ng-template pTemplate="caption">
+                    <div
+                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
+                    >
+                        <div
+                            class="flex flex-column"
+                            style="margin-left: -12px"
+                        >
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Tìm kiếm theo tên phòng ban:</label
+                            >
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input
+                                    pInputText
+                                    type="text"
+                                    [(ngModel)]="code"
+                                    placeholder="Tìm theo tên phòng ban"
+                                    style="width: 350px"
+                                    class="sm:"
+                                />
+                            </span>
+                        </div>
+                        <button
+                            pButton
+                            pRipple
+                            label="Lọc"
+                            (click)="EvenFilter()"
+                        ></button>
+                    </div>
+                </ng-template>
+                <!-- Header của bảng -->
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th
+                            class="text-center"
+                            pSortableColumn="name"
+                            style="width: 30%"
+                        >
+                            Tên phòng ban
+                            <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="value"
+                            style="width: 20%"
+                        >
+                            Trình tự
+                            <p-sortIcon field="value"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="description"
+                            style="width: 35%"
+                        >
+                            Miêu tả
+                            <p-sortIcon field="description"></p-sortIcon>
+                        </th>
+                        <th class="text-center" style="width: 15%">Thao tác</th>
+                    </tr>
+                </ng-template>
+                <!-- Body của bảng -->
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td style="width: 30%" class="text-center">
+                            {{ item.name || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 20%">
+                            {{ item.value || "Chưa có thông tin" }}
+                        </td>
+                        <td
+                            style="width: 35%"
+                            class="truncate-text text-center"
+                            title="{{ item.description || 'Chưa có thông tin' }}"
+                        >
+                            {{ item.description || "Chưa có thông tin" }}
+                        </td>
+                        <td style="width: 15%">
+                            <div class="flex gap-2 justify-content-center">
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-info p-button-sm"
+                                    (click)="openEditDialog(item)"
+                                    pTooltip="Sửa"
+                                    tooltipPosition="top"
+                                ></button>
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm"
+                                    (click)="confirmDelete(item)"
+                                    pTooltip="Xóa"
+                                    tooltipPosition="top"
+                                ></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <!-- Thông báo khi không có dữ liệu -->
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            Không có dữ liệu phòng ban.
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<!-- Dialog để sửa thông tin phòng ban -->
+<p-dialog
+    [(visible)]="editDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Chỉnh sửa thông tin phòng ban"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name"
+                >Tên phòng ban <span class="text-danger">*</span></label
+            >
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="editingDepartment.name"
+                required
+                autofocus
+            />
+        </div>
+        <div class="field">
+            <label for="value">Thứ tự</label>
+            <p-inputNumber
+                id="value"
+                [(ngModel)]="editingDepartment.value"
+                [min]="0"
+            ></p-inputNumber>
+        </div>
+        <div class="field">
+            <label for="description">Miêu tả</label>
+            <textarea
+                id="description"
+                pInputTextarea
+                [(ngModel)]="editingDepartment.description"
+                rows="3"
+            ></textarea>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideEditDialog()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Lưu"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveDepartment()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog xác nhận xóa -->
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
+
+<!-- Dialog thêm mới phòng ban -->
+<p-dialog
+    [(visible)]="addDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Thêm phòng ban mới"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name"
+                >Tên phòng ban <span class="text-danger">*</span></label
+            >
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="newDepartment.name"
+                required
+                autofocus
+            />
+            <small *ngIf="submitted && !newDepartment.name" class="p-error"
+                >Tên phòng ban là bắt buộc</small
+            >
+        </div>
+
+        <div class="field">
+            <label for="value"
+                >Thứ tự <span class="text-danger"></span
+            ></label>
+            <p-inputNumber
+                id="value"
+                [(ngModel)]="newDepartment.value"
+                [min]="0"
+            ></p-inputNumber>
+        </div>
+        <div class="field">
+            <label for="description">Miêu tả</label>
+            <textarea
+                id="description"
+                pInputTextarea
+                [(ngModel)]="newDepartment.description"
+                rows="3"
+            ></textarea>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="addDialogVisible = false; submitted = false"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Thêm"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveNewDepartment()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Thông báo Toast -->
+<p-toast></p-toast>
