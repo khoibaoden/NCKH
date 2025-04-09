@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
     DEFAULT_PAGE_SIZE,
@@ -9,43 +10,27 @@ import pagingConfig, {
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
-import { ClassService } from 'src/app/core/services/class.service';
-import { ScienceProjectService } from 'src/app/core/services/science-project.service';
-import { ScienceReportService } from 'src/app/core/services/science-report.service';
+import { CurriculumService } from 'src/app/core/services/curriculum.service';
 
 @Component({
     selector: 'app-curriculum',
     templateUrl: './curriculum.component.html',
     styleUrls: ['./curriculum.component.css'],
+    providers: [MessageService, ConfirmationService],
 })
 export class CurriculumComponent implements OnInit {
     items: any;
-    curriculums: any;
-    visibleCurriculum: boolean = false;
+    curriculums: any[] = [];
+    filteredCurriculums: any[] = [];
+    addDialogVisible: boolean = false;
+    editDialogVisible: boolean = false;
+    submitted: boolean = false;
+    code: string = '';
+    publishYearRange: Date[] | null = null;
+
     createCurriculumForm: FormGroup;
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private scienceReportService: ScienceReportService,
-        private fb: FormBuilder
-    ) {
-        this.createCurriculumForm = this.fb.group({
-            projectName: [''],
-            scienceProjectLevelId: [null],
-            userId: [null],
-            name: [''],
-            publishYear: [null],
-            isAuthor: [false],
-            memberNumber: [null],
-            isAuthorWrite: [false],
-            isbn: [''],
-            publishingHouse: [''],
-            curriculumLevelId: [null],
-            workHoursPerProject: [null],
-            hoursCalculated: [null],
-            note: [''],
-        });
-    }
+    editCurriculumForm: FormGroup;
+    editingCurriculum: any = {};
 
     public config: any = {
         paging: pagingConfig.default,
@@ -54,10 +39,9 @@ export class CurriculumComponent implements OnInit {
         pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     };
 
-    // public constant: any = {
-    //     class: classConstant,
-    //     sort: sortConstant,
-    // };
+    public constant: any = {
+        sort: sortConstant,
+    };
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -68,16 +52,43 @@ export class CurriculumComponent implements OnInit {
         totalPages: 0,
     };
 
-    public selectedScienceReport: any = [];
-
     public queryParameters: any = {
         ...this.config.paging,
         status: 0,
         keyWord: '',
     };
 
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private fb: FormBuilder,
+        private curriculumService: CurriculumService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
+    ) {
+        this.createCurriculumForm = this.fb.group({
+            name: ['', Validators.required],
+            publishYear: [null],
+            isAuthor: [false],
+            memberNumber: [null],
+            publishingHouse: [''],
+            isbn: [''],
+            note: [''],
+        });
+
+        this.editCurriculumForm = this.fb.group({
+            name: ['', Validators.required],
+            publishYear: [null],
+            isAuthor: [false],
+            memberNumber: [null],
+            publishingHouse: [''],
+            isbn: [''],
+            note: [''],
+        });
+    }
+
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Danh sách sách' }];
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -88,31 +99,22 @@ export class CurriculumComponent implements OnInit {
                     ? params['pageSize']
                     : this.config.paging.pageSize,
             };
-
             this.queryParameters = {
                 ...params,
                 status: params['status'] ? params['status'] : 0,
                 keyWord: params['keyWord'] ? params['keyWord'] : null,
             };
-            this.getScienceReport(request);
+            this.getCurriculums(request);
         });
     }
 
-    public getScienceReport(request: any): any {
-        this.scienceReportService
-            .getPaging(request)
-            .subscribe((result: any) => {
+    getCurriculums(request: any) {
+        this.curriculumService.getPaging(request).subscribe(
+            (result: any) => {
                 if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
+                    if (request.pageIndex !== 1 && result.data.items.length === 0) {
                         this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
-
+                            const request = { ...params, pageIndex: 1 };
                             this.router.navigate([], {
                                 relativeTo: this.route,
                                 queryParams: request,
@@ -120,73 +122,203 @@ export class CurriculumComponent implements OnInit {
                             });
                         });
                     }
-                    console.log(result.data.items);
                     this.curriculums = result.data.items;
-                    // this.classes = this.classes.map(
-                    //     (class: any) => ({
-                    //         ...class,
-                    //         status:
-                    //             this.constant.class.status.find(
-                    //                 (status: any) =>
-                    //                     status.value === class.status
-                    //             )?.label ?? '',
-                    //     })
-                    // );
-
+                    this.filteredCurriculums = [...this.curriculums];
                     if (this.curriculums.length === 0) {
                         this.paging.pageIndex = 1;
                     }
-
                     const { items, ...paging } = result.data;
                     this.paging = paging;
-
-                    this.selectedScienceReport = [];
+                    this.paging.totalRecords = this.filteredCurriculums.length;
                 }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Không thể tải danh sách sách',
+                });
+            }
+        );
+    }
+
+    openAddDialog() {
+        this.submitted = false;
+        this.createCurriculumForm.reset();
+        this.addDialogVisible = true;
+    }
+
+    saveNewCurriculum() {
+        this.submitted = true;
+        if (this.createCurriculumForm.invalid) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập đầy đủ thông tin bắt buộc',
             });
-    }
-
-    public selectAllScience(event: any): void {
-        if (event.target.checked) {
-            this.selectedScienceReport = this.curriculums.map(
-                (teacher: any) => teacher.id
-            );
-        } else {
-            this.selectedScienceReport = [];
+            return;
         }
+
+        // Chuyển đổi publishYear thành định dạng DateTime (ISO 8601) nếu có giá trị
+        const publishYearValue = this.createCurriculumForm.value.publishYear;
+        const publishYearFormatted = publishYearValue
+            ? new Date(publishYearValue).toISOString() // Chuyển thành định dạng ISO 8601 (ví dụ: "2023-01-01T00:00:00.000Z")
+            : null;
+
+        const jsonRequest = {
+            request: {
+                ...this.createCurriculumForm.value,
+                publishYear: publishYearFormatted, // Gửi dưới dạng chuỗi ISO 8601
+            },
+        };
+
+        this.curriculumService.create(jsonRequest).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm sách mới',
+                    });
+                    this.addDialogVisible = false;
+                    this.submitted = false;
+                    this.getCurriculums(this.queryParameters);
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Thêm sách thất bại',
+                    });
+                }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi thêm sách: ' + (error.message || 'Không xác định'),
+                });
+            }
+        );
     }
 
-    public handleSelectItem(id: number): void {
-        if (this.isSelected(id)) {
-            this.selectedScienceReport = this.selectedScienceReport.filter(
-                (id: any) => id !== id
-            );
-        } else {
-            this.selectedScienceReport.push(id);
-        }
-    }
-
-    public isSelected(id: number): boolean {
-        return this.selectedScienceReport.includes(id);
-    }
-
-    public handleSearchclass() {
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                status: this.queryParameters.status
-                    ? this.queryParameters.status
-                    : null,
-                keyWord: this.queryParameters.keyWord
-                    ? this.queryParameters.keyWord
-                    : null,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
+    openEditDialog(book: any) {
+        this.editingCurriculum = { ...book };
+        this.editCurriculumForm.patchValue({
+            name: book.name,
+            publishYear: book.publishYear ? new Date(book.publishYear) : null,
+            isAuthor: book.isAuthor,
+            memberNumber: book.memberNumber,
+            publishingHouse: book.publishingHouse,
+            isbn: book.isbn,
+            note: book.note,
         });
+        this.editDialogVisible = true;
+    }
+
+    hideEditDialog() {
+        this.editDialogVisible = false;
+        this.submitted = false;
+    }
+
+    saveCurriculum() {
+        this.submitted = true;
+        if (this.editCurriculumForm.invalid) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập đầy đủ thông tin bắt buộc',
+            });
+            return;
+        }
+
+        // Chuyển đổi publishYear thành định dạng DateTime (ISO 8601) nếu có giá trị
+        const publishYearValue = this.editCurriculumForm.value.publishYear;
+        const publishYearFormatted = publishYearValue
+            ? new Date(publishYearValue).toISOString() // Chuyển thành định dạng ISO 8601
+            : null;
+
+        const updateRequest = {
+            request: {
+                id: this.editingCurriculum.id,
+                ...this.editCurriculumForm.value,
+                publishYear: publishYearFormatted, // Gửi dưới dạng chuỗi ISO 8601
+            },
+        };
+
+        this.curriculumService.update(updateRequest).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Cập nhật thông tin sách thành công',
+                    });
+                    this.hideEditDialog();
+                    this.getCurriculums(this.queryParameters);
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Cập nhật thất bại',
+                    });
+                }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi cập nhật: ' + (error.message || 'Không xác định'),
+                });
+            }
+        );
+    }
+
+    confirmDelete(book: any) {
+        this.confirmationService.confirm({
+            message: `Bạn có chắc muốn xóa sách "${book.name}" không?`,
+            header: 'Xác nhận xóa',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Có',
+            rejectLabel: 'Không',
+            accept: () => {
+                this.deleteCurriculum(book.id);
+            },
+            reject: () => {
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Hủy bỏ',
+                    detail: 'Đã hủy thao tác xóa',
+                });
+            },
+        });
+    }
+
+    deleteCurriculum(id: number) {
+        this.curriculumService.delete(id).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã xóa sách thành công',
+                    });
+                    this.getCurriculums(this.queryParameters);
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Xóa sách thất bại',
+                    });
+                }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi xóa sách',
+                });
+            }
+        );
     }
 
     onPageChange(event: any) {
@@ -198,12 +330,35 @@ export class CurriculumComponent implements OnInit {
                 pageIndex: event.page + 1,
                 pageSize: event.rows,
             };
-
             this.router.navigate([], {
                 relativeTo: this.route,
                 queryParams: request,
                 queryParamsHandling: 'merge',
             });
         });
+    }
+
+    applyFilter() {
+        this.filteredCurriculums = [...this.curriculums];
+
+        if (this.code) {
+            this.filteredCurriculums = this.filteredCurriculums.filter((book) =>
+                book.name?.toLowerCase().includes(this.code.toLowerCase())
+            );
+        }
+
+        if (this.publishYearRange && this.publishYearRange[0] && this.publishYearRange[1]) {
+            const startYear = this.publishYearRange[0].getFullYear();
+            const endYear = this.publishYearRange[1].getFullYear();
+            this.filteredCurriculums = this.filteredCurriculums.filter(
+                (book) =>
+                    book.publishYear &&
+                    book.publishYear >= startYear &&
+                    book.publishYear <= endYear
+            );
+        }
+
+        this.paging.totalRecords = this.filteredCurriculums.length;
+        this.paging.pageIndex = 1;
     }
 }

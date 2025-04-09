@@ -1,1 +1,332 @@
-<p>officer works!</p>
+<div class="grid">
+    <div class="col-12">
+        <p-toolbar styleClass="mb-2">
+            <div class="">
+                <h3>Danh sách cán bộ</h3>
+                <p-breadcrumb
+                    [model]="items"
+                    [home]="{ icon: 'pi pi-home' }"
+                ></p-breadcrumb>
+            </div>
+            <ng-template pTemplate="right">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-plus"
+                    label="Thêm"
+                    (click)="openAddDialog()"
+                ></button>
+            </ng-template>
+        </p-toolbar>
+        <div class="card">
+            <p-table
+                #dt
+                [value]="filteredstaff"
+                responsiveLayout="scroll"
+                styleClass="p-datatable-gridlines p-datatable-striped"
+                [paginator]="true"
+                [rows]="paging.pageSize"
+                [totalRecords]="paging.totalRecords"
+                [rowsPerPageOptions]="config.pageSizeOptions"
+                (onPage)="onPageChange($event)"
+                [rowHover]="true"
+            >
+                <ng-template pTemplate="caption">
+                    <div
+                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
+                    >
+                        <div
+                            class="flex flex-column"
+                            style="margin-left: -12px"
+                        >
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Tìm kiếm:</label
+                            >
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input
+                                    pInputText
+                                    type="text"
+                                    [(ngModel)]="code"
+                                    placeholder="Tìm theo mã hoặc tên cán bộ"
+                                    style="width: 350px"
+                                    class="sm:"
+                                />
+                            </span>
+                        </div>
+                        <button
+                            pButton
+                            pRipple
+                            label="Lọc"
+                            (click)="EvenFilter()"
+                        ></button>
+                    </div>
+                </ng-template>
+                <!-- Header của bảng -->
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th
+                            class="text-center"
+                            pSortableColumn="userName"
+                            style="width: 15%"
+                        >
+                            STT
+                            <p-sortIcon field="userName"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="name"
+                            style="width: 20%"
+                        >
+                            Họ và tên
+                            <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="positionName"
+                            style="width: 15%"
+                        >
+                            Chức danh
+                            <p-sortIcon field="positionName"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="faculty.name"
+                            style="width: 20%"
+                        >
+                            Khoa
+                            <p-sortIcon field="faculty.name"></p-sortIcon>
+                        </th>
+                        <th
+                            class="text-center"
+                            pSortableColumn="faculty.university.name"
+                            style="width: 20%"
+                        >
+                            Trường
+                            <p-sortIcon field="faculty.university.name"></p-sortIcon>
+                        </th>
+                        <th class="text-center" style="width: 10%">Thao tác</th>
+                    </tr>
+                </ng-template>
+                <!-- Body của bảng -->
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td style="width: 15%" class="text-center">
+                            {{ item.id || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 20%">
+                            {{ item.name || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 15%">
+                            {{ item.staffPosition?.positionName || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 20%">
+                            {{ item.faculty?.name || "Chưa có thông tin" }}
+                        </td>
+                        <td class="text-center" style="width: 20%">
+                            {{ item.faculty?.university?.name || "Chưa có thông tin" }}
+                        </td>
+                        <td style="width: 10%">
+                            <div class="flex gap-2 justify-content-center">
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-info p-button-sm"
+                                    (click)="openEditDialog(item)"
+                                    pTooltip="Sửa"
+                                    tooltipPosition="top"
+                                ></button>
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm"
+                                    (click)="confirmDelete(item)"
+                                    pTooltip="Xóa"
+                                    tooltipPosition="top"
+                                ></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <!-- Thông báo khi không có dữ liệu -->
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Không có dữ liệu cán bộ.
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<!-- Dialog để sửa thông tin cán bộ -->
+<!-- <p-dialog
+    [(visible)]="editDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Chỉnh sửa thông tin cán bộ"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="userName">Mã cán bộ <span class="text-danger">*</span></label>
+            <input
+                type="text"
+                pInputText
+                id="userName"
+                [(ngModel)]="editingStaff.userName"
+                required
+                autofocus
+            />
+        </div>
+        <div class="field">
+            <label for="name">Họ và tên <span class="text-danger">*</span></label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="editingStaff.name"
+                required
+            />
+        </div>
+        <div class="field">
+            <label for="positionName">Chức danh</label>
+            <input
+                type="text"
+                pInputText
+                id="positionName"
+                [(ngModel)]="editingStaff.positionName"
+            />
+        </div>
+        <div class="field">
+            <label for="facultyName">Khoa</label>
+            <input
+                type="text"
+                pInputText
+                id="facultyName"
+                [(ngModel)]="editingStaff.faculty.name"
+            />
+        </div>
+        <div class="field">
+            <label for="universityName">Trường</label>
+            <input
+                type="text"
+                pInputText
+                id="universityName"
+                [(ngModel)]="editingStaff.faculty.university.name"
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideEditDialog()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Lưu"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveStaff()"
+        ></button>
+    </ng-template>
+</p-dialog> -->
+
+<!-- Dialog xác nhận xóa -->
+<!-- <p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog> -->
+
+<!-- Dialog thêm mới cán bộ -->
+<!-- <p-dialog
+    [(visible)]="addDialogVisible"
+    [style]="{ width: '550px' }"
+    header="Thêm cán bộ mới"
+    [modal]="true"
+    styleClass="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="userName">Mã cán bộ <span class="text-danger">*</span></label>
+            <input
+                type="text"
+                pInputText
+                id="userName"
+                [(ngModel)]="newStaff.userName"
+                required
+                autofocus
+            />
+            <small *ngIf="submitted && !newStaff.userName" class="p-error"
+                >Mã cán bộ là bắt buộc</small
+            >
+        </div>
+        <div class="field">
+            <label for="name">Họ và tên <span class="text-danger">*</span></label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="newStaff.name"
+                required
+            />
+            <small *ngIf="submitted && !newStaff.name" class="p-error"
+                >Họ và tên là bắt buộc</small
+            >
+        </div>
+        <div class="field">
+            <label for="positionName">Chức danh</label>
+            <input
+                type="text"
+                pInputText
+                id="positionName"
+                [(ngModel)]="newStaff.positionName"
+            />
+        </div>
+        <div class="field">
+            <label for="facultyId">Khoa</label>
+            <p-dropdown
+                [options]="faculties"
+                [(ngModel)]="newStaff.facultyId"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Chọn khoa"
+            ></p-dropdown>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Hủy"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="addDialogVisible = false; submitted = false"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Thêm"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveNewStaff()"
+        ></button>
+    </ng-template>
+</p-dialog> -->
+
+<!-- Thông báo Toast -->
+<p-toast></p-toast>

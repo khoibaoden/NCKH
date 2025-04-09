@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, Form } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import pagingConfig, {
     DEFAULT_PAGE_INDEX,
     DEFAULT_PAGE_SIZE,
@@ -19,6 +20,7 @@ import { IntellecturealPropertyService } from 'src/app/core/services/intellectur
     selector: 'app-intellectureal-property',
     templateUrl: './intellectureal-property.component.html',
     styleUrls: ['./intellectureal-property.component.css'],
+    providers: [MessageService, ConfirmationService],
 })
 export class IntellecturealPropertyComponent implements OnInit {
     createIntellecturealForm: FormGroup;
@@ -28,6 +30,9 @@ export class IntellecturealPropertyComponent implements OnInit {
     users: any;
     intellectualPropertyLevels: any = [];
     updateIntellecturealForm: FormGroup;
+    totalRecordsCount: any = 0;
+
+    visibleUpdateIntellectureal: boolean = false;
     membersList = [
         { name: 'Nguyễn Văn A', id: 1 },
         { name: 'Trần Thị B', id: 2 },
@@ -40,19 +45,21 @@ export class IntellecturealPropertyComponent implements OnInit {
         private router: Router,
         private formBuilder: FormBuilder,
         private userService: UserService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService,
         private intellecturealPropertyService: IntellecturealPropertyService,
         private intellecturalPropertyLevelService: IntellecturalPropertyLevelService
     ) {
         this.createIntellecturealForm = this.formBuilder.group({
-            code: ['', [Validators.required]],
-            name: ['', Validators.required],
+            userId: [null, [Validators.required]],
+            name: [null, Validators.required],
             acceptanceDate: [null],
-            membersName: [''], // Đã đúng rồi nè
+            membersName: [null], // Đã đúng rồi nè
             teamNumber: [null],
             intellecturalPropertyLevelId: [null, Validators.required],
             workHoursPerProject: [null],
             hoursCalculated: [null],
-            note: [''],
+            note: [null],
         });
 
         this.updateIntellecturealForm = this.formBuilder.group({
@@ -66,8 +73,6 @@ export class IntellecturealPropertyComponent implements OnInit {
             hoursCalculated: [null],
             note: [''],
         });
-        this.loadUser();
-        this.loadIntellecturealPropertyLevel();
     }
     public config: any = {
         paging: pagingConfig.default,
@@ -124,7 +129,13 @@ export class IntellecturealPropertyComponent implements OnInit {
             this.getIntellecturealProperty(request);
         });
 
+        this.loadUser();
         this.loadIntellecturealPropertyLevel();
+    }
+
+    onSelectCanBo(event: any) {
+        console.log(event);
+        this.createIntellecturealForm.get('userId')?.setValue(event.value.id);
     }
 
     loadIntellecturealPropertyLevel() {
@@ -183,8 +194,8 @@ export class IntellecturealPropertyComponent implements OnInit {
                         });
                     }
 
-                    this.IntellecturealProperty = result.data.items;
-                    console.log(this.intellecturealPropertys);
+                    this.intellecturealPropertys = result.data.items;
+                    this.totalRecordsCount = result.data.totalRecords;
                     if (this.intellecturealPropertys.length === 0) {
                         this.paging.pageIndex = 1;
                     }
@@ -276,11 +287,21 @@ export class IntellecturealPropertyComponent implements OnInit {
     public handleCreateItem() {
         console.log(this.createIntellecturealForm.value);
         this.intellecturealPropertyService
-            .create(this.createIntellecturealForm.value)
+            .create({
+                ...this.createIntellecturealForm.value,
+                intellecturalPropertyLevelId:
+                    this.createIntellecturealForm.value
+                        .intellecturalPropertyLevelId.value,
+            })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.visibleIntellectureal = false;
                     this.createIntellecturealForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm hội thảo mới',
+                    });
                     this.getIntellecturealProperty(this.queryParameters);
                 }
             });
@@ -344,13 +365,26 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
     }
 
-    handleShowUpdateIntellectureal(id: any) {
+    handleShowUpdateIntellectureal(item: any) {
+        this.visibleUpdateIntellectureal = true;
         this.intellecturealPropertyService
-            .getById({ id: id })
+            .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
-                    this.updateIntellecturealForm.patchValue(result.data);
-                    this.visibleIntellectureal = true;
+                    this.updateIntellecturealForm = this.formBuilder.group({
+                        code: ['', [Validators.required]],
+                        name: ['', Validators.required],
+                        acceptanceDate: [null],
+                        membersName: [''], // Đã đúng rồi nè
+                        teamNumber: [null],
+                        intellecturalPropertyLevelId: [
+                            null,
+                            Validators.required,
+                        ],
+                        workHoursPerProject: [null],
+                        hoursCalculated: [null],
+                        note: [''],
+                    });
                 }
             });
     }

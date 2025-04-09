@@ -21,4 +21,7 @@ export class ScienceProjectService {
     delete(request: any): Observable<any> {
         return this.http.put('scienceproject/delete', request);
     }
+    getById(request: any = null): Observable<any> {
+        return this.http.get('scienceproject/get-by-id', request);
+    }
 }

@@ -1,0 +1,5 @@
+.checkbox-label-spacing {
+    .p-checkbox {
+        margin-right: 8px; /* Khoảng cách giữa checkbox và label */
+    }
+}
