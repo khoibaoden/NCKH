@@ -151,11 +151,6 @@ export class IntellecturealPropertyComponent implements OnInit {
     }
 
     public handleOnSearch(event: any = null): void {
-        // this.search = event.target.value;
-        // this.filteredItems = this.items.filter((item: any) =>
-        //     item.name.toLowerCase().includes(this.search.toLowerCase())
-        // );
-
         this.userService
             .getPaging({ name: this.search })
             .subscribe((result: any) => {

@@ -15,6 +15,7 @@ import { ClassService } from 'src/app/core/services/class.service';
 import { CurriculumService } from 'src/app/core/services/curriculum.service';
 import { ScienceProjectService } from 'src/app/core/services/science-project.service';
 import { ScienceReportService } from 'src/app/core/services/science-report.service';
+import { UserService } from 'src/app/core/services/user.service';
 
 @Component({
     selector: 'app-curriculum',
@@ -29,6 +30,8 @@ export class CurriculumComponent implements OnInit {
     visibleUpdateCurriculum: boolean = false;
     createCurriculumForm: FormGroup;
     updateCurriculumForm: FormGroup;
+    canbos: any;
+    search: string = '';
 
     curriculumLevels: any;
     constructor(
@@ -40,7 +43,8 @@ export class CurriculumComponent implements OnInit {
         private curriculumLevelService: CurriculumLevelService,
         private fb: FormBuilder,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private userService: UserService
     ) {
         this.createCurriculumForm = this.fb.group({
             projectName: [''],
@@ -129,50 +133,45 @@ export class CurriculumComponent implements OnInit {
     }
 
     public getCurriculum(request: any): any {
-        this.scienceReportService
-            .getPaging(request)
-            .subscribe((result: any) => {
-                if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
-                        this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
+        this.curriculumService.getPaging(request).subscribe((result: any) => {
+            if (result.status) {
+                if (request.pageIndex !== 1 && result.data.items.length === 0) {
+                    this.route.queryParams.subscribe((params) => {
+                        const request = {
+                            ...params,
+                            pageIndex: 1,
+                        };
 
-                            this.router.navigate([], {
-                                relativeTo: this.route,
-                                queryParams: request,
-                                queryParamsHandling: 'merge',
-                            });
+                        this.router.navigate([], {
+                            relativeTo: this.route,
+                            queryParams: request,
+                            queryParamsHandling: 'merge',
                         });
-                    }
-                    console.log(result.data.items);
-                    this.curriculums = result.data.items;
-                    // this.classes = this.classes.map(
-                    //     (class: any) => ({
-                    //         ...class,
-                    //         status:
-                    //             this.constant.class.status.find(
-                    //                 (status: any) =>
-                    //                     status.value === class.status
-                    //             )?.label ?? '',
-                    //     })
-                    // );
-
-                    if (this.curriculums.length === 0) {
-                        this.paging.pageIndex = 1;
-                    }
-
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
-
-                    this.selectedScienceReport = [];
+                    });
                 }
-            });
+                console.log(result.data.items);
+                this.curriculums = result.data.items;
+                // this.classes = this.classes.map(
+                //     (class: any) => ({
+                //         ...class,
+                //         status:
+                //             this.constant.class.status.find(
+                //                 (status: any) =>
+                //                     status.value === class.status
+                //             )?.label ?? '',
+                //     })
+                // );
+
+                if (this.curriculums.length === 0) {
+                    this.paging.pageIndex = 1;
+                }
+
+                const { items, ...paging } = result.data;
+                this.paging = paging;
+
+                this.selectedScienceReport = [];
+            }
+        });
     }
 
     public selectAllScience(event: any): void {
@@ -230,12 +229,10 @@ export class CurriculumComponent implements OnInit {
     public handleDeleteItem(id: number) {}
 
     public handleCreateItem() {
+        console.log(this.createCurriculumForm.value);
         this.curriculumService
             .create({
                 ...this.createCurriculumForm.value,
-                intellecturalPropertyLevelId:
-                    this.createCurriculumForm.value.intellecturalPropertyLevelId
-                        .value,
             })
             .subscribe((result: any) => {
                 if (result.status) {
@@ -290,11 +287,27 @@ export class CurriculumComponent implements OnInit {
         });
     }
 
+    onSelectCanBo(event: any) {
+        console.log(event);
+        this.createCurriculumForm.get('userId')?.setValue(event.value.id);
+    }
+
     loadCurriculumLevel() {
         this.curriculumLevelService.getPaging({}).subscribe((result: any) => {
             if (result.status) {
                 this.curriculumLevels = result.data.items;
             }
         });
+    }
+    public handleOnSearch(event: any = null): void {
+        this.userService
+            .getPaging({ name: this.search })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.canbos = result.data.items;
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
     }
 }
