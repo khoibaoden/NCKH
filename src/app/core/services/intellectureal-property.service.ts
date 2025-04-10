@@ -14,8 +14,21 @@ export class IntellecturealPropertyService {
         return this.http.postFormData('intellecturalproperty/create', request);
     }
 
-    update(request: any): Observable<any> {
-        return this.http.putFormData('intellecturalproperty/update', request);
+    update(id: any, request: any): Observable<any> {
+        return this.http.putFormData(
+            `intellectualproperty/update?id=${id}`,
+            request
+        );
+    }
+    updateBodyAndQueryParamsStatus(
+        dataQueryParams: any,
+        dataBody: any
+    ): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'intellecturalproperty/update',
+            dataQueryParams,
+            dataBody
+        );
     }
 
     delete(request: any): Observable<any> {

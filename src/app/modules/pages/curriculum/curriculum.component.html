@@ -108,55 +108,32 @@
                 </ng-template>
                 <ng-template pTemplate="body" let-book let-i="rowIndex">
                     <tr>
-                        <td class="text-center" style="width: 5%">
-                            {{ i + 1 + (paging.pageIndex - 1) * paging.pageSize }}
-                        </td>
-                        <td class="text-center" style="width: 20%">
-                            {{ book.name || 'Chưa có thông tin' }}
-                        </td>
-                        <td class="text-center" style="width: 10%">
-                            {{ book.publishYear | date: 'yyyy' || 'Chưa có thông tin' }}
-                        </td>
-                        <td class="text-center" style="width: 10%">
-                            {{ book.isAuthor ? 'Có' : 'Không' }}
-                        </td>
-                        <td class="text-center" style="width: 10%">
-                            {{ book.memberNumber || 'Chưa có thông tin' }}
-                        </td>
-                        <td class="text-center" style="width: 15%">
-                            {{ book.publishingHouse || 'Chưa có thông tin' }}
-                        </td>
-                        <td class="text-center" style="width: 20%">
-                            {{ book.note || 'Chưa có thông tin' }}
-                        </td>
-                        <td class="text-center" style="width: 10%">
-                            <div class="flex gap-2 justify-content-center">
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-pencil"
-                                    class="p-button-rounded p-button-info p-button-sm"
-                                    (click)="openEditDialog(book)"
-                                    pTooltip="Sửa"
-                                    tooltipPosition="top"
-                                ></button>
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-trash"
-                                    class="p-button-rounded p-button-danger p-button-sm"
-                                    (click)="confirmDelete(book)"
-                                    pTooltip="Xóa"
-                                    tooltipPosition="top"
-                                ></button>
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage">
-                    <tr>
-                        <td colspan="8" class="text-center">
-                            Không có dữ liệu sách.
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ book.name }}</td>
+                        <td>{{ book.publishYear | date : "yyyy" }}</td>
+                        <td>{{ book.isAuthor ? "Có" : "Không" }}</td>
+                        <td>{{ book.memberNumber }}</td>
+                        <td>{{ book.publishingHouse }}</td>
+                        <td>{{ book.note }}</td>
+                        <td class="flex gap-2">
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-pencil"
+                                class="p-button-rounded p-button-info p-button-sm"
+                                (click)="handleShowUpdateCurriculum(item)"
+                                pTooltip="Sửa"
+                                tooltipPosition="top"
+                            ></button>
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-sm"
+                                (click)="confirmDelete(item)"
+                                pTooltip="Xóa"
+                                tooltipPosition="top"
+                            ></button>
                         </td>
                     </tr>
                 </ng-template>

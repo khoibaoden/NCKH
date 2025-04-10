@@ -24,6 +24,29 @@ export class HttpLoadingService {
         return user.token || '';
     }
 
+    putBodyAndQueryParams(
+        endpoint: string,
+        dataQueryParams: any,
+        dataBody: any
+    ): Observable<any> {
+        const headers = this.createHeaders();
+        const queryParams = this.buildQueryParams(dataQueryParams);
+        return this.http
+            .put(
+                `${this.baseUrl}/${endpoint}${
+                    queryParams ? `?${queryParams}` : ''
+                }`,
+                dataBody,
+                { headers }
+            )
+            .pipe(
+                catchError((error: HttpErrorResponse) => {
+                    this.handleErrorResponse(error);
+                    return throwError(error);
+                })
+            );
+    }
+
     //
     get(endpoint: string, data: any): Observable<any> {
         const headers = this.createHeaders();

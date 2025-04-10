@@ -121,7 +121,7 @@
                                     pRipple
                                     icon="pi pi-trash"
                                     class="p-button-rounded p-button-danger p-button-sm"
-                                    (click)="confirmDelete(item)"
+                                    (click)="handleDeleteItem(item.id)"
                                     pTooltip="Xóa"
                                     tooltipPosition="top"
                                 ></button>
@@ -350,7 +350,7 @@
 >
     <form
         [formGroup]="updateIntellecturealForm"
-        (ngSubmit)="handleCreateItem()"
+        (ngSubmit)="handleUpdateItem()"
     >
         <div class="p-fluid">
             <div class="p-formgrid grid">
@@ -512,9 +512,15 @@
             ></p-button>
             <p-button
                 icon="pi pi-plus"
-                label="Thêm mới"
+                label="Câp nhật"
+                (click)="handleUpdateItem()"
                 type="submit"
             ></p-button>
         </div>
     </form>
 </p-dialog>
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
