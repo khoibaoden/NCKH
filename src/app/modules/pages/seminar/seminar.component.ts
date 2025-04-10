@@ -126,6 +126,7 @@ export class SeminarComponent implements OnInit {
                     label: item.name,
                     value: item.id,
                 }));
+                this.bomon = this.Bomon;
             }
         });
     }

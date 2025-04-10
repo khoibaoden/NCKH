@@ -10,12 +10,12 @@ export class CurriculumService {
     getPaging(request: any = null): Observable<any> {
         return this.http.get('curriculum/paging', request);
     }
-    create(request: FormData): Observable<any> {
-        return this.http.postFormData('curriculum/create', request);
+    create(request: any): Observable<any> {
+        return this.http.post('curriculum/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('curriculum/update', request);
+        return this.http.put('curriculum/update', request);
     }
     updateBodyAndQueryParamsStatus(
         dataQueryParams: any,
