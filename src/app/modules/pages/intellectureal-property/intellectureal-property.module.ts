@@ -5,6 +5,7 @@ import { IntellecturealPropertyRoutingModule } from './intellectureal-routing.mo
 import { SharedModule } from 'src/app/shared/modules/shared.module';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 @NgModule({
     imports: [
         CommonModule,
@@ -12,6 +13,7 @@ import { ReactiveFormsModule } from '@angular/forms';
         SharedModule,
         MultiSelectModule,
         ReactiveFormsModule,
+        ConfirmDialogModule,
     ],
     declarations: [IntellecturealPropertyComponent],
 })

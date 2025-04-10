@@ -222,6 +222,22 @@ export class CurriculumComponent implements OnInit {
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
+                    this.updateCurriculumForm = this.fb.group({
+                        projectName: [''],
+                        scienceProjectLevelId: [null],
+                        userId: [null],
+                        name: [''],
+                        publishYear: [null],
+                        isAuthor: [false],
+                        memberNumber: [null],
+                        isAuthorWrite: [false],
+                        isbn: [''],
+                        publishingHouse: [''],
+                        curriculumLevelId: [null],
+                        workHoursPerProject: [null],
+                        hoursCalculated: [null],
+                        note: [''],
+                    });
                 }
             });
     }

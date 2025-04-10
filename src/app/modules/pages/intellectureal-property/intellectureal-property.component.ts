@@ -31,6 +31,7 @@ export class IntellecturealPropertyComponent implements OnInit {
     intellectualPropertyLevels: any = [];
     updateIntellecturealForm: FormGroup;
     totalRecordsCount: any = 0;
+    intellecturalPropertyId: any;
 
     visibleUpdateIntellectureal: boolean = false;
     membersList = [
@@ -277,8 +278,6 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
     }
 
-    public handleDeleteItem(id: number) {}
-
     public handleCreateItem() {
         console.log(this.createIntellecturealForm.value);
         this.intellecturealPropertyService
@@ -360,25 +359,69 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
     }
 
+    handleDeleteItem(id: number) {
+        this.confirmationService.confirm({
+            message: 'Bạn có chắc chắn muốn xóa bản ghi này?',
+            header: 'Xác nhận',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.intellecturealPropertyService
+                    .delete({ id: id })
+                    .subscribe((result: any) => {
+                        if (result.status) {
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Thành công',
+                                detail: 'Đã xóa hội thảo',
+                            });
+                            this.getIntellecturealProperty(
+                                this.queryParameters
+                            );
+                        }
+                    });
+            },
+        });
+    }
+    handleHideUpdateIntellectureal() {
+        this.visibleUpdateIntellectureal = false;
+    }
+
+    handleUpdateItem() {
+        this.intellecturealPropertyService
+            .delete({ id: this.intellecturalPropertyId })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleUpdateIntellectureal = false;
+                    this.updateIntellecturealForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã cập nhật hội thảo',
+                    });
+                    this.getIntellecturealProperty(this.queryParameters);
+                }
+            });
+    }
     handleShowUpdateIntellectureal(item: any) {
         this.visibleUpdateIntellectureal = true;
         this.intellecturealPropertyService
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
+                    this.intellecturalPropertyId = item.id;
                     this.updateIntellecturealForm = this.formBuilder.group({
-                        code: ['', [Validators.required]],
-                        name: ['', Validators.required],
-                        acceptanceDate: [null],
-                        membersName: [''], // Đã đúng rồi nè
-                        teamNumber: [null],
+                        userId: [result.data.user, [Validators.required]],
+                        name: [result.data.name, Validators.required],
+                        acceptanceDate: [new Date(result.data.acceptanceDate)],
+                        membersName: [result.data.membersName], // Đã đúng rồi nè
+                        teamNumber: [result.data.teamNumber],
                         intellecturalPropertyLevelId: [
-                            null,
+                            result.data.intellecturalPropertyLevel.id,
                             Validators.required,
                         ],
-                        workHoursPerProject: [null],
-                        hoursCalculated: [null],
-                        note: [''],
+                        workHoursPerProject: [result.data.workHoursPerProject],
+                        hoursCalculated: [result.data.hoursCalculated],
+                        note: [result.data.note],
                     });
                 }
             });
