@@ -148,8 +148,14 @@ export class CurriculumComponent implements OnInit {
         this.addDialogVisible = true;
     }
 
+    formatDateForApi(date: any): string | null {
+        return date ? new Date(date).toISOString() : null; 
+    }
+
     saveNewCurriculum() {
         this.submitted = true;
+    
+        // Kiểm tra form hợp lệ
         if (this.createCurriculumForm.invalid) {
             this.messageService.add({
                 severity: 'warn',
@@ -158,20 +164,20 @@ export class CurriculumComponent implements OnInit {
             });
             return;
         }
-
-        // Chuyển đổi publishYear thành định dạng DateTime (ISO 8601) nếu có giá trị
-        const publishYearValue = this.createCurriculumForm.value.publishYear;
-        const publishYearFormatted = publishYearValue
-            ? new Date(publishYearValue).toISOString() // Chuyển thành định dạng ISO 8601 (ví dụ: "2023-01-01T00:00:00.000Z")
-            : null;
-
+    
+        // Lấy giá trị từ form
+        const formValue = this.createCurriculumForm.value;
+    
         const jsonRequest = {
-            request: {
-                ...this.createCurriculumForm.value,
-                publishYear: publishYearFormatted, // Gửi dưới dạng chuỗi ISO 8601
-            },
+            name: formValue.name || '',
+            publishYear: this.formatDateForApi(formValue.publishYear), 
+            isAuthor: formValue.isAuthor || false, 
+            memberNumber: formValue.memberNumber || null, 
+            publishingHouse: formValue.publishingHouse || '', 
+            note: formValue.note || null, 
         };
-
+    
+        // Gọi API
         this.curriculumService.create(jsonRequest).subscribe(
             (result: any) => {
                 if (result.status) {
@@ -195,8 +201,9 @@ export class CurriculumComponent implements OnInit {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Lỗi',
-                    detail: 'Có lỗi xảy ra khi thêm sách: ' + (error.message || 'Không xác định'),
+                    detail: 'Có lỗi xảy ra khi thêm sách',
                 });
+                console.error('Error creating curriculum:', error);
             }
         );
     }

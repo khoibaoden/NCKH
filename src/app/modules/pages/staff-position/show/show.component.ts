@@ -1,30 +1,43 @@
-import {
-    DEFAULT_PAGE_INDEX,
-    DEFAULT_PAGE_SIZE,
-} from './../../../../core/configs/paging.config';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import pagingConfig, {
+    DEFAULT_PAGE_INDEX,
+    DEFAULT_PAGE_SIZE,
     DEFAULT_PAGE_SIZE_OPTIONS,
     DEFAULT_PER_PAGE_OPTIONS,
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
-import classConstant from 'src/app/core/constants/staff-position.constant';
-import { StaffPositionService } from 'src/app/core/services/staff-position.service';
+import { StaffPossitionService } from 'src/app/core/services/staffpossition.service';
 
 @Component({
     selector: 'app-show',
     templateUrl: './show.component.html',
     styleUrls: ['./show.component.css'],
+    providers: [MessageService, ConfirmationService],
 })
 export class ShowComponent implements OnInit {
     items: any;
+    editDialogVisible: boolean = false;
+    editingPosition: any = {};
+    code: string = '';
+    addDialogVisible: boolean = false;
+    submitted: boolean = false;
+
+    newPosition: any = {
+        positionCode: '',
+        positionName: '',
+    };
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private staffPositionService: StaffPositionService
+        private StafffPositionService: StaffPossitionService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
     ) {}
+
     public config: any = {
         paging: pagingConfig.default,
         baseUrl: systemConfig.baseFileSystemUrl,
@@ -33,12 +46,11 @@ export class ShowComponent implements OnInit {
     };
 
     public constant: any = {
-        class: classConstant,
         sort: sortConstant,
     };
 
-    //Banners
-    public classes: any = [];
+    public positions: any = [];
+    public filteredPositions: any = [];
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
@@ -49,7 +61,7 @@ export class ShowComponent implements OnInit {
         totalPages: 0,
     };
 
-    public selectedclass: any = [];
+    public selectedPositions: any = [];
 
     public queryParameters: any = {
         ...this.config.paging,
@@ -58,82 +70,298 @@ export class ShowComponent implements OnInit {
     };
 
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Chức danh' }];
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
                 pageIndex: params['pageIndex']
-                    ? params['pageIndex']
+                    ? Number(params['pageIndex'])
                     : this.config.paging.pageIndex,
                 pageSize: params['pageSize']
-                    ? params['pageSize']
+                    ? Number(params['pageSize'])
                     : this.config.paging.pageSize,
+                keyWord: params['keyWord'] || null,
             };
-
-            this.queryParameters = {
-                ...params,
-                status: params['status'] ? params['status'] : 0,
-                keyWord: params['keyWord'] ? params['keyWord'] : null,
-            };
-            this.getStaffPosition(request);
+            this.queryParameters = { ...request };
+            this.getPositions(request);
         });
     }
 
-    public getStaffPosition(request: any): any {
-        this.staffPositionService
-            .getPaging(request)
-            .subscribe((result: any) => {
+    openAddDialog() {
+        this.submitted = false;
+        this.newPosition = {
+            positionCode: '',
+            positionName: '',
+        };
+        this.addDialogVisible = true;
+    }
+
+    validatePositionForm(): boolean {
+        let isValid = true;
+        if (!this.newPosition.positionName) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập tên chức danh',
+            });
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    saveNewPosition() {
+        this.submitted = true;
+        if (!this.validatePositionForm()) {
+            return;
+        }
+
+        const jsonRequest = {
+            positionCode: this.newPosition.positionCode || null,
+            positionName: this.newPosition.positionName,
+        };
+
+        this.StafffPositionService.create(jsonRequest).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã thêm chức danh mới',
+                    });
+                    this.addDialogVisible = false;
+                    this.submitted = false;
+
+                    if (result.data && result.data.id) {
+                        const newItem = {
+                            id: result.data.id,
+                            positionCode: this.newPosition.positionCode || null,
+                            positionName: this.newPosition.positionName,
+                        };
+
+                        if (this.paging.pageIndex === 1) {
+                            this.positions.unshift(newItem);
+                            if (this.positions.length > this.paging.pageSize) {
+                                this.positions.pop();
+                            }
+                            this.filteredPositions = [...this.positions];
+                        }
+
+                        this.paging.totalRecords += 1;
+                        this.paging.totalPages = Math.ceil(
+                            this.paging.totalRecords / this.paging.pageSize
+                        );
+                    }
+
+                    const request = {
+                        pageIndex: 1,
+                        pageSize: this.paging.pageSize,
+                        status: 0,
+                        keyWord: this.code || null,
+                    };
+                    this.router.navigate([], {
+                        relativeTo: this.route,
+                        queryParams: request,
+                        queryParamsHandling: 'merge',
+                    });
+
+                    this.newPosition = {
+                        positionCode: '',
+                        positionName: '',
+                    };
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Thêm chức danh thất bại',
+                    });
+                }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi thêm chức danh',
+                });
+                console.error('Error creating position:', error);
+            }
+        );
+    }
+
+    public getPositions(request: any): any {
+        console.log('Request params:', request);
+        this.StafffPositionService.getPaging(request).subscribe(
+            (result: any) => {
+                console.log('API response:', result);
                 if (result.status) {
                     if (
                         request.pageIndex !== 1 &&
                         result.data.items.length === 0
                     ) {
-                        this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
-
-                            this.router.navigate([], {
-                                relativeTo: this.route,
-                                queryParams: request,
-                                queryParamsHandling: 'merge',
-                            });
+                        this.router.navigate([], {
+                            relativeTo: this.route,
+                            queryParams: { ...request, pageIndex: 1 },
+                            queryParamsHandling: 'merge',
                         });
+                        return;
                     }
-                    this.classes = result.data.items;
-
-                    // this.classes = this.classes.map(
-                    //     (class: any) => ({
-                    //         ...class,
-                    //         status:
-                    //             this.constant.class.status.find(
-                    //                 (status: any) =>
-                    //                     status.value === class.status
-                    //             )?.label ?? '',
-                    //     })
-                    // );
-
-                    if (this.classes.length === 0) {
-                        this.paging.pageIndex = 1;
-                    }
+                    this.positions = result.data.items;
+                    this.filteredPositions = [...this.positions];
 
                     const { items, ...paging } = result.data;
-                    this.paging = paging;
+                    this.paging = {
+                        ...this.paging,
+                        ...paging,
+                        pageIndex: request.pageIndex,
+                        pageSize: request.pageSize,
+                    };
 
-                    this.selectedclass = [];
+                    this.selectedPositions = [];
+                    console.log('Final positions list:', this.positions);
+                    console.log('Paging info:', this.paging);
                 }
-            });
+            },
+            (error) => {
+                console.error('Error fetching positions:', error);
+            }
+        );
     }
 
-    public selectAllStaffPosition(event: any): void {
-        if (event.target.checked) {
-            this.selectedclass = this.classes.map((teacher: any) => teacher.id);
+    openEditDialog(position: any) {
+        this.editingPosition = { ...position };
+        this.editDialogVisible = true;
+    }
+
+    hideEditDialog() {
+        this.editDialogVisible = false;
+    }
+
+    savePosition() {
+        if (this.editingPosition.positionName) {
+            const updateRequest = {
+                id: this.editingPosition.id,
+                positionCode: this.editingPosition.positionCode || null,
+                positionName: this.editingPosition.positionName,
+            };
+            this.StafffPositionService.update(updateRequest).subscribe(
+                (result: any) => {
+                    if (result.status) {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Thành công',
+                            detail: 'Cập nhật thông tin chức danh thành công',
+                        });
+                        this.hideEditDialog();
+                        this.getPositions(this.queryParameters);
+                    } else {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Lỗi',
+                            detail: result.message || 'Cập nhật thất bại',
+                        });
+                    }
+                },
+                (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: 'Có lỗi xảy ra khi cập nhật',
+                    });
+                }
+            );
         } else {
-            this.selectedclass = [];
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng nhập tên chức danh',
+            });
         }
     }
 
+    confirmDelete(position: any) {
+        this.confirmationService.confirm({
+            message: `Bạn có chắc muốn xóa chức danh "${position.positionName}" không?`,
+            header: 'Xác nhận xóa',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Có',
+            rejectLabel: 'Không',
+            accept: () => {
+                this.deletePosition(position.id);
+            },
+            reject: () => {
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Hủy bỏ',
+                    detail: 'Đã hủy thao tác xóa',
+                });
+            },
+        });
+    }
+
+    deletePosition(id: number) {
+        this.StafffPositionService.delete(id).subscribe(
+            (result: any) => {
+                if (result.status) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Đã xóa chức danh thành công',
+                    });
+                    this.getPositions(this.queryParameters);
+                } else {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: result.message || 'Xóa chức danh thất bại',
+                    });
+                }
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Lỗi',
+                    detail: 'Có lỗi xảy ra khi xóa chức danh',
+                });
+                console.error('Error deleting position:', error);
+            }
+        );
+    }
+
+    onPageChange(event: any) {
+        this.paging.pageIndex = event.page + 1;
+        this.paging.pageSize = event.rows;
+
+        const request = {
+            ...this.queryParameters,
+            pageIndex: this.paging.pageIndex,
+            pageSize: this.paging.pageSize,
+            keyWord: this.code || null,
+        };
+
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: request,
+            queryParamsHandling: 'merge',
+        });
+    }
+
+    EvenFilter() {
+        this.applyFilter();
+    }
+
+    private applyFilter() {
+        const request = {
+            ...this.queryParameters,
+            pageIndex: 1,
+            keyWord: this.code || null,
+        };
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: request,
+            queryParamsHandling: 'merge',
+        });
+    }
+
+    // Các hàm khác không cần thay đổi
     public handleOnSortAndOrderChange(orderBy: string): void {
         if (this.paging.orderBy === orderBy) {
             this.paging.sortBy =
@@ -143,132 +371,26 @@ export class ShowComponent implements OnInit {
         } else {
             this.paging.sortBy = sortConstant.desc;
         }
-
-        this.paging = {
-            orderBy: orderBy,
+        this.paging.orderBy = orderBy;
+        const request = {
+            ...this.queryParameters,
             sortBy: this.paging.sortBy,
+            orderBy: this.paging.orderBy,
         };
-
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                orderBy: this.paging.orderBy,
-                sortBy: this.paging.sortBy,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
+        this.getPositions(request);
     }
 
     public handleSelectItem(id: number): void {
         if (this.isSelected(id)) {
-            this.selectedclass = this.selectedclass.filter(
-                (id: any) => id !== id
+            this.selectedPositions = this.selectedPositions.filter(
+                (positionId: any) => positionId !== id
             );
         } else {
-            this.selectedclass.push(id);
+            this.selectedPositions.push(id);
         }
     }
 
     public isSelected(id: number): boolean {
-        return this.selectedclass.includes(id);
-    }
-
-    public handleSearchclass() {
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                status: this.queryParameters.status
-                    ? this.queryParameters.status
-                    : null,
-                keyWord: this.queryParameters.keyWord
-                    ? this.queryParameters.keyWord
-                    : null,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
-    }
-
-    public handleDeleteItem(id: number) {
-        // const swalWithBootstrapButtons = Swal.mixin({
-        //     customClass: {
-        //         cancelButton: 'btn btn-danger ml-2',
-        //         confirmButton: 'btn btn-success',
-        //     },
-        //     buttonsStyling: false,
-        // });
-        // swalWithBootstrapButtons
-        //     .fire({
-        //         title: `Bạn có chắc muốn xoá banner có Id ${id}?`,
-        //         text: 'Sau khi xoá bản sẽ không thể khôi phục dữ liệu!',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Xác nhận',
-        //         cancelButtonText: 'Bỏ qua',
-        //         reverseButtons: false,
-        //     })
-        //     .then((result) => {
-        //         if (result.isConfirmed) {
-        //             const request = {
-        //                 id: id,
-        //             };
-        //         }
-        //     });
-    }
-
-    public handleOnDeleteMultiple() {
-        // const swalWithBootstrapButtons = Swal.mixin({
-        //     customClass: {
-        //         cancelButton: 'btn btn-danger ml-2',
-        //         confirmButton: 'btn btn-success',
-        //     },
-        //     buttonsStyling: false,
-        // });
-        // swalWithBootstrapButtons
-        //     .fire({
-        //         title: `Bạn có muốn xoá các bản ghi có Id: ${this.selectedBanners.join(
-        //             ', '
-        //         )} không?`,
-        //         text: 'Sau khi xoá bản sẽ không thể khôi phục dữ liệu!',
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Xác nhận',
-        //         cancelButtonText: 'Bỏ qua',
-        //         reverseButtons: false,
-        //     })
-        //     .then((result) => {
-        //         if (result.isConfirmed) {
-        //             const request = {
-        //                 ids: this.selectedBanners,
-        //             };
-        //         }
-        //     });
-    }
-
-    onPageChange(event: any) {
-        this.paging.pageIndex = event.page + 1;
-        this.paging.pageSize = event.rows;
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: event.page + 1,
-                pageSize: event.rows,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
+        return this.selectedPositions.includes(id);
     }
 }
