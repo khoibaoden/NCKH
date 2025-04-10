@@ -135,8 +135,7 @@ export class IntellecturealPropertyComponent implements OnInit {
     }
 
     onSelectCanBo(event: any) {
-        console.log(event);
-        this.createIntellecturealForm.get('userId')?.setValue(event.value.id);
+        this.createIntellecturealForm.get('userId')?.setValue(event.value);
     }
 
     loadIntellecturealPropertyLevel() {
@@ -285,7 +284,7 @@ export class IntellecturealPropertyComponent implements OnInit {
                 ...this.createIntellecturealForm.value,
                 intellecturalPropertyLevelId:
                     this.createIntellecturealForm.value
-                        .intellecturalPropertyLevelId.value,
+                        .intellecturalPropertyLevelId,
             })
             .subscribe((result: any) => {
                 if (result.status) {
