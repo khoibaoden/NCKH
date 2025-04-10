@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách sách</h3>
+                <h3>Danh sách viết sách</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -14,32 +14,28 @@
                     pRipple
                     icon="pi pi-plus"
                     label="Thêm mới"
-                    (click)="openAddDialog()"
+                    (click)="visibleCurriculum = true"
                 ></button>
             </ng-template>
         </p-toolbar>
         <div class="card">
             <p-table
                 #dt
-                [value]="filteredCurriculums"
+                [value]="curriculums"
                 responsiveLayout="scroll"
-                styleClass="p-datatable-gridlines p-datatable-striped"
-                [paginator]="true"
-                [rows]="paging.pageSize"
-                [totalRecords]="paging.totalRecords"
-                [rowsPerPageOptions]="config.pageSizeOptions"
-                (onPage)="onPageChange($event)"
+                styleClass="p-datatable-striped"
+                [paginator]="false"
                 [rowHover]="true"
             >
                 <ng-template pTemplate="caption">
                     <div
-                        class="flex flex-column gap-3 align-items-end md:flex-row"
+                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
                     >
-                        <div class="flex flex-column" style="margin-left: -12px">
+                        <div class="flex flex-column">
                             <label
-                                for="searchName"
+                                for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo tên sách:</label
+                                >Tìm kiếm theo người tạo:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
@@ -47,63 +43,46 @@
                                     pInputText
                                     type="text"
                                     [(ngModel)]="code"
-                                    placeholder="Tìm theo tên sách"
+                                    placeholder="Tìm theo người tạo"
                                     style="width: 350px"
+                                    class="sm:"
                                 />
                             </span>
                         </div>
                         <div class="flex flex-column">
                             <label
-                                for="publishYear"
+                                for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Năm xuất bản:</label
+                                >Ngày nhập kho:</label
                             >
                             <p-calendar
-                                placeholder="Chọn khoảng năm"
-                                [(ngModel)]="publishYearRange"
+                                placeholder="Từ ngày - Đến ngày"
+                                [(ngModel)]="deadlineRange"
                                 selectionMode="range"
                                 [showIcon]="true"
                                 [showClearButton]="true"
-                                (onBlur)="applyFilter()"
-                                dateFormat="yy"
+                                (onBlur)="blurDateRange()"
+                                [dateFormat]="this.formatdate"
                             ></p-calendar>
                         </div>
                         <button
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="applyFilter()"
+                            (click)="EvenFilter()"
                         ></button>
                     </div>
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th class="text-center" style="width: 5%">STT</th>
-                        <th class="text-center" pSortableColumn="name" style="width: 20%">
-                            Tên sách
-                            <p-sortIcon field="name"></p-sortIcon>
-                        </th>
-                        <th class="text-center" pSortableColumn="publishYear" style="width: 10%">
-                            Năm xuất bản
-                            <p-sortIcon field="publishYear"></p-sortIcon>
-                        </th>
-                        <th class="text-center" pSortableColumn="isAuthor" style="width: 10%">
-                            Tác giả chủ biên
-                            <p-sortIcon field="isAuthor"></p-sortIcon>
-                        </th>
-                        <th class="text-center" pSortableColumn="memberNumber" style="width: 10%">
-                            Số lượng tác giả
-                            <p-sortIcon field="memberNumber"></p-sortIcon>
-                        </th>
-                        <th class="text-center" pSortableColumn="publishingHouse" style="width: 15%">
-                            Nhà xuất bản
-                            <p-sortIcon field="publishingHouse"></p-sortIcon>
-                        </th>
-                        <th class="text-center" pSortableColumn="note" style="width: 20%">
-                            Ghi chú
-                            <p-sortIcon field="note"></p-sortIcon>
-                        </th>
-                        <th class="text-center" style="width: 10%">Thao tác</th>
+                        <th>STT</th>
+                        <th>Tên sách</th>
+                        <th>Năm xuất bản</th>
+                        <th>Tác giả chủ biên</th>
+                        <th>Số lượng tác giả</th>
+                        <th>Nhà xuất bản</th>
+                        <th>Ghi chú</th>
+                        <th>Hành động</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-book let-i="rowIndex">
@@ -138,227 +117,397 @@
                     </tr>
                 </ng-template>
             </p-table>
+            <div
+                class="flex align-items-center mt-3"
+                style="justify-content: space-between"
+            >
+                <p>
+                    <span style="font-weight: 500">{{
+                        1 + (paging.pageIndex - 1) * paging.pageSize
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        1 +
+                            (paging.pageIndex - 1) * paging.pageSize +
+                            (paging.pageSize - 1)
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
+                    }}</span>
+                    bản ghi
+                </p>
+                <div *ngIf="curriculums?.length > 0">
+                    <p-paginator
+                        class="custum-paging"
+                        (onPageChange)="onPageChange($event)"
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    />
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Dialog thêm mới sách -->
 <p-dialog
-    [(visible)]="addDialogVisible"
-    [style]="{ width: '60rem' }"
-    header="Thêm sách mới"
+    header="Thêm mới"
     [modal]="true"
-    styleClass="p-fluid"
+    [(visible)]="visibleCurriculum"
+    [style]="{ width: '60rem' }"
 >
-    <ng-template pTemplate="content">
-        <form [formGroup]="createCurriculumForm">
+    <form [formGroup]="createCurriculumForm">
+        <div class="p-fluid">
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="name">Tên sách <span class="text-danger">*</span></label>
+                    <label for="projectName">Tên đề tài NCKH</label>
                     <input
                         type="text"
+                        id="projectName"
                         pInputText
-                        id="name"
-                        formControlName="name"
-                        required
-                        autofocus
+                        formControlName="projectName"
+                        placeholder="Nhập tên đề tài NCKH"
                     />
-                    <small *ngIf="submitted && createCurriculumForm.get('name')?.hasError('required')" class="p-error">
-                        Tên sách là bắt buộc
-                    </small>
                 </div>
                 <div class="field col mb-0">
-                    <label for="publishYear">Năm xuất bản</label>
-                    <p-calendar
-                        id="publishYear"
-                        formControlName="publishYear"
-                        [showIcon]="true"
-                        dateFormat="yy"
-                        view="year"
-                        placeholder="Chọn năm"
-                    ></p-calendar>
-                </div>
-            </div>
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="isAuthor">Tác giả chủ biên</label>
-                    <div class="checkbox-label-spacing">
-                        <p-checkbox
-                            binary="true"
-                            formControlName="isAuthor"
-                            inputId="isAuthor"
-                        ></p-checkbox>
-                    </div>
-                </div>
-                <div class="field col mb-0">
-                    <label for="memberNumber">Số lượng tác giả</label>
-                    <p-inputNumber
-                        id="memberNumber"
-                        formControlName="memberNumber"
-                        [min]="1"
-                    ></p-inputNumber>
-                </div>
-            </div>
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="publishingHouse">Nhà xuất bản</label>
+                    <label for="scienceProjectLevelId">Cấp đề tài</label>
                     <input
-                        type="text"
+                        type="number"
+                        id="scienceProjectLevelId"
                         pInputText
-                        id="publishingHouse"
-                        formControlName="publishingHouse"
+                        formControlName="scienceProjectLevelId"
+                        placeholder="Nhập cấp đề tài"
                     />
                 </div>
             </div>
             <div class="p-formgrid grid">
+                <!-- Bổ sung các trường mới -->
                 <div class="field col mb-0">
-                    <label for="note">Ghi chú</label>
-                    <textarea
-                        id="note"
-                        pInputTextarea
-                        formControlName="note"
-                        rows="3"
-                    ></textarea>
+                    <label for="userId">Cán bộ/Giáo viên</label>
+                    <p-autoComplete
+                        formControlName="userId"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập cán bộ giáo viên"
+                        (onSelect)="onSelectCanBo($event)"
+                    >
+                    </p-autoComplete>
                 </div>
-            </div>
-        </form>
-    </ng-template>
-    <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
-            label="Hủy"
-            icon="pi pi-times"
-            class="p-button-text"
-            (click)="addDialogVisible = false; submitted = false"
-        ></button>
-        <button
-            pButton
-            pRipple
-            label="Thêm"
-            icon="pi pi-check"
-            class="p-button-text"
-            (click)="saveNewCurriculum()"
-        ></button>
-    </ng-template>
-</p-dialog>
 
-<!-- Dialog chỉnh sửa sách -->
-<p-dialog
-    [(visible)]="editDialogVisible"
-    [style]="{ width: '60rem' }"
-    header="Chỉnh sửa thông tin sách"
-    [modal]="true"
-    styleClass="p-fluid"
->
-    <ng-template pTemplate="content">
-        <form [formGroup]="editCurriculumForm">
-            <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="name">Tên sách <span class="text-danger">*</span></label>
+                    <label for="name">Tên sách/giáo trình</label>
                     <input
                         type="text"
-                        pInputText
                         id="name"
+                        pInputText
                         formControlName="name"
-                        required
-                        autofocus
+                        placeholder="Nhập tên sách/giáo trình"
                     />
-                    <small *ngIf="submitted && editCurriculumForm.get('name')?.hasError('required')" class="p-error">
-                        Tên sách là bắt buộc
-                    </small>
                 </div>
+            </div>
+            <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="publishYear">Năm xuất bản</label>
-                    <p-calendar
-                        id="publishYear"
-                        formControlName="publishYear"
-                        [showIcon]="true"
-                        dateFormat="yy"
-                        view="year"
-                        placeholder="Chọn năm"
-                    ></p-calendar>
-                </div>
-            </div>
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="isAuthor">Tác giả chủ biên</label>
-                    <div class="checkbox-label-spacing">
-                        <p-checkbox
-                            binary="true"
-                            formControlName="isAuthor"
-                            inputId="isAuthor"
-                        ></p-checkbox>
-                    </div>
-                </div>
-                <div class="field col mb-0">
-                    <label for="memberNumber">Số lượng tác giả</label>
-                    <p-inputNumber
-                        id="memberNumber"
-                        formControlName="memberNumber"
-                        [min]="1"
-                    ></p-inputNumber>
-                </div>
-            </div>
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="publishingHouse">Nhà xuất bản</label>
                     <input
-                        type="text"
+                        type="date"
+                        id="publishYear"
                         pInputText
-                        id="publishingHouse"
-                        formControlName="publishingHouse"
+                        formControlName="publishYear"
+                        placeholder="Chọn năm xuất bản"
                     />
                 </div>
+
+                <div class="field col mb-0">
+                    <label for="memberNumber">Số lượng tác giả</label>
+                    <input
+                        type="number"
+                        id="memberNumber"
+                        pInputText
+                        formControlName="memberNumber"
+                        placeholder="Nhập số lượng tác giả"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="isbn">ISBN</label>
                     <input
                         type="text"
-                        pInputText
                         id="isbn"
+                        pInputText
                         formControlName="isbn"
+                        placeholder="Nhập ISBN"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="publishingHouse">Nhà xuất bản</label>
+                    <input
+                        type="text"
+                        id="publishingHouse"
+                        pInputText
+                        formControlName="publishingHouse"
+                        placeholder="Nhập nhà xuất bản"
                     />
                 </div>
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
+                    <label for="curriculumLevelId">Cấp giáo trình</label>
+                    <p-dropdown
+                        id="curriculumLevelId"
+                        formControlName="curriculumLevelId"
+                        [options]="curriculumLevels"
+                        optionLabel="key"
+                        optionValue="id"
+                        placeholder="Chọn cấp giáo trình"
+                    >
+                    </p-dropdown>
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject">Định mức giờ</label>
+                    <input
+                        type="number"
+                        id="workHoursPerProject"
+                        pInputText
+                        formControlName="workHoursPerProject"
+                        step="0.1"
+                        placeholder="Nhập định mức giờ"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        id="hoursCalculated"
+                        pInputText
+                        formControlName="hoursCalculated"
+                        step="0.1"
+                        placeholder="Nhập số giờ được tính"
+                    />
+                </div>
+
+                <div class="field col mb-0">
                     <label for="note">Ghi chú</label>
                     <textarea
+                        rows="3"
                         id="note"
                         pInputTextarea
                         formControlName="note"
-                        rows="3"
+                        placeholder="Nhập ghi chú"
                     ></textarea>
                 </div>
             </div>
-        </form>
-    </ng-template>
-    <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="isAuthorWrite">Chủ biên tham gia viết</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthorWrite"
+                        inputId="isAuthorWrite"
+                    ></p-checkbox>
+                </div>
+                <div class="field col mb-0">
+                    <label for="isAuthor">Tác giả chủ biên</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthor"
+                        inputId="isAuthor"
+                    ></p-checkbox>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
             label="Hủy"
-            icon="pi pi-times"
-            class="p-button-text"
-            (click)="hideEditDialog()"
-        ></button>
-        <button
-            pButton
-            pRipple
-            label="Lưu"
-            icon="pi pi-check"
-            class="p-button-text"
-            (click)="saveCurriculum()"
-        ></button>
-    </ng-template>
+            severity="secondary"
+            (onClick)="visibleCurriculum = false"
+        ></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Thêm mới"
+            (click)="handleCreateItem()"
+        ></p-button>
+    </div>
 </p-dialog>
 
-<!-- Dialog xác nhận xóa -->
-<p-confirmDialog
-    [style]="{ width: '450px' }"
-    header="Xác nhận"
-    icon="pi pi-exclamation-triangle"
-></p-confirmDialog>
+<p-dialog
+    header="Chỉnh sửa"
+    [modal]="true"
+    [(visible)]="visibleUpdateCurriculum"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createCurriculumForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="projectName">Tên đề tài NCKH</label>
+                    <input
+                        type="text"
+                        id="projectName"
+                        pInputText
+                        formControlName="projectName"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="scienceProjectLevelId">Cấp đề tài</label>
+                    <input
+                        type="number"
+                        id="scienceProjectLevelId"
+                        pInputText
+                        formControlName="scienceProjectLevelId"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Bổ sung các trường mới -->
+                <div class="field col mb-0">
+                    <label for="userId">ID Cán bộ</label>
+                    <input
+                        type="number"
+                        id="userId"
+                        pInputText
+                        formControlName="userId"
+                    />
+                </div>
 
-<!-- Thông báo Toast -->
-<p-toast></p-toast>
+                <div class="field col mb-0">
+                    <label for="name">Tên sách/giáo trình</label>
+                    <input
+                        type="text"
+                        id="name"
+                        pInputText
+                        formControlName="name"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="publishYear">Năm xuất bản</label>
+                    <input
+                        type="date"
+                        id="publishYear"
+                        pInputText
+                        formControlName="publishYear"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="memberNumber">Số lượng tác giả</label>
+                    <input
+                        type="number"
+                        id="memberNumber"
+                        pInputText
+                        formControlName="memberNumber"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="isbn">ISBN</label>
+                    <input
+                        type="text"
+                        id="isbn"
+                        pInputText
+                        formControlName="isbn"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="publishingHouse">Nhà xuất bản</label>
+                    <input
+                        type="text"
+                        id="publishingHouse"
+                        pInputText
+                        formControlName="publishingHouse"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="curriculumLevelId">Cấp giáo trình</label>
+                    <input
+                        type="number"
+                        id="curriculumLevelId"
+                        pInputText
+                        formControlName="curriculumLevelId"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject">Định mức giờ</label>
+                    <input
+                        type="number"
+                        id="workHoursPerProject"
+                        pInputText
+                        formControlName="workHoursPerProject"
+                        step="0.1"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        id="hoursCalculated"
+                        pInputText
+                        formControlName="hoursCalculated"
+                        step="0.1"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        rows="3"
+                        id="note"
+                        pInputTextarea
+                        formControlName="note"
+                    ></textarea>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="isAuthorWrite">Chủ biên tham gia viết</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthorWrite"
+                        inputId="isAuthorWrite"
+                    ></p-checkbox>
+                </div>
+                <div class="field col mb-0">
+                    <label for="isAuthor">Tác giả chủ biên</label>
+                    <p-checkbox
+                        binary="true"
+                        formControlName="isAuthor"
+                        inputId="isAuthor"
+                    ></p-checkbox>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleCurriculum = false"
+        ></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Thêm mới"
+            (click)="handleCreateItem()"
+        ></p-button>
+    </div>
+</p-dialog>

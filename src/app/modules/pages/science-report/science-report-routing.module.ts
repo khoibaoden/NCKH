@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ScienceReportComponent } from './science-report.component';
+import { ScienceReportsComponent } from './science-report.component';
 
 @NgModule({
     imports: [
         RouterModule.forChild([
-            { path: '', component: ScienceReportComponent },
+            { path: '', component: ScienceReportsComponent},
         ]),
     ],
     exports: [RouterModule],

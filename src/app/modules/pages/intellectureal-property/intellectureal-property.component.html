@@ -194,19 +194,19 @@
 
                     <div
                         *ngIf="
-                            createIntellecturealForm.get('code')?.invalid &&
-                            (createIntellecturealForm.get('code')?.dirty ||
-                                createIntellecturealForm.get('code')?.touched)
+                            createIntellecturealForm.get('userId')?.invalid &&
+                            (createIntellecturealForm.get('userId')?.dirty ||
+                                createIntellecturealForm.get('userId')?.touched)
                         "
                     >
                         <div
-                            *ngIf="createIntellecturealForm.get('code')?.errors?.['required']"
+                            *ngIf="createIntellecturealForm.get('userId')?.errors?.['required']"
                             class="error-message"
                         >
                             Vui lòng nhập mã sở hữu trí tuệ
                         </div>
                         <div
-                            *ngIf="!createIntellecturealForm.get('code')?.errors?.['required'] && createIntellecturealForm.get('code')?.errors?.['whitespace']"
+                            *ngIf="!createIntellecturealForm.get('userId')?.errors?.['required'] && createIntellecturealForm.get('code')?.errors?.['whitespace']"
                             class="error-message"
                         >
                             Mã không được chứa khoảng trắng
@@ -245,12 +245,14 @@
                 <!-- Các trường mới -->
                 <div class="field col mb-0">
                     <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <input
-                        type="date"
-                        pInputText
+                    <p-calendar
                         id="acceptanceDate"
                         formControlName="acceptanceDate"
-                    />
+                        dateFormat="dd/mm/yy"
+                        showIcon="true"
+                        [placeholder]="'dd/mm/yyyy'"
+                        [showButtonBar]="true"
+                    ></p-calendar>
                 </div>
 
                 <div class="field col mb-0">
@@ -356,34 +358,30 @@
             <div class="p-formgrid grid">
                 <!-- Mã -->
                 <div class="field col mb-0">
-                    <label htmlFor="code">Cán bộ giáo viên</label>
-                    <p-autoComplete
+                    <label htmlFor="userId">Cán bộ giáo viên</label>
+                    <p-dropdown
                         formControlName="userId"
-                        [suggestions]="canbos"
-                        (completeMethod)="handleOnSearch($event)"
-                        field="name"
-                        [dropdown]="true"
-                        [minLength]="1"
-                        placeholder="Nhập cán bộ giáo viên"
-                        (onSelect)="onSelectCanBo($event)"
-                    >
-                    </p-autoComplete>
+                        [options]="canbos"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Chọn cán bộ giáo viên"
+                    ></p-dropdown>
 
                     <div
                         *ngIf="
-                            createIntellecturealForm.get('code')?.invalid &&
-                            (createIntellecturealForm.get('code')?.dirty ||
-                                createIntellecturealForm.get('code')?.touched)
+                            updateIntellecturealForm.get('userId')?.invalid &&
+                            (updateIntellecturealForm.get('userId')?.dirty ||
+                                updateIntellecturealForm.get('userId')?.touched)
                         "
                     >
                         <div
-                            *ngIf="createIntellecturealForm.get('code')?.errors?.['required']"
+                            *ngIf="updateIntellecturealForm.get('userId')?.errors?.['required']"
                             class="error-message"
                         >
                             Vui lòng nhập mã sở hữu trí tuệ
                         </div>
                         <div
-                            *ngIf="!createIntellecturealForm.get('code')?.errors?.['required'] && createIntellecturealForm.get('code')?.errors?.['whitespace']"
+                            *ngIf="!updateIntellecturealForm.get('userId')?.errors?.['required'] && updateIntellecturealForm.get('code')?.errors?.['whitespace']"
                             class="error-message"
                         >
                             Mã không được chứa khoảng trắng
@@ -422,12 +420,13 @@
                 <!-- Các trường mới -->
                 <div class="field col mb-0">
                     <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <input
-                        type="date"
-                        pInputText
+                    <p-calendar
                         id="acceptanceDate"
                         formControlName="acceptanceDate"
-                    />
+                        dateFormat="dd/mm/yy"
+                        showIcon="true"
+                        [showButtonBar]="true"
+                    ></p-calendar>
                 </div>
 
                 <div class="field col mb-0">
@@ -519,6 +518,7 @@
         </div>
     </form>
 </p-dialog>
+
 <p-confirmDialog
     [style]="{ width: '450px' }"
     header="Xác nhận"

@@ -193,10 +193,7 @@ export class ShowComponent implements OnInit {
             (result: any) => {
                 console.log('API response:', result);
                 if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
+                    if (request.pageIndex !== 1 && result.data.items.length === 0) {
                         this.router.navigate([], {
                             relativeTo: this.route,
                             queryParams: { ...request, pageIndex: 1 },
@@ -204,9 +201,11 @@ export class ShowComponent implements OnInit {
                         });
                         return;
                     }
+                    
+                    // Chỉ hiển thị các items được trả về từ API cho trang hiện tại
                     this.positions = result.data.items;
                     this.filteredPositions = [...this.positions];
-
+    
                     const { items, ...paging } = result.data;
                     this.paging = {
                         ...this.paging,
@@ -214,7 +213,7 @@ export class ShowComponent implements OnInit {
                         pageIndex: request.pageIndex,
                         pageSize: request.pageSize,
                     };
-
+    
                     this.selectedPositions = [];
                     console.log('Final positions list:', this.positions);
                     console.log('Paging info:', this.paging);
@@ -327,16 +326,36 @@ export class ShowComponent implements OnInit {
     }
 
     onPageChange(event: any) {
-        this.paging.pageIndex = event.page + 1;
+        // Lưu lại các giá trị pageIndex và pageSize hiện tại để so sánh
+        const currentPageIndex = this.paging.pageIndex;
+        const currentPageSize = this.paging.pageSize;
+        
+        // Phần tử đầu tiên hiện đang hiển thị (1-based index)
+        const currentFirstItem = (currentPageIndex - 1) * currentPageSize + 1;
+        
+        // Cập nhật giá trị mới từ sự kiện
         this.paging.pageSize = event.rows;
-
+        
+        // Tính toán trang mới dựa trên phần tử đầu tiên đang hiển thị
+        if (event.rows === 25 && currentFirstItem <= 10) {
+            // Nếu chọn pageSize là 25 và đang xem các phần tử từ 1-10
+            // Chuyển đến trang 2 để hiển thị phần tử thứ 11 đầu tiên
+            this.paging.pageIndex = 2;
+        } else if (event.first !== undefined) {
+            // Nếu sự kiện là chuyển trang (không phải thay đổi pageSize)
+            this.paging.pageIndex = event.page + 1;
+        } else {
+            // Tính trang mới dựa trên phần tử đầu tiên đang hiển thị
+            this.paging.pageIndex = Math.ceil(currentFirstItem / this.paging.pageSize);
+        }
+        
         const request = {
             ...this.queryParameters,
             pageIndex: this.paging.pageIndex,
             pageSize: this.paging.pageSize,
             keyWord: this.code || null,
         };
-
+    
         this.router.navigate([], {
             relativeTo: this.route,
             queryParams: request,

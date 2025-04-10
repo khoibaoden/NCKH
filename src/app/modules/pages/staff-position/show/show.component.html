@@ -35,29 +35,29 @@
                 <ng-template pTemplate="caption">
                     <div
                         class="flex flex-column gap-3 align-items-end md:flex-row md:"
-                    >   
-                    <div
-                    class="flex flex-column"
-                    style="margin-left: -12px"
-                >
-                    <label
-                        for="email1"
-                        class="block text-900 text-large font-weight mb-2"
-                        >Tìm kiếm theo mã chức danh:</label
                     >
-                    <span class="block mt-2 md:mt-0 p-input-icon-left">
-                        <i class="pi pi-search"></i>
-                        <input
-                            pInputText
-                            type="text"
-                            [(ngModel)]="code"
-                            placeholder="Tìm theo mã"
-                            style="width: 350px"
-                            class="sm:"
-                        />
-                    </span>
-                </div>
-                        
+                        <div
+                            class="flex flex-column"
+                            style="margin-left: -12px"
+                        >
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Tìm kiếm theo mã chức danh:</label
+                            >
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input
+                                    pInputText
+                                    type="text"
+                                    [(ngModel)]="code"
+                                    placeholder="Tìm theo mã"
+                                    style="width: 350px"
+                                    class="sm:"
+                                />
+                            </span>
+                        </div>
+
                         <div
                             class="flex flex-column"
                             style="margin-left: -12px"
@@ -79,7 +79,7 @@
                                 />
                             </span>
                         </div>
-                        
+
                         <button
                             pButton
                             pRipple
@@ -91,12 +91,7 @@
                 <!-- Header của bảng -->
                 <ng-template pTemplate="header">
                     <tr>
-                        <th
-                            class="text-center"
-                            style="width: 10%"
-                        >
-                            STT
-                        </th>
+                        <th class="text-center" style="width: 10%">STT</th>
                         <th
                             class="text-center"
                             pSortableColumn="positionCode"
@@ -120,7 +115,7 @@
                 <ng-template pTemplate="body" let-item let-i="rowIndex">
                     <tr>
                         <td style="width: 10%" class="text-center">
-                            {{ (paging.pageIndex - 1) * paging.pageSize + i + 1 }}
+                            {{ ((paging.pageIndex || 1) - 1) * (paging.pageSize || 10) + i + 1 }}
                         </td>
                         <td style="width: 25%" class="text-center">
                             {{ item.positionCode || "Chưa có thông tin" }}
@@ -128,7 +123,9 @@
                         <td
                             style="width: 50%"
                             class="truncate-text text-center"
-                            title="{{ item.positionName || 'Chưa có thông tin' }}"
+                            title="{{
+                                item.positionName || 'Chưa có thông tin'
+                            }}"
                         >
                             {{ item.positionName || "Chưa có thông tin" }}
                         </td>
@@ -259,7 +256,9 @@
                 [(ngModel)]="newPosition.positionName"
                 required
             />
-            <small *ngIf="submitted && !newPosition.positionName" class="p-error"
+            <small
+                *ngIf="submitted && !newPosition.positionName"
+                class="p-error"
                 >Tên chức danh là bắt buộc</small
             >
         </div>
