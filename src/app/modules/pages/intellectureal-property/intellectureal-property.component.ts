@@ -64,7 +64,7 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
 
         this.updateIntellecturealForm = this.formBuilder.group({
-            code: ['', [Validators.required]],
+            userId: ['', [Validators.required]],
             name: ['', Validators.required],
             acceptanceDate: [null],
             membersName: [''], // Đã đúng rồi nè
@@ -131,6 +131,7 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
 
         this.loadUser();
+        this.loadCanbos();
         this.loadIntellecturealPropertyLevel();
     }
 
@@ -151,6 +152,17 @@ export class IntellecturealPropertyComponent implements OnInit {
     }
 
     public handleOnSearch(event: any = null): void {
+        this.userService
+            .getPaging({ name: this.search })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.canbos = result.data.items;
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
+    }
+    public loadCanbos(event: any = null): void {
         this.userService
             .getPaging({ name: this.search })
             .subscribe((result: any) => {
@@ -285,6 +297,8 @@ export class IntellecturealPropertyComponent implements OnInit {
                 intellecturalPropertyLevelId:
                     this.createIntellecturealForm.value
                         .intellecturalPropertyLevelId,
+
+                userId: this.createIntellecturealForm.value.userId?.id,
             })
             .subscribe((result: any) => {
                 if (result.status) {
@@ -293,7 +307,7 @@ export class IntellecturealPropertyComponent implements OnInit {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Thành công',
-                        detail: 'Đã thêm hội thảo mới',
+                        detail: 'Đã thêm sở hữu trí tuệ mới',
                     });
                     this.getIntellecturealProperty(this.queryParameters);
                 }
@@ -331,7 +345,6 @@ export class IntellecturealPropertyComponent implements OnInit {
 
     loadUser() {
         this.userService.getPaging({}).subscribe((result: any) => {
-            console.log(result);
             if (result.status) {
                 this.users = result.data.items;
                 const { items, ...paging } = result.data;
@@ -407,9 +420,12 @@ export class IntellecturealPropertyComponent implements OnInit {
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
+                    console.log(result.data.user.id);
+                    console.log(this.canbos);
+                    console.log(this.intellectualPropertyLevels);
                     this.intellecturalPropertyId = item.id;
                     this.updateIntellecturealForm = this.formBuilder.group({
-                        userId: [result.data.user, [Validators.required]],
+                        userId: [result.data.user.id, [Validators.required]],
                         name: [result.data.name, Validators.required],
                         acceptanceDate: [new Date(result.data.acceptanceDate)],
                         membersName: [result.data.membersName], // Đã đúng rồi nè
