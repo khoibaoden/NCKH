@@ -31,8 +31,8 @@ export class IntellecturealPropertyService {
         );
     }
 
-    delete(request: any): Observable<any> {
-        return this.http.put('intellecturalproperty/delete', request);
+    delete(id): Observable<any> {
+        return this.http.put(`intellecturalproperty/delete?id=${id}`, null);
     }
 
     getById(request: any = null): Observable<any> {

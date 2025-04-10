@@ -31,6 +31,7 @@ export class CurriculumComponent implements OnInit {
     createCurriculumForm: FormGroup;
     updateCurriculumForm: FormGroup;
     canbos: any;
+    curriculumId: any;
     search: string = '';
 
     curriculumLevels: any;
@@ -47,8 +48,6 @@ export class CurriculumComponent implements OnInit {
         private userService: UserService
     ) {
         this.createCurriculumForm = this.fb.group({
-            projectName: [''],
-            scienceProjectLevelId: [null],
             userId: [null],
             name: [''],
             publishYear: [null],
@@ -63,8 +62,6 @@ export class CurriculumComponent implements OnInit {
             note: [''],
         });
         this.updateCurriculumForm = this.fb.group({
-            projectName: [''],
-            scienceProjectLevelId: [null],
             userId: [null],
             name: [''],
             publishYear: [null],
@@ -129,6 +126,7 @@ export class CurriculumComponent implements OnInit {
             };
             this.getCurriculum(request);
         });
+        this.loadCanbos();
         this.loadCurriculumLevel();
     }
 
@@ -218,31 +216,31 @@ export class CurriculumComponent implements OnInit {
 
     handleShowUpdateCurriculum(item: any) {
         this.visibleUpdateCurriculum = true;
+        console.log(item);
+
+        this.curriculumId = item;
         this.curriculumService
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
+                    console.log(result.data);
                     this.updateCurriculumForm = this.fb.group({
-                        projectName: [''],
-                        scienceProjectLevelId: [null],
-                        userId: [null],
-                        name: [''],
-                        publishYear: [null],
+                        userId: [result.data.userId],
+                        name: [result.data.name],
+                        publishYear: [result.data.publishYear],
                         isAuthor: [false],
-                        memberNumber: [null],
+                        memberNumber: [result.data.memberNumber],
                         isAuthorWrite: [false],
-                        isbn: [''],
-                        publishingHouse: [''],
-                        curriculumLevelId: [null],
-                        workHoursPerProject: [null],
-                        hoursCalculated: [null],
-                        note: [''],
+                        isbn: [result.data.isbn],
+                        publishingHouse: [result.data.publishingHouse],
+                        curriculumLevelId: [result.data.curriculumLevelId],
+                        workHoursPerProject: [result.data.workHoursPerProject],
+                        hoursCalculated: [result.data.hoursCalculated],
+                        note: [result.data.note],
                     });
                 }
             });
     }
-
-    public handleDeleteItem(id: number) {}
 
     public handleCreateItem() {
         console.log(this.createCurriculumForm.value);
@@ -264,11 +262,28 @@ export class CurriculumComponent implements OnInit {
             });
     }
 
+    public loadCanbos(event: any = null): void {
+        this.userService
+            .getPaging({ name: this.search })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.canbos = result.data.items;
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
+    }
+
     public handleUpdateItem() {
         this.curriculumService
-            .update({
-                ...this.updateCurriculumForm.value,
-            })
+            .updateBodyAndQueryParamsStatus(
+                {
+                    id: this.curriculumId.id,
+                },
+                {
+                    ...this.updateCurriculumForm.value,
+                }
+            )
             .subscribe((result: any) => {
                 if (result.status) {
                     this.visibleUpdateCurriculum = false;
@@ -315,6 +330,28 @@ export class CurriculumComponent implements OnInit {
             }
         });
     }
+
+    handleDeleteItem(id: number) {
+        console.log(id);
+        this.confirmationService.confirm({
+            message: 'Bạn có chắc chắn muốn xóa bản ghi này?',
+            header: 'Xác nhận',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.curriculumService.delete(id).subscribe((result: any) => {
+                    if (result.status) {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Thành công',
+                            detail: 'Đã xóa hội thảo',
+                        });
+                        this.getCurriculum(this.queryParameters);
+                    }
+                });
+            },
+        });
+    }
+
     public handleOnSearch(event: any = null): void {
         this.userService
             .getPaging({ name: this.search })

@@ -19,7 +19,7 @@ export class CurriculumLevelService {
         return this.http.putFormData('curriculumlevel/update', request);
     }
 
-    delete(request: any): Observable<any> {
-        return this.http.put('curriculumlevel/delete', request);
+    delete(id): Observable<any> {
+        return this.http.put(`curriculumlevel/delete?id=${id}`, null);
     }
 }

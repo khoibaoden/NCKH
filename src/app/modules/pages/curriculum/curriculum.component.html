@@ -100,7 +100,7 @@
                                 pRipple
                                 icon="pi pi-pencil"
                                 class="p-button-rounded p-button-info p-button-sm"
-                                (click)="handleShowUpdateCurriculum(item)"
+                                (click)="handleShowUpdateCurriculum(book)"
                                 pTooltip="Sửa"
                                 tooltipPosition="top"
                             ></button>
@@ -109,7 +109,7 @@
                                 pRipple
                                 icon="pi pi-trash"
                                 class="p-button-rounded p-button-danger p-button-sm"
-                                (click)="confirmDelete(item)"
+                                (click)="handleDeleteItem(book.id)"
                                 pTooltip="Xóa"
                                 tooltipPosition="top"
                             ></button>
@@ -161,42 +161,16 @@
     <form [formGroup]="createCurriculumForm">
         <div class="p-fluid">
             <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="projectName">Tên đề tài NCKH</label>
-                    <input
-                        type="text"
-                        id="projectName"
-                        pInputText
-                        formControlName="projectName"
-                        placeholder="Nhập tên đề tài NCKH"
-                    />
-                </div>
-                <div class="field col mb-0">
-                    <label for="scienceProjectLevelId">Cấp đề tài</label>
-                    <input
-                        type="number"
-                        id="scienceProjectLevelId"
-                        pInputText
-                        formControlName="scienceProjectLevelId"
-                        placeholder="Nhập cấp đề tài"
-                    />
-                </div>
-            </div>
-            <div class="p-formgrid grid">
                 <!-- Bổ sung các trường mới -->
                 <div class="field col mb-0">
                     <label for="userId">Cán bộ/Giáo viên</label>
-                    <p-autoComplete
+                    <p-dropdown
                         formControlName="userId"
-                        [suggestions]="canbos"
-                        (completeMethod)="handleOnSearch($event)"
-                        field="name"
-                        [dropdown]="true"
-                        [minLength]="1"
-                        placeholder="Nhập cán bộ giáo viên"
-                        (onSelect)="onSelectCanBo($event)"
-                    >
-                    </p-autoComplete>
+                        [options]="canbos"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Chọn cán bộ giáo viên"
+                    ></p-dropdown>
                 </div>
 
                 <div class="field col mb-0">
@@ -213,13 +187,14 @@
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="publishYear">Năm xuất bản</label>
-                    <input
-                        type="date"
-                        id="publishYear"
-                        pInputText
+                    <p-calendar
+                        id="acceptanceDate"
                         formControlName="publishYear"
+                        dateFormat="dd/mm/yy"
                         placeholder="Chọn năm xuất bản"
-                    />
+                        showIcon="true"
+                        [showButtonBar]="true"
+                    ></p-calendar>
                 </div>
 
                 <div class="field col mb-0">
@@ -341,44 +316,26 @@
     </div>
 </p-dialog>
 
+<!-- Sua -->
 <p-dialog
     header="Chỉnh sửa"
     [modal]="true"
     [(visible)]="visibleUpdateCurriculum"
     [style]="{ width: '60rem' }"
 >
-    <form [formGroup]="createCurriculumForm">
+    <form [formGroup]="updateCurriculumForm">
         <div class="p-fluid">
-            <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="projectName">Tên đề tài NCKH</label>
-                    <input
-                        type="text"
-                        id="projectName"
-                        pInputText
-                        formControlName="projectName"
-                    />
-                </div>
-                <div class="field col mb-0">
-                    <label for="scienceProjectLevelId">Cấp đề tài</label>
-                    <input
-                        type="number"
-                        id="scienceProjectLevelId"
-                        pInputText
-                        formControlName="scienceProjectLevelId"
-                    />
-                </div>
-            </div>
             <div class="p-formgrid grid">
                 <!-- Bổ sung các trường mới -->
                 <div class="field col mb-0">
                     <label for="userId">ID Cán bộ</label>
-                    <input
-                        type="number"
-                        id="userId"
-                        pInputText
+                    <p-dropdown
                         formControlName="userId"
-                    />
+                        [options]="canbos"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Chọn cán bộ giáo viên"
+                    ></p-dropdown>
                 </div>
 
                 <div class="field col mb-0">
@@ -506,8 +463,14 @@
         ></p-button>
         <p-button
             icon="pi pi-plus"
-            label="Thêm mới"
-            (click)="handleCreateItem()"
+            label="Cập nhật"
+            (click)="handleUpdateItem()"
         ></p-button>
     </div>
 </p-dialog>
+
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>

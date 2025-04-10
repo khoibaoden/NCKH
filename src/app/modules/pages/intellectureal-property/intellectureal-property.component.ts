@@ -378,7 +378,7 @@ export class IntellecturealPropertyComponent implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.intellecturealPropertyService
-                    .delete({ id: id })
+                    .delete(id)
                     .subscribe((result: any) => {
                         if (result.status) {
                             this.messageService.add({
@@ -400,7 +400,17 @@ export class IntellecturealPropertyComponent implements OnInit {
 
     handleUpdateItem() {
         this.intellecturealPropertyService
-            .delete({ id: this.intellecturalPropertyId })
+            .updateBodyAndQueryParamsStatus(
+                { id: this.intellecturalPropertyId },
+                {
+                    ...this.updateIntellecturealForm.value,
+                    intellecturalPropertyLevelId:
+                        this.updateIntellecturealForm.value
+                            .intellecturalPropertyLevelId,
+
+                    userId: this.updateIntellecturealForm.value.userId,
+                }
+            )
             .subscribe((result: any) => {
                 if (result.status) {
                     this.visibleUpdateIntellectureal = false;
