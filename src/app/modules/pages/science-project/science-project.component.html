@@ -75,8 +75,8 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 15%">Tên đề tài</th>
                         <th style="width: 10%">Mã số</th>
+                        <th style="width: 15%">Tên đề tài</th>
                         <th style="width: 15%">Chủ nhiệm đề tài</th>
                         <th style="width: 10%">Số thành viên</th>
                         <th style="width: 15%">Thời gian thực hiện</th>
@@ -87,9 +87,9 @@
                 </ng-template>
                 <ng-template pTemplate="body" let-project>
                     <tr>
-                        <td>{{ project.projectName }}</td>
                         <td>{{ project.projectCode }}</td>
-                        <td>{{ project.projectLeader }}</td>
+                        <td>{{ project.projectName }}</td>
+                        <td>{{ project?.projectManager?.name }}</td>
                         <td>{{ project.memberCount }}</td>
                         <td>
                             {{ project.startYear | date : "yyyy" }} -
@@ -106,7 +106,9 @@
                                     pRipple
                                     icon="pi pi-pencil"
                                     class="p-button-rounded p-button-info p-button-sm"
-                                    (click)="handleShowUpdateCurriculum(item)"
+                                    (click)="
+                                        handleShowUpdateCurriculum(project)
+                                    "
                                     pTooltip="Sửa"
                                     tooltipPosition="top"
                                 ></button>
@@ -115,7 +117,7 @@
                                     pRipple
                                     icon="pi pi-trash"
                                     class="p-button-rounded p-button-danger p-button-sm"
-                                    (click)="confirmDelete(item)"
+                                    (click)="handleDeleteItem(project.id)"
                                     pTooltip="Xóa"
                                     tooltipPosition="top"
                                 ></button>
@@ -125,26 +127,34 @@
                 </ng-template>
             </p-table>
             <div
-                class="flex align-items-center"
+                class="flex align-items-center mt-3"
                 style="justify-content: space-between"
             >
-                <!-- <p>
-                    <span style="font-weight: 500">{{ startRecord }}</span> -
-                    <span style="font-weight: 500">{{ endRecord }}</span> trong
+                <p>
                     <span style="font-weight: 500">{{
-                        totalRecordsCount
+                        1 + (paging.pageIndex - 1) * paging.pageSize
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        1 +
+                            (paging.pageIndex - 1) * paging.pageSize +
+                            (paging.pageSize - 1)
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
                     }}</span>
                     bản ghi
-                </p> -->
+                </p>
                 <div *ngIf="scienceProjects?.length > 0">
                     <p-paginator
-                        [rows]="pageSize"
+                        class="custum-paging"
                         (onPageChange)="onPageChange($event)"
-                        [totalRecords]="
-                            totalRecordsCount > 0 ? totalRecordsCount : 1
-                        "
-                        [rowsPerPageOptions]="[10, 20, 30]"
-                    ></p-paginator>
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    />
                 </div>
             </div>
         </div>
@@ -165,52 +175,57 @@
                     <input
                         type="text"
                         id="projectName"
+                        placeholder="Nhập tên đề tài"
                         pInputText
                         formControlName="projectName"
                     />
                 </div>
-
                 <div class="field col mb-0">
                     <label for="scienceProjectLevelId">Cấp đề tài</label>
                     <p-dropdown
                         [options]="scienceProjectLevels"
-                        optionLabel="name"
-                        optionValue="id"
+                        optionLabel="key"
                         formControlName="scienceProjectLevelId"
                         placeholder="Chọn cấp"
                         inputId="scienceProjectLevelId"
                     ></p-dropdown>
                 </div>
             </div>
+
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="startYear">Năm bắt đầu</label>
-                    <input
-                        type="date"
+                    <p-calendar
                         id="startYear"
-                        pInputText
                         formControlName="startYear"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
                 <div class="field col mb-0">
                     <label for="endYear">Năm kết thúc</label>
-                    <input
-                        type="date"
-                        id="endYear"
-                        pInputText
+                    <p-calendar
+                        id="startYear"
                         formControlName="endYear"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
             </div>
+
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="projectLeader">Chủ nhiệm đề tài</label>
-                    <input
-                        type="text"
+                    <p-dropdown
                         id="projectLeader"
-                        pInputText
+                        [options]="projectLeaders"
                         formControlName="projectLeader"
-                    />
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Chọn chủ nhiệm"
+                    ></p-dropdown>
                 </div>
 
                 <div class="field col mb-0">
@@ -272,22 +287,22 @@
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="projectManagerId">ID Chủ nhiệm</label>
-                    <input
-                        type="number"
-                        id="projectManagerId"
-                        pInputText
-                        formControlName="projectManagerId"
-                    />
-                </div>
-
-                <div class="field col mb-0">
                     <label for="managingAgency">Cơ quan quản lý</label>
                     <input
                         type="text"
                         id="managingAgency"
                         pInputText
                         formControlName="managingAgency"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <p-calendar
+                        id="startYear"
+                        formControlName="acceptanceDate"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
             </div>
@@ -312,32 +327,23 @@
                     ></textarea>
                 </div>
             </div>
-            <div class="p-formgrid grid">
-                <!-- Các trường trước đó -->
-                <div class="field col mb-0">
-                    <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <input
-                        type="date"
-                        pInputText
-                        id="acceptanceDate"
-                        formControlName="acceptanceDate"
-                    />
-                </div>
-
-                <div class="field col mb-0">
-                    <label for="membersName">Tên các thành viên</label>
-                    <input
-                        type="text"
-                        pInputText
-                        id="membersName"
-                        formControlName="membersName"
-                        placeholder="Nhập tên các thành viên"
-                    />
-                </div>
-            </div>
         </div>
     </form>
-
+    <div class="p-formgrid grid">
+        <div class="field col mb-0">
+            <label for="membersName">Tên các thành viên</label>
+            <p-multiSelect
+                id="membersName"
+                [options]="members"
+                [(ngModel)]="selectedMembers"
+                name="membersName"
+                appendTo="body"
+                optionLabel="name"
+                placeholder="Chọn các thành viên"
+                display="chip"
+            ></p-multiSelect>
+        </div>
+    </div>
     <div class="p-dialog-footer flex justify-content-end gap-2">
         <p-button
             label="Hủy"
@@ -366,16 +372,16 @@
                     <input
                         type="text"
                         id="projectName"
+                        placeholder="Nhập tên đề tài"
                         pInputText
                         formControlName="projectName"
                     />
                 </div>
-
                 <div class="field col mb-0">
                     <label for="scienceProjectLevelId">Cấp đề tài</label>
                     <p-dropdown
                         [options]="scienceProjectLevels"
-                        optionLabel="name"
+                        optionLabel="key"
                         optionValue="id"
                         formControlName="scienceProjectLevelId"
                         placeholder="Chọn cấp"
@@ -383,35 +389,41 @@
                     ></p-dropdown>
                 </div>
             </div>
+
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="startYear">Năm bắt đầu</label>
-                    <input
-                        type="date"
+                    <p-calendar
                         id="startYear"
-                        pInputText
                         formControlName="startYear"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
                 <div class="field col mb-0">
                     <label for="endYear">Năm kết thúc</label>
-                    <input
-                        type="date"
-                        id="endYear"
-                        pInputText
+                    <p-calendar
+                        id="startYear"
                         formControlName="endYear"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
             </div>
+
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="projectLeader">Chủ nhiệm đề tài</label>
-                    <input
-                        type="text"
+                    <p-dropdown
                         id="projectLeader"
-                        pInputText
-                        formControlName="projectLeader"
-                    />
+                        [options]="projectLeaders"
+                        formControlName="projectManagerId"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Chọn chủ nhiệm"
+                    ></p-dropdown>
                 </div>
 
                 <div class="field col mb-0">
@@ -434,7 +446,6 @@
                         formControlName="projectCode"
                     />
                 </div>
-
                 <div class="field col mb-0">
                     <label for="durationInYears">Số năm thực hiện</label>
                     <input
@@ -473,22 +484,22 @@
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="projectManagerId">ID Chủ nhiệm</label>
-                    <input
-                        type="number"
-                        id="projectManagerId"
-                        pInputText
-                        formControlName="projectManagerId"
-                    />
-                </div>
-
-                <div class="field col mb-0">
                     <label for="managingAgency">Cơ quan quản lý</label>
                     <input
                         type="text"
                         id="managingAgency"
                         pInputText
                         formControlName="managingAgency"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <p-calendar
+                        id="startYear"
+                        formControlName="acceptanceDate"
+                        [showIcon]="true"
+                        placeholder="Chọn năm bắt đầu"
+                        [showButtonBar]="true"
                     />
                 </div>
             </div>
@@ -513,42 +524,43 @@
                     ></textarea>
                 </div>
             </div>
-            <div class="p-formgrid grid">
-                <!-- Các trường trước đó -->
-                <div class="field col mb-0">
-                    <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <input
-                        type="date"
-                        pInputText
-                        id="acceptanceDate"
-                        formControlName="acceptanceDate"
-                    />
-                </div>
-
-                <div class="field col mb-0">
-                    <label for="membersName">Tên các thành viên</label>
-                    <input
-                        type="text"
-                        pInputText
-                        id="membersName"
-                        formControlName="membersName"
-                        placeholder="Nhập tên các thành viên"
-                    />
-                </div>
-            </div>
         </div>
     </form>
-
-    <div class="p-dialog-footer flex justify-content-end gap-2">
+    <div class="p-formgrid grid">
+        <div class="field col mb-0">
+            <label for="membersName">Tên các thành viên</label>
+            <p-multiSelect
+                id="membersName"
+                [options]="members"
+                [(ngModel)]="selectedMembersUpdate"
+                name="membersName"
+                appendTo="body"
+                optionLabel="name"
+                placeholder="Chọn các thành viên"
+                display="chip"
+            ></p-multiSelect>
+        </div>
+    </div>
+    <div class="p-dialog-footer flex justify-content-end gap-2 p-0">
         <p-button
             label="Hủy"
             severity="secondary"
-            (onClick)="visibleUpdateScienceProject = false"
+            (onClick)="visibleScienceProject = false"
         ></p-button>
         <p-button
-            icon="pi pi-plus"
-            label="Thêm mới"
+            icon="pi pi-save"
+            label="Cập nhật"
             (click)="handleUpdateItem()"
         ></p-button>
     </div>
 </p-dialog>
+
+<!-- Thông báo Toast -->
+<p-toast></p-toast>
+
+<!-- Dialog xác nhận xóa -->
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>

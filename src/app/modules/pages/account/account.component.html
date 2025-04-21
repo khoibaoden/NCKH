@@ -1,0 +1,404 @@
+<div class="grid">
+    <div class="col-12">
+        <p-toolbar styleClass="mb-2">
+            <div class="">
+                <h4>DANH SÁCH TÀI KHOẢN</h4>
+            </div>
+            <ng-template pTemplate="right">
+                <!-- Add right toolbar buttons if needed -->
+                <p-button
+                    label="Thêm tài khoản giáo vụ"
+                    icon="pi pi-plus"
+                    (click)="displayRegisterModal = true"
+                ></p-button>
+            </ng-template>
+        </p-toolbar>
+        <div class="card">
+            <div class="flex align-items-end gap-3">
+                <div class="flex flex-column">
+                    <label class="mb-2 font-bold">Họ và tên:</label>
+                    <input
+                        type="text"
+                        pInputText
+                        [(ngModel)]="filteredName"
+                        placeholder="Ví dụ: Ngọc Nhi"
+                    />
+                </div>
+                <div class="flex flex-column">
+                    <button
+                        pButton
+                        type="button"
+                        label="Lọc"
+                        (click)="filter()"
+                    ></button>
+                </div>
+            </div>
+
+            <div class="table-section" style="margin-top: 20px">
+                <p-table
+                    [value]="accounts"
+                    dataKey="id"
+                    styleClass="p-datatable-gridlines"
+                    [tableStyle]="{ 'min-width': '60rem' }"
+                    [paginator]="false"
+                    [rows]="paging.pageSize"
+                    [expandedRowKeys]="expandedRows"
+                    (onRowExpand)="onRowExpand($event)"
+                    (onRowCollapse)="onRowCollapse($event)"
+                >
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width: 5rem">STT</th>
+                            <th>Họ và tên</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Vai trò</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-account let-i="rowIndex">
+                        <tr>
+                            <td>
+                                {{
+                                    i +
+                                        1 +
+                                        (paging.pageIndex - 1) * paging.pageSize
+                                }}
+                            </td>
+
+                            <td>{{ account.name }}</td>
+                            <td>{{ account.userName }}</td>
+                            <td>{{ account.roleNames || "Sinh viên" }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <p-button
+                                        icon="pi pi-pencil"
+                                        styleClass="p-button-rounded p-button-success"
+                                        [text]="true"
+                                        (click)="displayEditAccountModal = true"
+                                    ></p-button>
+                                    <p-button
+                                        icon="pi pi-trash"
+                                        styleClass="p-button-rounded p-button-danger"
+                                        [text]="true"
+                                    ></p-button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                Không có dữ liệu
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+                <div
+                    class="flex align-items-center mt-3"
+                    style="justify-content: space-between"
+                >
+                    <p>
+                        <span style="font-weight: 500">{{
+                            accounts.length > 0
+                                ? 1 + (paging.pageIndex - 1) * paging.pageSize
+                                : 0
+                        }}</span>
+                        -
+                        <span style="font-weight: 500">{{
+                            accounts.length > 0
+                                ? math.min(
+                                      paging.pageIndex * paging.pageSize,
+                                      paging.totalRecords
+                                  )
+                                : 0
+                        }}</span>
+                        trong
+                        <span style="font-weight: 500">{{
+                            paging.totalRecords
+                        }}</span>
+                        bản ghi
+                    </p>
+                    <div *ngIf="accounts?.length > 0">
+                        <p-paginator
+                            class="custum-paging"
+                            (onPageChange)="onPageChange($event)"
+                            [first]="(paging.pageIndex - 1) * paging.pageSize"
+                            [rows]="paging.pageSize"
+                            [totalRecords]="paging.totalRecords"
+                            [rowsPerPageOptions]="config.pageSizeOptions"
+                        ></p-paginator>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    [(visible)]="displayRegisterModal"
+    modal="true"
+    [closable]="false"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '35vw' }"
+>
+    <ng-template pTemplate="header">
+        <h4>Đăng ký tài khoản</h4>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+        <form [formGroup]="registerForm" (ngSubmit)="handleRegister()">
+            <div class="form-register">
+                <div class="grid p-fluid p-3">
+                    <div class="col-12 md:col-12 p-2">
+                        <div class="field mb-0">
+                            <label
+                                style="font-weight: 600; color: #000"
+                                htmlFor="account"
+                                >Tài khoản<span class="red-asterisk"
+                                    >*</span
+                                ></label
+                            >
+                            <input
+                                pInputText
+                                id="account"
+                                type="text"
+                                spellcheck="false"
+                                placeholder="Nhập tài khoản"
+                                formControlName="userName"
+                            />
+                            <div
+                                *ngIf="
+                                    registerForm.get('userName')?.invalid &&
+                                    (registerForm.get('userName')?.dirty ||
+                                        registerForm.get('userName')?.touched)
+                                "
+                            >
+                                <div
+                                    *ngIf="registerForm.get('userName')?.errors?.['required']"
+                                    class="error-message"
+                                >
+                                    Vui lòng nhập tài khoản
+                                </div>
+
+                                <div
+                                    *ngIf="!registerForm.get('userName')?.errors?.['required'] && registerForm.get('userName')?.errors?.['whitespace']"
+                                    class="error-message"
+                                >
+                                    Tài khoản không được chứa khoảng trắng
+                                </div>
+
+                                <div
+                                    *ngIf="
+                                            !registerForm.get('userName')?.errors?.['required'] &&
+                                            !registerForm.get('userName')?.errors?.['whitespace'] &&
+                                            registerForm.get('userName')?.errors?.['userName']
+                                        "
+                                    class="error-message"
+                                >
+                                    Định dạng account không hợp lệ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-12 p-2">
+                        <div class="field mb-0">
+                            <label
+                                style="font-weight: 600; color: #000"
+                                htmlFor="password"
+                                >Mật khẩu<span class="red-asterisk"
+                                    >*</span
+                                ></label
+                            >
+                            <input
+                                pInputText
+                                id="password"
+                                type="text"
+                                spellcheck="false"
+                                placeholder="Nhập mật khẩu"
+                                formControlName="password"
+                            />
+                            <div
+                                *ngIf="
+                                    registerForm.get('password')?.invalid &&
+                                    (registerForm.get('password')?.dirty ||
+                                        registerForm.get('password')?.touched)
+                                "
+                            >
+                                <div
+                                    *ngIf="registerForm.get('password')?.errors?.['required']"
+                                    class="error-message"
+                                >
+                                    Vui lòng nhập mật khẩu
+                                </div>
+                                <div
+                                    *ngIf="!registerForm.get('password')?.errors?.['required'] &&
+                                                   registerForm.get('password')?.errors?.['whitespace']"
+                                    class="error-message"
+                                >
+                                    Mật khẩu không được chứa khoảng trắng
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-12 p-2">
+                        <div class="field mb-0">
+                            <label
+                                style="font-weight: 600; color: #000"
+                                htmlFor="password"
+                                >Nhập lại mật khẩu<span class="red-asterisk"
+                                    >*</span
+                                ></label
+                            >
+                            <input
+                                pInputText
+                                id="confirmPassword"
+                                type="text"
+                                spellcheck="false"
+                                placeholder="Nhập mật khẩu"
+                                formControlName="confirmPassword"
+                            />
+                            <div
+                                *ngIf="
+                                    registerForm.get('confirmPassword')
+                                        ?.invalid &&
+                                    (registerForm.get('confirmPassword')
+                                        ?.dirty ||
+                                        registerForm.get('confirmPassword')
+                                            ?.touched)
+                                "
+                            >
+                                <div
+                                    *ngIf="registerForm.get('confirmPassword')?.errors?.['required']"
+                                    class="error-message"
+                                >
+                                    Vui lòng nhập mật khẩu
+                                </div>
+                                <div
+                                    *ngIf="!registerForm.get('confirmPassword')?.errors?.['required'] &&
+                                                   registerForm.get('confirmPassword')?.errors?.['whitespace']"
+                                    class="error-message"
+                                >
+                                    Mật khẩu không được chứa khoảng trắng
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-12 p-2">
+                        <div class="field mb-0">
+                            <label
+                                style="font-weight: 600; color: #000"
+                                htmlFor="account"
+                                >Lớp quản lý<span class="red-asterisk"
+                                    >*</span
+                                ></label
+                            >
+                            <p-multiSelect
+                                [options]="classes"
+                                formControlName="selectedClass"
+                                name="selectedClass"
+                                appendTo="body"
+                                optionLabel="name"
+                                placeholder="Chọn lớp quản lý"
+                            ></p-multiSelect>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 justify-content-end py-2">
+                <button
+                    pButton
+                    pRipple
+                    type="button"
+                    label="Thoát"
+                    (click)="displayRegisterModal = false; registerForm.reset()"
+                    icon="pi pi-times"
+                    class="p-button-danger"
+                ></button>
+                <button
+                    type="submit"
+                    pButton
+                    label="Đăng ký"
+                    (click)="handleRegister()"
+                    icon="pi pi-plus"
+                    class="p-button-primary"
+                ></button>
+            </div>
+        </form>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="displayEditAccountModal"
+    modal="true"
+    [closable]="false"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '35vw' }"
+>
+    <ng-template pTemplate="header">
+        <h4>Chỉnh sửa thông tin tài khoản</h4>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+        <div class="form-register">
+            <div class="grid p-fluid p-3">
+                <div class="col-12 md:col-12 p-2">
+                    <div class="field mb-0">
+                        <label
+                            style="font-weight: 600; color: #000"
+                            htmlFor="account"
+                            >Họ và tên<span class="red-asterisk">*</span></label
+                        >
+                        <input
+                            pInputText
+                            id="account"
+                            type="text"
+                            spellcheck="false"
+                            placeholder="Nhập họ và tên giáo vụ"
+                            [(ngModel)]="fullName"
+                        />
+                    </div>
+                </div>
+                <div class="col-12 md:col-12 p-2">
+                    <div class="field mb-0">
+                        <label
+                            style="font-weight: 600; color: #000"
+                            htmlFor="account"
+                            >Lớp quản lý<span class="red-asterisk"
+                                >*</span
+                            ></label
+                        >
+                        <p-multiSelect
+                            [options]="classes"
+                            [(ngModel)]="selectedClass"
+                            name="selectedClass"
+                            appendTo="body"
+                            optionLabel="name"
+                            placeholder="Chọn lớp quản lý"
+                        ></p-multiSelect>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-2 justify-content-end py-2">
+            <button
+                pButton
+                pRipple
+                type="button"
+                label="Thoát"
+                (click)="displayEditAccountModal = false"
+                icon="pi pi-times"
+                class="p-button-danger"
+            ></button>
+            <button
+                pButton
+                label="Đăng ký"
+                icon="pi pi-check"
+                class="p-button-primary"
+            ></button>
+        </div>
+    </ng-template>
+</p-dialog>

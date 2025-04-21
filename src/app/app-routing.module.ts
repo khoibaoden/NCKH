@@ -110,6 +110,20 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                     ],
                 },
 
+                //statistic
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'statistic',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/statistic/statistic.module'
+                                ).then((m) => m.StatisticModule),
+                        },
+                    ],
+                },
                 //science-project
                 {
                     path: '',
@@ -136,6 +150,20 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                 import(
                                     'src/app/modules/pages/intellectureal-property/intellectureal-property.module'
                                 ).then((m) => m.IntellecturealPropertyModule),
+                        },
+                    ],
+                },
+                //account
+                {
+                    path: '',
+                    component: AppLayoutComponent,
+                    children: [
+                        {
+                            path: 'account',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/account/account.module'
+                                ).then((m) => m.AccountModule),
                         },
                     ],
                 },

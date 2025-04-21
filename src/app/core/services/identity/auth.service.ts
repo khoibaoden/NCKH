@@ -1,15 +1,15 @@
-import { HttpLoadingService } from 'src/app/core/https/http-loading.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AuthToken } from '../../models/identity/auth-token.interface';
-import { ApiResult } from '../../models/identity/api-result.interface';
-import { UserCurrent } from '../../models/identity/user-current.interface';
-import { LocalStorage } from '../../enums/local-storage.enum';
-import { RefreshTokenRequest } from '../../models/identity/refresh-token-request.interface';
+import { HttpLoadingService } from '../../https/http-loading.service';
 import { LocalStorageService } from '../local-storage.service';
 import { HttpService } from '../http.service';
+import { UserCurrent } from '../../models/identity/user-current.interface';
+import { AuthToken } from '../../models/identity/auth-token.interface';
+import { LocalStorage } from '../../enums/local-storage.enum';
+import { ApiResult } from '../../models/identity/api-result.interface';
+import { RefreshTokenRequest } from '../../models/identity/refresh-token-request.interface';
 
 @Injectable({
     providedIn: 'root',
@@ -17,14 +17,15 @@ import { HttpService } from '../http.service';
 export class AuthService {
     constructor(
         private http: HttpClient,
+        private httpLd: HttpLoadingService,
         private localStorageService: LocalStorageService,
-        private httpLoadingService: HttpLoadingService,
         private httpService: HttpService
     ) {}
 
-    public url = environment.baseApiUrl;
+    public url = environment.url;
     isLoggedIn(): boolean {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
+
         if (token) {
             return true;
         }
@@ -33,9 +34,14 @@ export class AuthService {
 
     // tny add
     login(request: any): Observable<any> {
-        return this.httpLoadingService
-            .post(`auth/login-by-username`, request)
+        return this.httpLd
+            .post('auth/login-by-username', request)
             .pipe(catchError(this.handleError));
+    }
+
+    //lấy ng dùng hiện tại
+    getUserInfo(): Observable<UserCurrent | null> {
+        return this.userCurrent;
     }
 
     private isInitAuthSubject: BehaviorSubject<boolean> =
@@ -45,6 +51,7 @@ export class AuthService {
     public userCurrent = this.currentUserSubject.asObservable();
 
     getUserCurrent() {
+        console.log(this.currentUserSubject.value);
         return this.currentUserSubject.value;
     }
 
@@ -61,27 +68,25 @@ export class AuthService {
     }
 
     setAuthTokenLocalStorage(authToken: AuthToken | null) {
-        // setTimeout(() => {s
+        // console.log("sét thành công:   "+JSON.stringify(authToken));
         // this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
-        // }, 300);
-        this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
+        setTimeout(() => {
+            this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
+        }, 300);
     }
 
     getUserCurrentApi(): Observable<ApiResult<UserCurrent>> {
-        console.log(1);
         return this.http.get<ApiResult<UserCurrent>>(
-            `${this.url}/user/user-info`
+            'https://localhost:7115/api/user/user-info'
         );
     }
 
     fetchUserCurrent(): Observable<ApiResult<UserCurrent>> {
         let headers = this.httpService.addSkipLoadingHeader();
-        console.log(headers);
+
         return this.http.get<ApiResult<UserCurrent>>(
-            `https://localhost:7115/api/user/user-info`,
-            {
-                headers,
-            }
+            'https://localhost:7115/api/user/user-info',
+            { headers }
         );
     }
 
@@ -89,7 +94,7 @@ export class AuthService {
         request: RefreshTokenRequest
     ): Observable<ApiResult<AuthToken>> {
         return this.http.post<ApiResult<AuthToken>>(
-            `/auth/refresh-token`,
+            'https://localhost:7115/api/auth/refresh-token',
             request
         );
     }
@@ -119,7 +124,10 @@ export class AuthService {
     }
 
     logout(): Observable<ApiResult<boolean>> {
-        return this.http.post<ApiResult<boolean>>(`/auth/logout`, null);
+        return this.http.post<ApiResult<boolean>>(
+            'https://localhost:7115/api/auth/logout',
+            null
+        );
     }
 
     private handleError(error: HttpErrorResponse): Observable<any> {
@@ -127,37 +135,55 @@ export class AuthService {
         return throwError('Something bad happened; please try again later.');
     }
 
-    resendEmailOtp(request: any = null): Observable<any> {
-        return this.httpLoadingService.post('auth/send-email-otp', request);
-    }
+    resendEmailOtp(toEmail: string): Observable<any> {
+        const requestPayload = {
+            toEmail: toEmail,
+            subject: 'BHDT',
+            body: 'Lấy lại mật khẩu.',
+        };
 
-    setPassword(request: any): Observable<any> {
-        return this.httpLoadingService.post('user/set-password', request);
-    }
-
-    getUsers(request: any): Observable<any> {
-        // return this.http.get<any>(
-        //     `${this.url}/api/user/paging-info?pageSize=${pageSize}`
-        // );
-        return this.httpLoadingService.get('user/paging-info', request);
-    }
-
-    registerUser(request: any): Observable<any> {
-        return this.httpLoadingService.post(
-            `auth/register-verify-by-email`,
-            request
+        return this.http.post<any>(
+            `${this.url}/api/user/resend-email-otp`,
+            requestPayload
         );
     }
 
-    registerCustomer(request: any): Observable<any> {
-        return this.httpLoadingService.post(`user/create-customer`, request);
+    setPassword(payload: any): Observable<any> {
+        return this.http.post(`${this.url}/api/user/set-password`, payload);
     }
 
-    verifyOtp(request: any): Observable<any> {
-        return this.httpLoadingService.post(
-            `auth/confirm-email-otp-register`,
-            request
+    getUsers(pageSize: number = 1000): Observable<any> {
+        return this.http.get<any>(
+            `${this.url}/api/user/paging-info?pageSize=${pageSize}`
+        );
+    }
+
+    getPagingUser(request: any): Observable<any> {
+        return this.http.get('https://localhost:7115/api/user/paging-info', {
+            params: request.params,
+        });
+    }
+
+    getStudentDisciplineScores(params: any): Observable<any> {
+        return this.http.get<any>(
+            'https://localhost:7115/api/student-discipline-score/statistic-result',
+            { params: params }
         );
     }
     // tny end add
+
+    register(request: any): Observable<any> {
+        return this.http.post<any>(
+            'https://localhost:7115/api/auth/register-with-advisor',
+            request
+        );
+    }
+
+    getRoles(): Observable<any> {
+        return this.http.get<any>('https://localhost:7115/api/role/paging');
+    }
+
+    getClassByAdvisor(): Observable<any> {
+        return this.http.get<any>('https://localhost:7115/api/role/paging');
+    }
 }

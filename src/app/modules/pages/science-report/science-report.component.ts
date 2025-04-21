@@ -29,31 +29,34 @@ export class ScienceReportsComponent implements OnInit {
     reportLevels: any[] = [
         {
             id: 1,
-            key: "HT1",
+            key: 'HT1',
             value: 1200,
-            description: "Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế thuộc hệ thống ISI/Scopus"
+            description:
+                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế thuộc hệ thống ISI/Scopus',
         },
         {
             id: 2,
-            key: "HT2",
+            key: 'HT2',
             value: 800,
-            description: "Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế có phản biện độc lập"
+            description:
+                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế có phản biện độc lập',
         },
         {
             id: 3,
-            key: "HT3",
+            key: 'HT3',
             value: 400,
-            description: "Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc gia"
-        }
+            description:
+                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc gia',
+        },
     ];
 
     // Mẫu data cho danh sách người dùng
     users: any[] = [
-        { id: 1, name: "Nguyễn Văn A" },
-        { id: 2, name: "Phạm Ngọc Hưng" },
-        { id: 3, name: "Nguyễn Văn Hậu" },
-        { id: 4, name: "Phạm Minh Chuẩn" },
-        { id: 5, name: "Trần Thị B" }
+        { id: 1, name: 'Nguyễn Văn A' },
+        { id: 2, name: 'Phạm Ngọc Hưng' },
+        { id: 3, name: 'Nguyễn Văn Hậu' },
+        { id: 4, name: 'Phạm Minh Chuẩn' },
+        { id: 5, name: 'Trần Thị B' },
     ];
 
     editingReport: any = {};
@@ -70,9 +73,7 @@ export class ScienceReportsComponent implements OnInit {
         isbn: '',
         notes: '',
         projectManagerId: null,
-        authorScienceReports: [
-            { userId: null }
-        ]
+        authorScienceReports: [{ userId: null }],
     };
 
     constructor(
@@ -135,6 +136,23 @@ export class ScienceReportsComponent implements OnInit {
         });
     }
 
+    saveNewReport() {
+        this.scienceReportService.create(this.newReport).subscribe({
+            next: (response) => {
+                console.log('Tạo báo cáo thành công:', response);
+                // có thể reset form hoặc điều hướng người dùng
+            },
+            error: (error) => {
+                console.error('Lỗi khi tạo báo cáo:', error);
+                // hiển thị thông báo lỗi nếu cần
+            },
+        });
+    }
+
+    addNewAuthor() {
+        this.newReport.authorScienceReports.push({ userId: null });
+    }
+
     openAddDialog() {
         this.submitted = false;
         this.newReport = {
@@ -148,9 +166,7 @@ export class ScienceReportsComponent implements OnInit {
             isbn: '',
             notes: '',
             projectManagerId: null,
-            authorScienceReports: [
-                { userId: null }
-            ]
+            authorScienceReports: [{ userId: null }],
         };
         this.addDialogVisible = true;
     }
@@ -197,7 +213,7 @@ export class ScienceReportsComponent implements OnInit {
             });
             isValid = false;
         }
-        
+
         // Kiểm tra tác giả
         let hasEmptyAuthor = false;
         this.newReport.authorScienceReports.forEach((author: any) => {
@@ -205,7 +221,7 @@ export class ScienceReportsComponent implements OnInit {
                 hasEmptyAuthor = true;
             }
         });
-        
+
         if (hasEmptyAuthor) {
             this.messageService.add({
                 severity: 'warn',
@@ -214,46 +230,8 @@ export class ScienceReportsComponent implements OnInit {
             });
             isValid = false;
         }
-        
+
         return isValid;
-    }
-
-    saveNewReport() {
-        this.submitted = true;
-        if (!this.validateReportForm()) {
-            return;
-        }
-
-        // Trong thực tế, bạn sẽ gọi API để lưu báo cáo
-        // Ở đây tôi chỉ mô phỏng quá trình thêm báo cáo
-        setTimeout(() => {
-            // Mô phỏng response từ server
-            const result = {
-                status: true,
-                message: 'Thêm báo cáo khoa học thành công',
-                data: {
-                    ...this.newReport,
-                    id: Math.floor(Math.random() * 1000) + 10
-                }
-            };
-
-            if (result.status) {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Thành công',
-                    detail: 'Đã thêm báo cáo khoa học mới',
-                });
-                this.addDialogVisible = false;
-                this.submitted = false;
-                this.getReports(this.queryParameters);
-            } else {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Lỗi',
-                    detail: result.message || 'Thêm báo cáo thất bại',
-                });
-            }
-        }, 500);
     }
 
     public getReports(request: any): any {
@@ -270,7 +248,7 @@ export class ScienceReportsComponent implements OnInit {
                                 ...params,
                                 pageIndex: 1,
                             };
-    
+
                             this.router.navigate([], {
                                 relativeTo: this.route,
                                 queryParams: request,
@@ -281,11 +259,11 @@ export class ScienceReportsComponent implements OnInit {
                     console.log(result.data.items);
                     this.reports = result.data.items;
                     this.filteredReports = [...this.reports];
-    
+
                     if (this.reports.length === 0) {
                         this.paging.pageIndex = 1;
                     }
-    
+
                     const { items, ...paging } = result.data;
                     this.paging = paging;
                     this.paging.totalRecords = this.filteredReports.length;
@@ -318,10 +296,6 @@ export class ScienceReportsComponent implements OnInit {
         this.editingReport.authorScienceReports.splice(index, 1);
     }
 
-    addNewAuthor() {
-        this.newReport.authorScienceReports.push({ userId: null });
-    }
-
     removeNewAuthor(index: number) {
         this.newReport.authorScienceReports.splice(index, 1);
     }
@@ -352,7 +326,7 @@ export class ScienceReportsComponent implements OnInit {
             });
             isValid = false;
         }
-        
+
         // Kiểm tra tác giả
         let hasEmptyAuthor = false;
         this.editingReport.authorScienceReports.forEach((author: any) => {
@@ -360,7 +334,7 @@ export class ScienceReportsComponent implements OnInit {
                 hasEmptyAuthor = true;
             }
         });
-        
+
         if (hasEmptyAuthor) {
             this.messageService.add({
                 severity: 'warn',
@@ -369,7 +343,7 @@ export class ScienceReportsComponent implements OnInit {
             });
             isValid = false;
         }
-        
+
         return isValid;
     }
 
@@ -383,7 +357,7 @@ export class ScienceReportsComponent implements OnInit {
             // Mô phỏng response từ server
             const result = {
                 status: true,
-                message: 'Cập nhật báo cáo khoa học thành công'
+                message: 'Cập nhật báo cáo khoa học thành công',
             };
 
             if (result.status) {
@@ -430,7 +404,7 @@ export class ScienceReportsComponent implements OnInit {
             // Mô phỏng xóa báo cáo thành công
             const result = {
                 status: true,
-                message: 'Xóa báo cáo khoa học thành công'
+                message: 'Xóa báo cáo khoa học thành công',
             };
 
             if (result.status) {

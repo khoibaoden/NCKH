@@ -1,11 +1,15 @@
 <p-toast />
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="loginForm">
     <div class="flex flex-column align-items-center justify-content-center">
         <div
             style="
                 border-radius: 56px;
                 padding: 0.3rem;
-                background: linear-gradient(180deg, #199807 10%, rgb(38 244 67 / 0%) 30%)
+                background: linear-gradient(
+                    180deg,
+                    #199807 10%,
+                    rgb(38 244 67 / 0%) 30%
+                );
             "
         >
             <div
@@ -20,18 +24,21 @@
                         height="100"
                         class="mb-3"
                     />
-                    <div style="color:rgba(0, 0, 0, 0.66)" class="text-600 text-2xl font-medium mb-3">
+                    <div
+                        style="color: rgba(0, 0, 0, 0.66)"
+                        class="text-600 text-2xl font-medium mb-3"
+                    >
                         BẠN QUÊN MẬT KHẨU ?
                     </div>
-                    <!-- <span class="text-600 font-medium"
-                        >Thay đổi mật khẩu</span
-                    > -->
                 </div>
 
                 <p-messages [(value)]="messages"></p-messages>
 
                 <div>
-                    <label style="color: #A9A9A9; padding-bottom: 15px;" for="">Nhập email đăng ký của bạn để nhận mã xác nhận lấy lại mật khẩu</label>
+                    <label style="color: #a9a9a9; padding-bottom: 15px" for=""
+                        >Nhập email đăng ký của bạn để nhận mã xác nhận lấy lại
+                        mật khẩu</label
+                    >
                     <div class="mb-3">
                         <div class="field-group user_name">
                             <input
@@ -43,24 +50,24 @@
                                 formControlName="email"
                             />
                             <div
-                            *ngIf="
-                                loginForm.get('email')?.invalid &&
-                                (loginForm.get('email')?.dirty ||
-                                    loginForm.get('email')?.touched)
-                            "
-                        >
-                            <div
-                                *ngIf="loginForm.get('email')?.errors?.['required']"
-                                class="error-message"
+                                *ngIf="
+                                    loginForm.get('email')?.invalid &&
+                                    (loginForm.get('email')?.dirty ||
+                                        loginForm.get('email')?.touched)
+                                "
                             >
-                                Vui lòng nhập email
-                            </div>
-                            <div
-                                *ngIf="loginForm.get('email')?.errors?.['pattern']"
-                                class="error-message"
-                            >
-                                Email không hợp lệ.
-                            </div>
+                                <div
+                                    *ngIf="loginForm.get('email')?.errors?.['required']"
+                                    class="error-message"
+                                >
+                                    Vui lòng nhập email
+                                </div>
+                                <div
+                                    *ngIf="loginForm.get('email')?.errors?.['pattern']"
+                                    class="error-message"
+                                >
+                                    Email không hợp lệ.
+                                </div>
                             </div>
                             <span>
                                 <svg
@@ -80,10 +87,9 @@
                             </span>
                         </div>
                     </div>
-                    
                     <button
                         *ngIf="!otpSent"
-                        style="background-color: #4d8526; margin-top: 10px;"
+                        style="background-color: #4d8526; margin-top: 10px"
                         pButton
                         pRipple
                         label="Lấy mã OTP"
@@ -93,7 +99,7 @@
 
                     <button
                         *ngIf="otpSent"
-                        style="background-color: #4d8526; margin-top: 10px;"
+                        style="background-color: #4d8526; margin-top: 10px"
                         pButton
                         pRipple
                         label="Đến trang đặt lại mật khẩu"
@@ -102,15 +108,20 @@
                         (click)="navigateToSetPassword()"
                     ></button>
                     <div class="flex justify-content-center mb-5 gap-5">
-                        <a [routerLink]="['']"
+                        <a
+                            [routerLink]="['']"
                             class="font-medium no-underline ml-2 cursor-pointer"
-                            style="color:rgba(0, 0, 0, 0.66); text-align: center; font-weight: 600; padding: 10px 0;"
-                            >Quay lại đăng nhập</a>
+                            style="
+                                color: rgba(0, 0, 0, 0.66);
+                                text-align: center;
+                                font-weight: 600;
+                                padding: 10px 0;
+                            "
+                            >Quay lại đăng nhập</a
+                        >
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </form>
-
-<!-- [routerLink]="['/']" -->

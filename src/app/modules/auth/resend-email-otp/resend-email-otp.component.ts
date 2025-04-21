@@ -41,80 +41,80 @@ export class ResendEmailOtpComponent {
         });
     }
 
-    checkEmailExists(): Promise<boolean> {
-        const email = this.loginForm.get('email')?.value;
+    // checkEmailExists(): Promise<boolean> {
+    //     const email = this.loginForm.get('email')?.value;
 
-        const request = {
-            pageSize: 1000,
-        };
+    //     const request = {
+    //         pageSize: 1000,
+    //     };
 
-        return new Promise((resolve, reject) => {
-            this.authService.getUsers(request).subscribe({
-                next: (response: any) => {
-                    const users = response.data.items;
-                    // Check if an email exists and if its associated name is not empty
-                    const emailExists = users.some(
-                        (user: any) =>
-                            user.email === email &&
-                            user.name?.trim() !== '' &&
-                            user.userName === email
-                    );
-                    resolve(emailExists);
-                },
-                error: (error) => {
-                    reject(error);
-                },
-            });
-        });
-    }
+    //     return new Promise((resolve, reject) => {
+    //         this.authService.getUsers(request).subscribe({
+    //             next: (response: any) => {
+    //                 const users = response.data.items;
+    //                 // Check if an email exists and if its associated name is not empty
+    //                 const emailExists = users.some(
+    //                     (user: any) =>
+    //                         user.email === email &&
+    //                         user.name?.trim() !== '' &&
+    //                         user.userName === email
+    //                 );
+    //                 resolve(emailExists);
+    //             },
+    //             error: (error) => {
+    //                 reject(error);
+    //             },
+    //         });
+    //     });
+    // }
 
-    async onSubmit() {
-        if (this.loginForm.invalid) {
-            return;
-        }
+    // async onSubmit() {
+    //     if (this.loginForm.invalid) {
+    //         return;
+    //     }
 
-        const emailExists = await this.checkEmailExists();
+    //     const emailExists = await this.checkEmailExists();
 
-        if (emailExists) {
-            const email = this.loginForm.get('email')?.value;
+    //     if (emailExists) {
+    //         const email = this.loginForm.get('email')?.value;
 
-            const request = {
-                toEmail: email,
-                subject: 'AFF',
-                body: 'Lấy lại mật khẩu.',
-            };
+    //         const request = {
+    //             toEmail: email,
+    //             subject: 'AFF',
+    //             body: 'Lấy lại mật khẩu.',
+    //         };
 
-            sessionStorage.setItem('email', email);
+    //         sessionStorage.setItem('email', email);
 
-            this.authService.resendEmailOtp(request).subscribe(
-                (response) => {
-                    this.messages = [];
-                    this.messages.push({
-                        severity: 'success',
-                        summary: '',
-                        detail: 'Mã OTP đã được gửi đến Email của bạn.',
-                    });
-                    this.otpSent = true;
-                },
-                (error) => {
-                    this.messages = [];
-                    this.messages.push({
-                        severity: 'error',
-                        summary: '',
-                        detail: 'Lấy mã OTP thất bại.',
-                    });
-                    this.otpSent = false;
-                }
-            );
-        } else {
-            this.messages = [];
-            this.messages.push({
-                severity: 'error',
-                summary: '',
-                detail: 'Email không tồn tại!',
-            });
-        }
-    }
+    //         this.authService.resendEmailOtp(request).subscribe(
+    //             (response) => {
+    //                 this.messages = [];
+    //                 this.messages.push({
+    //                     severity: 'success',
+    //                     summary: '',
+    //                     detail: 'Mã OTP đã được gửi đến Email của bạn.',
+    //                 });
+    //                 this.otpSent = true;
+    //             },
+    //             (error) => {
+    //                 this.messages = [];
+    //                 this.messages.push({
+    //                     severity: 'error',
+    //                     summary: '',
+    //                     detail: 'Lấy mã OTP thất bại.',
+    //                 });
+    //                 this.otpSent = false;
+    //             }
+    //         );
+    //     } else {
+    //         this.messages = [];
+    //         this.messages.push({
+    //             severity: 'error',
+    //             summary: '',
+    //             detail: 'Email không tồn tại!',
+    //         });
+    //     }
+    // }
 
     navigateToSetPassword() {
         this.router.navigate(['/set-password']);
