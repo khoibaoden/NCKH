@@ -76,6 +76,7 @@ export class AccountComponent implements OnInit {
         this.loadRoles();
         this.loadClass();
     }
+
     loadClass() {
         this.classService.getPaging().subscribe((response) => {
             console.log('Classes:', response.data.items);

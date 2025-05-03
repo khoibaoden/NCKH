@@ -38,7 +38,7 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
+                                >Tên sở hữu trí tuệ:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
@@ -46,27 +46,11 @@
                                     pInputText
                                     type="text"
                                     [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
+                                    placeholder="Tìm theo tên sở hữu trí tuệ"
                                     style="width: 350px"
                                     class="sm:"
                                 />
                             </span>
-                        </div>
-                        <div class="flex flex-column">
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
-                            >
-                            <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
-                                [(ngModel)]="deadlineRange"
-                                selectionMode="range"
-                                [showIcon]="true"
-                                [showClearButton]="true"
-                                (onBlur)="blurDateRange()"
-                                [dateFormat]="this.formatdate"
-                            ></p-calendar>
                         </div>
                         <button
                             pButton

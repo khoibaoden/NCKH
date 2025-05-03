@@ -31,8 +31,11 @@ export class CurriculumComponent implements OnInit {
     createCurriculumForm: FormGroup;
     updateCurriculumForm: FormGroup;
     canbos: any;
+    authorsList: any = [];
     curriculumId: any;
     search: string = '';
+    keyWord: any;
+    selectedAuthor: any;
 
     curriculumLevels: any;
     constructor(
@@ -61,6 +64,7 @@ export class CurriculumComponent implements OnInit {
             hoursCalculated: [null],
             note: [''],
         });
+
         this.updateCurriculumForm = this.fb.group({
             userId: [null],
             name: [''],
@@ -84,11 +88,6 @@ export class CurriculumComponent implements OnInit {
         pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     };
 
-    // public constant: any = {
-    //     class: classConstant,
-    //     sort: sortConstant,
-    // };
-
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
         pageSize: DEFAULT_PAGE_SIZE,
@@ -102,12 +101,11 @@ export class CurriculumComponent implements OnInit {
 
     public queryParameters: any = {
         ...this.config.paging,
-        status: 0,
         keyWord: '',
     };
 
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Quản lý viết sách' }];
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -121,11 +119,12 @@ export class CurriculumComponent implements OnInit {
 
             this.queryParameters = {
                 ...params,
-                status: params['status'] ? params['status'] : 0,
-                keyWord: params['keyWord'] ? params['keyWord'] : null,
+                keyWord: params['keyWord'] ? params['keyWord'] : '',
             };
+
             this.getCurriculum(request);
         });
+
         this.loadCanbos();
         this.loadCurriculumLevel();
     }
@@ -139,7 +138,6 @@ export class CurriculumComponent implements OnInit {
                             ...params,
                             pageIndex: 1,
                         };
-
                         this.router.navigate([], {
                             relativeTo: this.route,
                             queryParams: request,
@@ -147,26 +145,14 @@ export class CurriculumComponent implements OnInit {
                         });
                     });
                 }
-                console.log(result.data.items);
-                this.curriculums = result.data.items;
-                // this.classes = this.classes.map(
-                //     (class: any) => ({
-                //         ...class,
-                //         status:
-                //             this.constant.class.status.find(
-                //                 (status: any) =>
-                //                     status.value === class.status
-                //             )?.label ?? '',
-                //     })
-                // );
 
+                this.curriculums = result.data.items;
                 if (this.curriculums.length === 0) {
                     this.paging.pageIndex = 1;
                 }
 
                 const { items, ...paging } = result.data;
                 this.paging = paging;
-
                 this.selectedScienceReport = [];
             }
         });
@@ -196,34 +182,13 @@ export class CurriculumComponent implements OnInit {
         return this.selectedScienceReport.includes(id);
     }
 
-    onPageChange(event: any) {
-        this.paging.pageIndex = event.page + 1;
-        this.paging.pageSize = event.rows;
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: event.page + 1,
-                pageSize: event.rows,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
-    }
-
     handleShowUpdateCurriculum(item: any) {
         this.visibleUpdateCurriculum = true;
-        console.log(item);
-
         this.curriculumId = item;
         this.curriculumService
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
-                    console.log(result.data);
                     this.updateCurriculumForm = this.fb.group({
                         userId: [result.data.userId],
                         name: [result.data.name],
@@ -242,6 +207,17 @@ export class CurriculumComponent implements OnInit {
             });
     }
 
+    handleSearchAuthor(event: any) {
+        this.userService
+            .getPaging({ name: event.query })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.authorsList = result.data.items;
+                }
+            });
+    }
+
+    //Thêm
     public handleCreateItem() {
         console.log(this.createCurriculumForm.value);
         this.curriculumService
@@ -268,12 +244,11 @@ export class CurriculumComponent implements OnInit {
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
                 }
             });
     }
 
+    //Cập nhật
     public handleUpdateItem() {
         this.curriculumService
             .updateBodyAndQueryParamsStatus(
@@ -298,26 +273,6 @@ export class CurriculumComponent implements OnInit {
             });
     }
 
-    public handleSearchclass() {
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                status: this.queryParameters.status
-                    ? this.queryParameters.status
-                    : null,
-                keyWord: this.queryParameters.keyWord
-                    ? this.queryParameters.keyWord
-                    : null,
-            };
-
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParams: request,
-                queryParamsHandling: 'merge',
-            });
-        });
-    }
-
     onSelectCanBo(event: any) {
         console.log(event);
         this.createCurriculumForm.get('userId')?.setValue(event.value.id);
@@ -331,6 +286,7 @@ export class CurriculumComponent implements OnInit {
         });
     }
 
+    //Xóa
     handleDeleteItem(id: number) {
         console.log(id);
         this.confirmationService.confirm({
@@ -358,9 +314,44 @@ export class CurriculumComponent implements OnInit {
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
                 }
             });
+    }
+
+    //Phân trang
+    onPageChange(event: any) {
+        this.paging.pageIndex = event.page + 1;
+        this.paging.pageSize = event.rows;
+
+        this.route.queryParams.subscribe((params) => {
+            const request = {
+                ...params,
+                pageIndex: event.page + 1,
+                pageSize: event.rows,
+            };
+
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: request,
+                queryParamsHandling: 'merge',
+            });
+        });
+    }
+
+    public handleSearchCurriculum() {
+        this.route.queryParams.subscribe((params) => {
+            const request = {
+                ...params,
+                keyWord: this.queryParameters.keyWord
+                    ? this.queryParameters.keyWord
+                    : '',
+            };
+
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: request,
+                queryParamsHandling: 'merge',
+            });
+        });
     }
 }

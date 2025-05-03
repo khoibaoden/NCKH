@@ -32,7 +32,6 @@ export class IntellecturealPropertyComponent implements OnInit {
     updateIntellecturealForm: FormGroup;
     totalRecordsCount: any = 0;
     intellecturalPropertyId: any;
-
     visibleUpdateIntellectureal: boolean = false;
     membersList = [
         { name: 'Nguyễn Văn A', id: 1 },
@@ -75,6 +74,7 @@ export class IntellecturealPropertyComponent implements OnInit {
             note: [''],
         });
     }
+
     public config: any = {
         paging: pagingConfig.default,
         baseUrl: systemConfig.baseFileSystemUrl,
@@ -98,6 +98,7 @@ export class IntellecturealPropertyComponent implements OnInit {
         totalRecords: 0,
         totalPages: 0,
     };
+
     IntellecturealProperty: any;
     public selectedclass: any = [];
 
@@ -110,7 +111,7 @@ export class IntellecturealPropertyComponent implements OnInit {
     visibleIntellectureal: boolean = false;
 
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Danh sách sở hữu trí tuệ' }];
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -145,8 +146,6 @@ export class IntellecturealPropertyComponent implements OnInit {
             .subscribe((result: any) => {
                 if (result.status) {
                     this.intellectualPropertyLevels = result.data.items;
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
                 }
             });
     }
@@ -157,8 +156,6 @@ export class IntellecturealPropertyComponent implements OnInit {
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
                 }
             });
     }
@@ -168,8 +165,6 @@ export class IntellecturealPropertyComponent implements OnInit {
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
-                    const { items, ...paging } = result.data;
-                    this.paging = paging;
                 }
             });
     }
@@ -347,8 +342,6 @@ export class IntellecturealPropertyComponent implements OnInit {
         this.userService.getPaging({}).subscribe((result: any) => {
             if (result.status) {
                 this.users = result.data.items;
-                const { items, ...paging } = result.data;
-                this.paging = paging;
             }
         });
     }
@@ -430,9 +423,6 @@ export class IntellecturealPropertyComponent implements OnInit {
             .getById({ id: item.id })
             .subscribe((result: any) => {
                 if (result.status) {
-                    console.log(result.data.user.id);
-                    console.log(this.canbos);
-                    console.log(this.intellectualPropertyLevels);
                     this.intellecturalPropertyId = item.id;
                     this.updateIntellecturealForm = this.formBuilder.group({
                         userId: [result.data.user.id, [Validators.required]],

@@ -2,8 +2,7 @@ export enum PermissionConstant {
     // Master Permissions
     Admin = 'admin',
     Master = 'master',
-    Student = 'student',
-    AcademicAdvisor = 'academicadvisor ',
+    Teacher = 'teacher',
 
     // Human Resources Information
 

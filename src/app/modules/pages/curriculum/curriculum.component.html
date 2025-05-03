@@ -24,7 +24,6 @@
                 [value]="curriculums"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-striped"
-                [paginator]="false"
                 [rowHover]="true"
             >
                 <ng-template pTemplate="caption">
@@ -35,15 +34,15 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
+                                >Tìm kiếm theo tên sách:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
+                                    [(ngModel)]="queryParameters.keyWord"
+                                    placeholder="Tìm theo tên sách"
                                     style="width: 350px"
                                     class="sm:"
                                 />
@@ -53,23 +52,21 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
+                                >Tác giả:</label
                             >
-                            <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
-                                [(ngModel)]="deadlineRange"
-                                selectionMode="range"
-                                [showIcon]="true"
-                                [showClearButton]="true"
-                                (onBlur)="blurDateRange()"
-                                [dateFormat]="this.formatdate"
-                            ></p-calendar>
+                            <p-autoComplete
+                                [(ngModel)]="selectedAuthor"
+                                [suggestions]="authorsList"
+                                field="name"
+                                placeholder="Nhập tên tác giả"
+                                (completeMethod)="handleSearchAuthor($event)"
+                            />
                         </div>
                         <button
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="handleSearchCurriculum()"
                         ></button>
                     </div>
                 </ng-template>
@@ -90,7 +87,7 @@
                         <td>{{ i + 1 }}</td>
                         <td>{{ book.name }}</td>
                         <td>{{ book.publishYear | date : "yyyy" }}</td>
-                        <td>{{ book.isAuthor ? "Có" : "Không" }}</td>
+                        <td>{{ book.authorName }}</td>
                         <td>{{ book.memberNumber }}</td>
                         <td>{{ book.publishingHouse }}</td>
                         <td>{{ book.note }}</td>
@@ -117,6 +114,7 @@
                     </tr>
                 </ng-template>
             </p-table>
+
             <div
                 class="flex align-items-center mt-3"
                 style="justify-content: space-between"

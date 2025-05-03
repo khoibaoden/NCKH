@@ -19,7 +19,6 @@ export class AppMenuComponent implements OnInit {
     ) {
         this.authService.userCurrent.subscribe((user) => {
             this.userCurrent = user;
-            // console.log(this.userCurrent);
         });
     }
 
@@ -92,40 +91,40 @@ export class AppMenuComponent implements OnInit {
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Đề tài nghiên cứu',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/science-project'],
-                              },
-                          ]
-                        : []),
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Teacher,
+                    // ])
+                    // ? [
+                    {
+                        label: 'Đề tài nghiên cứu',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/science-project'],
+                    },
+                    //   ]
+                    // : []),
+                ],
+            },
+            {
+                label: '',
+                items: [
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Admin,
+                    // ])
+                    //     ? [
+                    {
+                        label: 'Quản lý chức danh',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/staff-position'],
+                    },
+                    //   ]
+                    // : []),
                 ],
             },
             {
                 label: '',
                 items: [
                     ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý chức danh',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/staff-position'],
-                              },
-                          ]
-                        : []),
-                ],
-            },
-            {
-                label: '',
-                items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
+                        PermissionConstant.Teacher,
                     ])
                         ? [
                               {
@@ -140,49 +139,49 @@ export class AppMenuComponent implements OnInit {
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý viết sách',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/curriculum'],
-                              },
-                          ]
-                        : []),
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Teacher,
+                    // ])
+                    //     ? [
+                    {
+                        label: 'Quản lý viết sách',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/curriculum'],
+                    },
+                    //   ]
+                    // : []),
                 ],
             },
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý sở hữu trí tuệ',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/intellectureal-property'],
-                              },
-                          ]
-                        : []),
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Teacher,
+                    // ])
+                    //     ? [
+                    {
+                        label: 'Quản lý sở hữu trí tuệ',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/intellectureal-property'],
+                    },
+                    //   ]
+                    // : []),
                 ],
             },
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Tài khoản',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/account'],
-                              },
-                          ]
-                        : []),
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Admin,
+                    // ])
+                    //     ? [
+                    {
+                        label: 'Tài khoản',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/account'],
+                    },
+                    //   ]
+                    // : []),
                 ],
             },
         ];

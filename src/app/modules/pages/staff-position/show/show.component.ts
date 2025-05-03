@@ -24,7 +24,6 @@ export class ShowComponent implements OnInit {
     code: string = '';
     addDialogVisible: boolean = false;
     submitted: boolean = false;
-
     newPosition: any = {
         positionCode: '',
         positionName: '',
@@ -67,6 +66,7 @@ export class ShowComponent implements OnInit {
         ...this.config.paging,
         status: 0,
         keyWord: '',
+        staffPositionName: '',
     };
 
     ngOnInit() {
@@ -81,6 +81,7 @@ export class ShowComponent implements OnInit {
                     ? Number(params['pageSize'])
                     : this.config.paging.pageSize,
                 keyWord: params['keyWord'] || null,
+                staffPositionName: params['staffPositionName'] || null,
             };
             this.queryParameters = { ...request };
             this.getPositions(request);
@@ -188,24 +189,24 @@ export class ShowComponent implements OnInit {
     }
 
     public getPositions(request: any): any {
-        console.log('Request params:', request);
         this.StafffPositionService.getPaging(request).subscribe(
             (result: any) => {
-                console.log('API response:', result);
                 if (result.status) {
-                    if (request.pageIndex !== 1 && result.data.items.length === 0) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
                         this.router.navigate([], {
                             relativeTo: this.route,
                             queryParams: { ...request, pageIndex: 1 },
                             queryParamsHandling: 'merge',
                         });
-                        return;
                     }
-                    
+
                     // Chỉ hiển thị các items được trả về từ API cho trang hiện tại
                     this.positions = result.data.items;
                     this.filteredPositions = [...this.positions];
-    
+
                     const { items, ...paging } = result.data;
                     this.paging = {
                         ...this.paging,
@@ -213,12 +214,10 @@ export class ShowComponent implements OnInit {
                         pageIndex: request.pageIndex,
                         pageSize: request.pageSize,
                     };
-    
                     this.selectedPositions = [];
-                    console.log('Final positions list:', this.positions);
-                    console.log('Paging info:', this.paging);
                 }
             },
+
             (error) => {
                 console.error('Error fetching positions:', error);
             }
@@ -329,13 +328,13 @@ export class ShowComponent implements OnInit {
         // Lưu lại các giá trị pageIndex và pageSize hiện tại để so sánh
         const currentPageIndex = this.paging.pageIndex;
         const currentPageSize = this.paging.pageSize;
-        
+
         // Phần tử đầu tiên hiện đang hiển thị (1-based index)
         const currentFirstItem = (currentPageIndex - 1) * currentPageSize + 1;
-        
+
         // Cập nhật giá trị mới từ sự kiện
         this.paging.pageSize = event.rows;
-        
+
         // Tính toán trang mới dựa trên phần tử đầu tiên đang hiển thị
         if (event.rows === 25 && currentFirstItem <= 10) {
             // Nếu chọn pageSize là 25 và đang xem các phần tử từ 1-10
@@ -346,16 +345,18 @@ export class ShowComponent implements OnInit {
             this.paging.pageIndex = event.page + 1;
         } else {
             // Tính trang mới dựa trên phần tử đầu tiên đang hiển thị
-            this.paging.pageIndex = Math.ceil(currentFirstItem / this.paging.pageSize);
+            this.paging.pageIndex = Math.ceil(
+                currentFirstItem / this.paging.pageSize
+            );
         }
-        
+
         const request = {
             ...this.queryParameters,
             pageIndex: this.paging.pageIndex,
             pageSize: this.paging.pageSize,
             keyWord: this.code || null,
         };
-    
+
         this.router.navigate([], {
             relativeTo: this.route,
             queryParams: request,
@@ -411,5 +412,29 @@ export class ShowComponent implements OnInit {
 
     public isSelected(id: number): boolean {
         return this.selectedPositions.includes(id);
+    }
+
+    public handleSearchStaffPosition() {
+        this.route.queryParams.subscribe((params) => {
+            const request = {
+                ...params,
+                // status: this.queryParameters.status
+                //     ? this.queryParameters.status
+                //     : null,
+                keyWord: this.queryParameters.keyWord
+                    ? this.queryParameters.keyWord
+                    : null,
+
+                staffPositionName: this.queryParameters.staffPositionName
+                    ? this.queryParameters.staffPositionName
+                    : null,
+            };
+
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: request,
+                queryParamsHandling: 'merge',
+            });
+        });
     }
 }

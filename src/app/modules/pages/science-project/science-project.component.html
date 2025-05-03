@@ -2,7 +2,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Đề tài nghiên cứu khoa học</h3>
+                <h3>Đề tài nghiên cứu</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -35,15 +35,15 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
+                                >Tìm kiếm theo tên sách:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
+                                    [(ngModel)]="topicName"
+                                    placeholder="Tìm theo tên sách"
                                     style="width: 350px"
                                     class="sm:"
                                 />
@@ -53,36 +53,40 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
+                                >Tác giả:</label
                             >
-                            <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
-                                [(ngModel)]="deadlineRange"
-                                selectionMode="range"
-                                [showIcon]="true"
-                                [showClearButton]="true"
-                                (onBlur)="blurDateRange()"
-                                [dateFormat]="this.formatdate"
-                            ></p-calendar>
+                            <!-- <input
+                                type="text"
+                                pInputText
+                                [(ngModel)]="codeSelected"
+                            /> -->
+                            <p-autoComplete
+                                [(ngModel)]="selectedAuthor"
+                                [suggestions]="authorsList"
+                                field="name"
+                                placeholder="Nhập tên tác giả"
+                                (completeMethod)="handleSearchAuthor($event)"
+                            />
                         </div>
                         <button
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="handleFilterScienceProject()"
                         ></button>
                     </div>
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 10%">Mã số</th>
-                        <th style="width: 15%">Tên đề tài</th>
-                        <th style="width: 15%">Chủ nhiệm đề tài</th>
-                        <th style="width: 10%">Số thành viên</th>
-                        <th style="width: 15%">Thời gian thực hiện</th>
-                        <th style="width: 10%">Giờ định mức</th>
-                        <th style="width: 25%">Ghi chú</th>
-                        <th style="width: 25%">Thao tác</th>
+                        <th>Mã số</th>
+                        <th>Tên đề tài</th>
+                        <th>Chủ nhiệm đề tài</th>
+                        <th>Số thành viên</th>
+                        <th style="width: 15%">Tác giả thực hiện</th>
+                        <th>Thời gian thực hiện</th>
+                        <th>Giờ định mức</th>
+                        <th>Ghi chú</th>
+                        <th style="text-align: center">Thao tác</th>
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="body" let-project>
@@ -91,15 +95,16 @@
                         <td>{{ project.projectName }}</td>
                         <td>{{ project?.projectManager?.name }}</td>
                         <td>{{ project.memberCount }}</td>
+                        <td>{{ project.authorScienceProjects }}</td>
                         <td>
-                            {{ project.startYear | date : "yyyy" }} -
-                            {{ project.endYear | date : "yyyy" }}
+                            {{ project.startYear | date : "dd/MM/yyyy" }} -
+                            {{ project.endYear | date : "dd/MM/yyyy" }}
                         </td>
                         <td>{{ project.workHoursPerProject }}</td>
                         <td>
                             <span class="truncate-2">{{ project.notes }}</span>
                         </td>
-                        <td style="width: 12%">
+                        <td style="text-align: center">
                             <div class="flex gap-2 justify-content-center">
                                 <button
                                     pButton

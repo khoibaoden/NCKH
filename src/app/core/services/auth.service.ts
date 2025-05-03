@@ -2,14 +2,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { HttpLoadingService } from '../../https/http-loading.service';
-import { LocalStorageService } from '../local-storage.service';
-import { HttpService } from '../http.service';
-import { UserCurrent } from '../../models/identity/user-current.interface';
-import { AuthToken } from '../../models/identity/auth-token.interface';
-import { LocalStorage } from '../../enums/local-storage.enum';
-import { ApiResult } from '../../models/identity/api-result.interface';
-import { RefreshTokenRequest } from '../../models/identity/refresh-token-request.interface';
+import { AuthToken } from '../models/identity/auth-token.interface';
+import { ApiResult } from '../models/identity/api-result.interface';
+import { UserCurrent } from '../models/identity/user-current.interface';
+import { LocalStorage } from '../enums/local-storage.enum';
+import { HttpService } from './http.service';
+import { RefreshTokenRequest } from '../models/identity/refresh-token-request.interface';
+import { LocalStorageService } from './local-storage.service';
+import { HttpLoadingService } from '../https/http-loading.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,16 +20,12 @@ export class AuthService {
         private httpLd: HttpLoadingService,
         private localStorageService: LocalStorageService,
         private httpService: HttpService
-    ) {
-        // const savedUser = localStorage.getItem('user');
-        // if (savedUser) {
-        //     this.currentUserSubject.next(JSON.parse(savedUser));
-        // }
-    }
+    ) {}
 
     public url = environment.url;
     isLoggedIn(): boolean {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
+
         if (token) {
             return true;
         }
@@ -39,7 +35,7 @@ export class AuthService {
     // tny add
     login(request: any): Observable<any> {
         return this.httpLd
-            .post(`auth/login-by-username`, request)
+            .post('auth/login-by-username', request)
             .pipe(catchError(this.handleError));
     }
 
@@ -55,6 +51,7 @@ export class AuthService {
     public userCurrent = this.currentUserSubject.asObservable();
 
     getUserCurrent() {
+        console.log(this.currentUserSubject.value);
         return this.currentUserSubject.value;
     }
 

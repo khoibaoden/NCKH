@@ -22,10 +22,11 @@ import { ScienceProjectLevelService } from 'src/app/core/services/science-projec
     providers: [MessageService, ConfirmationService],
 })
 export class ScienceProjectComponent implements OnInit {
-    // items: any[] = [];
-    // constructor() {}
+    topicName: any;
+    codeSelected: any;
+    authorsList: any;
+    selectedAuthor: any;
 
-    // ngOnInit() {}
     visibleScienceProject: boolean = false;
     visibleUpdateScienceProject: boolean = false;
     createScienceProjectForm: FormGroup;
@@ -128,10 +129,11 @@ export class ScienceProjectComponent implements OnInit {
         ...this.config.paging,
         status: 0,
         keyWord: '',
+        codeName: '',
     };
 
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Đề tài nghiên cứu' }];
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -154,6 +156,7 @@ export class ScienceProjectComponent implements OnInit {
             this.loadProjectLeaders();
             this.loadScienceProjectLevel();
         });
+        this.loadAuthors();
     }
 
     loadProjectLeaders() {
@@ -205,8 +208,17 @@ export class ScienceProjectComponent implements OnInit {
                             });
                         });
                     }
-
                     this.scienceProjects = result.data.items;
+                    this.scienceProjects = this.scienceProjects.map(
+                        (item: any) => ({
+                            ...item,
+                            authorScienceProjects: item.authorScienceProjects
+                                .map((item2) => item2.user.name)
+                                .join(', '),
+                        })
+                    );
+
+                    console.log(this.scienceProjects);
 
                     if (this.scienceProjects.length === 0) {
                         this.paging.pageIndex = 1;
@@ -281,7 +293,6 @@ export class ScienceProjectComponent implements OnInit {
             });
         });
     }
-
     formatUsersUpdate(data: any): [] {
         return data.map((item) => ({
             id: item.user.id,
@@ -436,5 +447,33 @@ export class ScienceProjectComponent implements OnInit {
             id: item.userId,
             name: item.user.name,
         }));
+    }
+
+    loadAuthors() {}
+
+    handleSearchAuthor(event: any) {
+        console.log(event.query);
+        this.userService
+            .getPaging({ name: event.query })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.authorsList = result.data.items;
+                    console.log(this.authorsList);
+                    // this.authorsList = this.authorsList.map((item: any) => ({
+                    //     id: item.id,
+                    //     name: item.name,
+                    // }));
+                }
+            });
+    }
+
+    handleFilterScienceProject() {
+        const payload = {
+            KeyWord: this.topicName,
+            AuthorIds: this.selectedAuthor
+                ? [this.selectedAuthor].map((author) => author?.id)
+                : null,
+        };
+        this.getScience(payload);
     }
 }

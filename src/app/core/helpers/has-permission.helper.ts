@@ -7,7 +7,6 @@ import { PermissionConstant } from '../constants/permission-constant';
 })
 export class HasPermissionHelper {
     constructor(private authService: AuthService) {}
-
     hasPermissions(permissions: string[]): boolean {
         const userPermissions =
             this.authService.getUserCurrent()?.roleNames || [];
@@ -15,7 +14,6 @@ export class HasPermissionHelper {
             userPermissions.includes(PermissionConstant.Admin) ||
             userPermissions.includes(PermissionConstant.Master)
         ) {
-            console.log('Admin or Master');
             return true;
         }
         return permissions.every(

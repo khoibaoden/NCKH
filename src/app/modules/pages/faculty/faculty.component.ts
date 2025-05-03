@@ -104,7 +104,6 @@ export class FacultyComponent implements OnInit {
 
                 const { items, ...paging } = result.data;
                 this.paging = paging;
-
                 this.selectedclass = [];
             }
         });

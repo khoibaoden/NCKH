@@ -14,7 +14,7 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Thêm"
+                    label="Thêm mới"
                     (click)="openAddDialog()"
                 ></button>
             </ng-template>
@@ -36,55 +36,49 @@
                     <div
                         class="flex flex-column gap-3 align-items-end md:flex-row md:"
                     >
-                        <div
-                            class="flex flex-column"
-                            style="margin-left: -12px"
-                        >
+                        <div class="flex flex-column">
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo mã chức danh:</label
+                                >Tìm kiếm theo mã:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
+                                    [(ngModel)]="queryParameters.keyWord"
                                     placeholder="Tìm theo mã"
-                                    style="width: 350px"
-                                    class="sm:"
+                                    style="width: 190px"
                                 />
                             </span>
                         </div>
 
-                        <div
-                            class="flex flex-column"
-                            style="margin-left: -12px"
-                        >
+                        <div class="flex flex-column">
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo tên chức danh:</label
+                                >Tìm kiếm theo tên:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
+                                    [(ngModel)]="
+                                        queryParameters.staffPositionName
+                                    "
                                     placeholder="Tìm theo tên chức danh"
-                                    style="width: 350px"
+                                    style="width: 250px"
                                     class="sm:"
                                 />
                             </span>
                         </div>
-
                         <button
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="handleSearchStaffPosition()"
                         ></button>
                     </div>
                 </ng-template>
@@ -111,23 +105,20 @@
                         <th class="text-center" style="width: 15%">Thao tác</th>
                     </tr>
                 </ng-template>
-                <!-- Body của bảng -->
                 <ng-template pTemplate="body" let-item let-i="rowIndex">
                     <tr>
                         <td style="width: 10%" class="text-center">
-                            {{ ((paging.pageIndex || 1) - 1) * (paging.pageSize || 10) + i + 1 }}
+                            {{ i + 1 }}
                         </td>
                         <td style="width: 25%" class="text-center">
-                            {{ item.positionCode || "Chưa có thông tin" }}
+                            {{ item.positionCode }}
                         </td>
                         <td
                             style="width: 50%"
                             class="truncate-text text-center"
-                            title="{{
-                                item.positionName || 'Chưa có thông tin'
-                            }}"
+                            title="{{ item.positionName }}"
                         >
-                            {{ item.positionName || "Chưa có thông tin" }}
+                            {{ item.positionName }}
                         </td>
                         <td style="width: 15%">
                             <div class="flex gap-2 justify-content-center">
@@ -181,6 +172,8 @@
                 type="text"
                 pInputText
                 id="positionCode"
+                placeholder="Nhập mã chức danh"
+                [(ngModel)]="selectedPosition.positionCode"
                 [(ngModel)]="editingPosition.positionCode"
                 autofocus
             />
@@ -193,6 +186,8 @@
                 type="text"
                 pInputText
                 id="positionName"
+                placeholder="Nhập tên chức danh"
+                [(ngModel)]="selectedPosition.positionName"
                 [(ngModel)]="editingPosition.positionName"
                 required
             />
@@ -241,6 +236,7 @@
                 type="text"
                 pInputText
                 id="positionCode"
+                placeholder="Nhập mã chức danh"
                 [(ngModel)]="newPosition.positionCode"
                 autofocus
             />
@@ -253,6 +249,7 @@
                 type="text"
                 pInputText
                 id="positionName"
+                placeholder="Nhập tên chức danh"
                 [(ngModel)]="newPosition.positionName"
                 required
             />
@@ -265,20 +262,17 @@
     </ng-template>
 
     <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
-            label="Hủy"
+        <p-button
+            label="Thoát"
+            [outline]="false"
             icon="pi pi-times"
-            class="p-button-text"
             (click)="addDialogVisible = false; submitted = false"
-        ></button>
+        ></p-button>
         <button
             pButton
             pRipple
             label="Thêm"
             icon="pi pi-check"
-            class="p-button-text"
             (click)="saveNewPosition()"
         ></button>
     </ng-template>

@@ -51,7 +51,7 @@ export class StatisticComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
+        this.items = [{ label: 'Thống kê' }];
         this.getStatistic(this.queryParameters);
     }
 
@@ -77,18 +77,8 @@ export class StatisticComponent implements OnInit {
                             });
                         });
                     }
-                    this.statistics = result.data;
-                    // this.classes = this.classes.map(
-                    //     (class: any) => ({
-                    //         ...class,
-                    //         status:
-                    //             this.constant.class.status.find(
-                    //                 (status: any) =>
-                    //                     status.value === class.status
-                    //             )?.label ?? '',
-                    //     })
-                    // );
 
+                    this.statistics = result.data;
                     if (this.statistics.length === 0) {
                         this.paging.pageIndex = 1;
                     }
