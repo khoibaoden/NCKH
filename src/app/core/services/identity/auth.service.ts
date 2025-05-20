@@ -17,8 +17,8 @@ import { RefreshTokenRequest } from '../../models/identity/refresh-token-request
 export class AuthService {
     constructor(
         private http: HttpClient,
-        private httpLd: HttpLoadingService,
         private localStorageService: LocalStorageService,
+        private httpLd: HttpLoadingService,
         private httpService: HttpService
     ) {
         // const savedUser = localStorage.getItem('user');
@@ -43,17 +43,13 @@ export class AuthService {
             .pipe(catchError(this.handleError));
     }
 
-    //lấy ng dùng hiện tại
-    getUserInfo(): Observable<UserCurrent | null> {
-        return this.userCurrent;
-    }
-
     private isInitAuthSubject: BehaviorSubject<boolean> =
         new BehaviorSubject<boolean>(false);
     isInitAuth$: Observable<boolean> = this.isInitAuthSubject.asObservable();
     private currentUserSubject = new BehaviorSubject<any>(null);
     public userCurrent = this.currentUserSubject.asObservable();
 
+    //lấy ng dùng hiện tại
     getUserCurrent() {
         return this.currentUserSubject.value;
     }
@@ -71,11 +67,10 @@ export class AuthService {
     }
 
     setAuthTokenLocalStorage(authToken: AuthToken | null) {
-        // console.log("sét thành công:   "+JSON.stringify(authToken));
-        // this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
-        setTimeout(() => {
-            this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
-        }, 300);
+        // setTimeout(() => {
+        //     this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
+        // }, 300);
+        this.localStorageService.setItem(LocalStorage.AuthToken, authToken);
     }
 
     getUserCurrentApi(): Observable<ApiResult<UserCurrent>> {

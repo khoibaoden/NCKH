@@ -5,7 +5,7 @@
     <div class="col-12">
         <p-toolbar styleClass="mb-2">
             <div class="">
-                <h3>Danh sách seminar</h3>
+                <h3>Danh sách hội thảo</h3>
                 <p-breadcrumb
                     [model]="items"
                     [home]="{ icon: 'pi pi-home' }"
@@ -16,7 +16,7 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Thêm"
+                    label="Thêm mới"
                     (click)="openAddDialog()"
                 ></button>
             </ng-template>
@@ -24,15 +24,9 @@
         <div class="card">
             <p-table
                 #dt
-                [value]="filteredSeminars"
+                [value]="seminars"
                 responsiveLayout="scroll"
                 styleClass="p-datatable-gridlines p-datatable-striped"
-                [paginator]="true"
-                [rows]="paging.pageSize"
-                [totalRecords]="paging.totalRecords"
-                [rowsPerPageOptions]="config.pageSizeOptions"
-                (onPage)="onPageChange($event)"
-                [rowHover]="true"
             >
                 <ng-template pTemplate="caption">
                     <div
@@ -45,15 +39,15 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
+                                >Tìm kiếm theo tên:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
+                                    [(ngModel)]="keyWord"
+                                    placeholder="Nhập tên hội thảo"
                                     style="width: 350px"
                                     class="sm:"
                                 />
@@ -63,12 +57,11 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Ngày tạo:</label
+                                >Ngày tổ chức:</label
                             >
                             <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
+                                placeholder="Chọn ngày tổ chức"
                                 [(ngModel)]="deadlineRange"
-                                selectionMode="range"
                                 [showIcon]="true"
                                 [showClearButton]="true"
                                 (onBlur)="blurDateRange()"
@@ -79,36 +72,22 @@
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="applyFilter()"
                         ></button>
                     </div>
                 </ng-template>
                 <!-- Header của bảng -->
                 <ng-template pTemplate="header">
                     <tr>
-                        <th
-                            class="text-center"
-                            pSortableColumn="seminarName"
-                            style="width: 18%"
-                        >
+                        <th style="width: 5%">STT</th>
+                        <th class="text-center" style="width: 18%">
                             Tên hội thảo
-                            <p-sortIcon field="seminarName"></p-sortIcon>
                         </th>
-                        <th
-                            class="text-center"
-                            pSortableColumn="user.name"
-                            style="width: 18%"
-                        >
+                        <th class="text-center" style="width: 18%">
                             Người tạo
-                            <p-sortIcon field="user.name"></p-sortIcon>
                         </th>
-                        <th
-                            class="text-center"
-                            pSortableColumn="date"
-                            style="width: 15%"
-                        >
+                        <th class="text-center" style="width: 15%">
                             Ngày tổ chức
-                            <p-sortIcon field="date"></p-sortIcon>
                         </th>
                         <th class="text-center" style="width: 12%">Số giờ</th>
                         <th class="text-center" style="width: 15%">Ghi chú</th>
@@ -117,8 +96,9 @@
                     </tr>
                 </ng-template>
                 <!-- Body của bảng -->
-                <ng-template pTemplate="body" let-item>
+                <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
                     <tr>
+                        <td style="text-align: center">{{ rowIndex + 1 }}</td>
                         <td style="width: 18%">
                             {{ item.seminarName || "Chưa có thông tin" }}
                         </td>
@@ -182,6 +162,42 @@
                     </tr>
                 </ng-template>
             </p-table>
+            <div
+                class="flex align-items-center mt-3"
+                style="justify-content: space-between"
+            >
+                <p>
+                    <span style="font-weight: 500">{{
+                        seminars.length > 0
+                            ? 1 + (paging.pageIndex - 1) * paging.pageSize
+                            : 0
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        seminars.length > 0
+                            ? math.min(
+                                  paging.pageIndex * paging.pageSize,
+                                  paging.totalRecords
+                              )
+                            : 0
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
+                    }}</span>
+                    bản ghi
+                </p>
+                <div *ngIf="seminars?.length > 0">
+                    <p-paginator
+                        class="custum-paging"
+                        (onPageChange)="onPageChange($event)"
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    ></p-paginator>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -230,6 +246,17 @@
             ></p-calendar>
         </div>
         <div class="field">
+            <label for="seminarLevel">Mức độ</label>
+            <p-dropdown
+                id="seminarLevel"
+                [options]="objects"
+                [(ngModel)]="editingSeminar.seminarLevel"
+                (onChange)="onEditSubjectChange($event)"
+                optionLabel="name"
+                placeholder="Chọn mức độ"
+            ></p-dropdown>
+        </div>
+        <div class="field">
             <label for="hourCalculated">Số giờ</label>
             <p-inputNumber
                 id="hourCalculated"
@@ -246,17 +273,6 @@
                 rows="3"
             ></textarea>
         </div>
-        <div class="field">
-            <label for="seminarLevel">Mức độ</label>
-            <p-dropdown
-                id="seminarLevel"
-                [options]="Bomon"
-                [(ngModel)]="selectedBomon"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Chọn mức độ"
-            ></p-dropdown>
-        </div>
     </ng-template>
 
     <ng-template pTemplate="footer">
@@ -264,27 +280,19 @@
             pButton
             pRipple
             label="Hủy"
-            icon="pi pi-times"
-            class="p-button-text"
+            class="p-button-danger"
             (click)="hideEditDialog()"
         ></button>
         <button
             pButton
             pRipple
             label="Lưu"
-            icon="pi pi-check"
-            class="p-button-text"
+            icon="pi pi-save"
+            class="p-button-primary"
             (click)="saveSeminar()"
         ></button>
     </ng-template>
 </p-dialog>
-
-<!-- Dialog xác nhận xóa -->
-<p-confirmDialog
-    [style]="{ width: '450px' }"
-    header="Xác nhận"
-    icon="pi pi-exclamation-triangle"
-></p-confirmDialog>
 
 <!-- Dialog thêm mới hội thảo -->
 <p-dialog
@@ -297,12 +305,13 @@
     <ng-template pTemplate="content">
         <div class="field">
             <label for="seminarName"
-                >Tên hội thảo <span class="text-danger">*</span></label
+                >Tên hội thảo <span class="red-strick">*</span></label
             >
             <input
                 type="text"
                 pInputText
                 id="seminarName"
+                placeholder="Nhập tên hội thảo"
                 [(ngModel)]="newSeminar.seminarName"
                 required
                 autofocus
@@ -311,7 +320,6 @@
                 >Tên hội thảo là bắt buộc</small
             >
         </div>
-
         <div class="field">
             <label for="name">Người tạo<span class="text-danger"></span></label>
             <p-dropdown
@@ -333,27 +341,32 @@
                 [showIcon]="true"
                 dateFormat="dd/mm/yy"
                 placeholder="Chọn ngày"
-                [required]="true"
             ></p-calendar>
-            <small *ngIf="submitted && !newSeminar.eventDate" class="p-error"
-                >Ngày tổ chức là bắt buộc</small
-            >
+        </div>
+        <div class="field">
+            <label for="seminarLevel"
+                >Mức độ <span class="text-danger"></span
+            ></label>
+            <p-dropdown
+                [options]="objects"
+                [(ngModel)]="newSeminar.seminarLevel"
+                optionLabel="name"
+                (onChange)="onSubjectChange($event)"
+                placeholder="Chọn bộ môn"
+                appendTo="body"
+            />
         </div>
         <div class="field">
             <label for="hourCalculated"
                 >Số giờ <span class="text-danger"></span
             ></label>
-            <p-inputNumber
-                id="hourCalculated"
+            <input
+                type="text"
+                pInputText
+                placeholder="Số giờ"
+                [disabled]="true"
                 [(ngModel)]="newSeminar.hourCalculated"
-                [min]="0"
-                [required]="true"
-            ></p-inputNumber>
-            <small
-                *ngIf="submitted && newSeminar.hourCalculated === null"
-                class="p-error"
-                >Số giờ là bắt buộc</small
-            >
+            />
         </div>
         <div class="field">
             <label for="note">Ghi chú</label>
@@ -364,40 +377,35 @@
                 rows="3"
             ></textarea>
         </div>
-        <div class="field">
-            <label for="seminarLevel"
-                >Mức độ <span class="text-danger"></span
-            ></label>
-            <p-dropdown
-                [options]="bomon"
-                [(ngModel)]="selectedBomon"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Chọn bộ môn"
-                appendTo="body"
-            />
-        </div>
     </ng-template>
 
     <ng-template pTemplate="footer">
         <button
             pButton
+            type="button"
             pRipple
             label="Hủy"
-            icon="pi pi-times"
-            class="p-button-text"
+            class="p-button-secondary"
             (click)="addDialogVisible = false; submitted = false"
         ></button>
         <button
             pButton
+            type="button"
             pRipple
-            label="Thêm"
-            icon="pi pi-check"
-            class="p-button-text"
+            label="Thêm mới"
+            icon="pi pi-plus"
+            class="p-button-primary"
             (click)="saveNewSeminar()"
         ></button>
     </ng-template>
 </p-dialog>
+
+<!-- Dialog xác nhận xóa -->
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
 
 <!-- Thông báo Toast -->
 <p-toast></p-toast>

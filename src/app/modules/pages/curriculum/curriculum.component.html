@@ -23,6 +23,8 @@
                 #dt
                 [value]="curriculums"
                 responsiveLayout="scroll"
+                [scrollable]="true"
+                [tableStyle]="{ 'min-width': '1700px' }"
                 styleClass="p-datatable-striped"
                 [rowHover]="true"
             >
@@ -43,7 +45,7 @@
                                     type="text"
                                     [(ngModel)]="queryParameters.keyWord"
                                     placeholder="Tìm theo tên sách"
-                                    style="width: 350px"
+                                    style="width: 300px"
                                     class="sm:"
                                 />
                             </span>
@@ -52,14 +54,15 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tác giả:</label
+                                >Tên tác giả:</label
                             >
-                            <p-autoComplete
-                                [(ngModel)]="selectedAuthor"
-                                [suggestions]="authorsList"
-                                field="name"
-                                placeholder="Nhập tên tác giả"
-                                (completeMethod)="handleSearchAuthor($event)"
+                            <input
+                                pInputText
+                                type="text"
+                                [(ngModel)]="queryParameters.authorName"
+                                placeholder="Tìm theo tên tác giả"
+                                style="width: 300px"
+                                class="sm:"
                             />
                         </div>
                         <button
@@ -72,26 +75,65 @@
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th>STT</th>
-                        <th>Tên sách</th>
-                        <th>Năm xuất bản</th>
-                        <th>Tác giả chủ biên</th>
-                        <th>Số lượng tác giả</th>
-                        <th>Nhà xuất bản</th>
-                        <th>Ghi chú</th>
-                        <th>Hành động</th>
+                        <th style="width: 40px; text-align: center">STT</th>
+                        <th style="min-width: 150px">Tác giả chủ biên</th>
+                        <th style="min-width: 200px">Tên sách</th>
+                        <th style="width: 100px; text-align: center">
+                            Chủ biên
+                        </th>
+                        <th style="width: 120px; text-align: center">
+                            Tham gia viết
+                        </th>
+                        <th style="width: 100px; text-align: center">
+                            Phân loại
+                        </th>
+                        <th style="width: 140px; text-align: center">
+                            Định mức
+                        </th>
+                        <th style="width: 100px; text-align: center">
+                            Giờ tính
+                        </th>
+                        <th style="width: 120px; text-align: center">Năm XB</th>
+                        <th style="width: 100px; text-align: center">
+                            SL tác giả
+                        </th>
+                        <th style="min-width: 150px">NXB</th>
+                        <th style="min-width: 150px">Ghi chú</th>
+                        <th style="width: 100px; text-align: center">
+                            Hành động
+                        </th>
                     </tr>
                 </ng-template>
+
                 <ng-template pTemplate="body" let-book let-i="rowIndex">
                     <tr>
-                        <td>{{ i + 1 }}</td>
-                        <td>{{ book.name }}</td>
-                        <td>{{ book.publishYear | date : "yyyy" }}</td>
+                        <td style="text-align: center">{{ i + 1 }}</td>
                         <td>{{ book.authorName }}</td>
-                        <td>{{ book.memberNumber }}</td>
+                        <td>{{ book.name }}</td>
+                        <td style="text-align: center">
+                            {{ book.isAuthor ? "x" : "" }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.isAuthorWrite ? "x" : "" }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.curriculumLevelName }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.workHoursPerProject }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.hoursCalculated }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.publishYear | date : "yyyy" }}
+                        </td>
+                        <td style="text-align: center">
+                            {{ book.memberNumber }}
+                        </td>
                         <td>{{ book.publishingHouse }}</td>
                         <td>{{ book.note }}</td>
-                        <td class="flex gap-2">
+                        <td class="flex gap-2 justify-center">
                             <button
                                 pButton
                                 pRipple
@@ -238,6 +280,7 @@
                         [options]="curriculumLevels"
                         optionLabel="key"
                         optionValue="id"
+                        (onChange)="onCurriculumLevelChange($event)"
                         placeholder="Chọn cấp giáo trình"
                     >
                     </p-dropdown>
@@ -257,18 +300,6 @@
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="hoursCalculated">Số giờ được tính</label>
-                    <input
-                        type="number"
-                        id="hoursCalculated"
-                        pInputText
-                        formControlName="hoursCalculated"
-                        step="0.1"
-                        placeholder="Nhập số giờ được tính"
-                    />
-                </div>
-
-                <div class="field col mb-0">
                     <label for="note">Ghi chú</label>
                     <textarea
                         rows="3"
@@ -280,17 +311,19 @@
                 </div>
             </div>
             <div class="p-formgrid grid">
-                <div class="field col mb-0">
+                <div class="field col flex gap-2">
                     <label for="isAuthorWrite">Chủ biên tham gia viết</label>
                     <p-checkbox
                         binary="true"
+                        class="ml-2"
                         formControlName="isAuthorWrite"
                         inputId="isAuthorWrite"
                     ></p-checkbox>
                 </div>
-                <div class="field col mb-0">
+                <div class="field col flex gap-2">
                     <label for="isAuthor">Tác giả chủ biên</label>
                     <p-checkbox
+                        class="ml-2"
                         binary="true"
                         formControlName="isAuthor"
                         inputId="isAuthor"
@@ -391,12 +424,16 @@
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
                     <label for="curriculumLevelId">Cấp giáo trình</label>
-                    <input
-                        type="number"
+                    <p-dropdown
                         id="curriculumLevelId"
-                        pInputText
                         formControlName="curriculumLevelId"
-                    />
+                        [options]="curriculumLevels"
+                        optionLabel="key"
+                        optionValue="id"
+                        (onChange)="onEditCurriculumLevelChange($event)"
+                        placeholder="Chọn cấp giáo trình"
+                    >
+                    </p-dropdown>
                 </div>
 
                 <div class="field col mb-0">
@@ -412,17 +449,6 @@
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
-                    <label for="hoursCalculated">Số giờ được tính</label>
-                    <input
-                        type="number"
-                        id="hoursCalculated"
-                        pInputText
-                        formControlName="hoursCalculated"
-                        step="0.1"
-                    />
-                </div>
-
-                <div class="field col mb-0">
                     <label for="note">Ghi chú</label>
                     <textarea
                         rows="3"
@@ -433,21 +459,25 @@
                 </div>
             </div>
             <div class="p-formgrid grid">
-                <div class="field col mb-0">
+                <div class="field col mb-0 flex">
                     <label for="isAuthorWrite">Chủ biên tham gia viết</label>
-                    <p-checkbox
-                        binary="true"
-                        formControlName="isAuthorWrite"
-                        inputId="isAuthorWrite"
-                    ></p-checkbox>
+                    <div class="ml-2">
+                        <p-checkbox
+                            binary="true"
+                            formControlName="isAuthorWrite"
+                            inputId="isAuthorWrite"
+                        ></p-checkbox>
+                    </div>
                 </div>
-                <div class="field col mb-0">
+                <div class="field col mb-0 flex">
                     <label for="isAuthor">Tác giả chủ biên</label>
-                    <p-checkbox
-                        binary="true"
-                        formControlName="isAuthor"
-                        inputId="isAuthor"
-                    ></p-checkbox>
+                    <div class="ml-2">
+                        <p-checkbox
+                            binary="true"
+                            formControlName="isAuthor"
+                            inputId="isAuthor"
+                        ></p-checkbox>
+                    </div>
                 </div>
             </div>
         </div>
@@ -457,7 +487,7 @@
         <p-button
             label="Hủy"
             severity="secondary"
-            (onClick)="visibleCurriculum = false"
+            (onClick)="visibleUpdateCurriculum = false"
         ></p-button>
         <p-button
             icon="pi pi-plus"

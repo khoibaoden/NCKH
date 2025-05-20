@@ -14,11 +14,19 @@ export class ScienceReportService {
         return this.http.postFormData('sciencereport/create', request);
     }
 
-    update(request: any): Observable<any> {
-        return this.http.putFormData('sciencereport/update', request);
+    update(request: any, request2: any): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'sciencereport/update',
+            request,
+            request2
+        );
     }
 
-    delete(request: any): Observable<any> {
-        return this.http.put('sciencereport/delete', request);
+    delete(request: any, request2: any): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'sciencereport/delete',
+            request,
+            request2
+        );
     }
 }

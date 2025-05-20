@@ -4,14 +4,22 @@ import { NgModule } from '@angular/core';
 import { AppLayoutComponent } from './layout/app.layout.component';
 import { AdminGuard } from './core/guards/admin.guard';
 import { NotfoundComponent } from './partials/notfound/notfound.component';
+import { AuthGuard } from './core/guards/auth.guard';
 
 @NgModule({
     imports: [
         RouterModule.forRoot(
             [
-                //Departments
+                {
+                    path: 'auth',
+                    loadChildren: () =>
+                        import('./modules/auth/auth.module').then(
+                            (m) => m.AuthModule
+                        ),
+                },
                 {
                     path: '',
+                    canActivate: [AuthGuard],
                     component: AppLayoutComponent,
                     children: [
                         {
@@ -21,13 +29,15 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/departments/departments.module'
                                 ).then((m) => m.DepartmentsModule),
                         },
-                    ],
-                },
-                //Officer
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        {
+                            path: 'student-guide',
+                            loadChildren: () =>
+                                import(
+                                    'src/app/modules/pages/student-guide/student-guide.module'
+                                ).then((m) => m.StudentGuideModule),
+                        },
+
+                        //Officer
                         {
                             path: 'officer',
                             loadChildren: () =>
@@ -35,13 +45,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/officer/officer.module'
                                 ).then((m) => m.officerModule),
                         },
-                    ],
-                },
-                //staff-position
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //staff-position
                         {
                             path: 'staff-position',
                             loadChildren: () =>
@@ -49,13 +53,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/staff-position/show/show.module'
                                 ).then((m) => m.ShowModule),
                         },
-                    ],
-                },
-                //news
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //news
                         {
                             path: 'news',
                             loadChildren: () =>
@@ -63,13 +61,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/news/news.module'
                                 ).then((m) => m.NewsModule),
                         },
-                    ],
-                },
-                //seminar
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //seminar
                         {
                             path: 'seminar',
                             loadChildren: () =>
@@ -77,14 +69,8 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/seminar/seminar.module'
                                 ).then((m) => m.SeminarModule),
                         },
-                    ],
-                },
 
-                //scientific-report
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //scientific-report
                         {
                             path: 'science-report',
                             loadChildren: () =>
@@ -92,14 +78,8 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/science-report/science-report.module'
                                 ).then((m) => m.ScienceReportModule),
                         },
-                    ],
-                },
 
-                //curriculum
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //curriculum
                         {
                             path: 'curriculum',
                             loadChildren: () =>
@@ -107,14 +87,8 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/curriculum/curriculum.module'
                                 ).then((m) => m.CurriculumModule),
                         },
-                    ],
-                },
 
-                //statistic
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //statistic
                         {
                             path: 'statistic',
                             loadChildren: () =>
@@ -122,13 +96,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/statistic/statistic.module'
                                 ).then((m) => m.StatisticModule),
                         },
-                    ],
-                },
-                //science-project
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //science-project
                         {
                             path: 'science-project',
                             loadChildren: () =>
@@ -136,14 +104,8 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/science-project/science-project.module'
                                 ).then((m) => m.ScienceProjectModule),
                         },
-                    ],
-                },
 
-                //intellectureal-property
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //intellectureal-property
                         {
                             path: 'intellectureal-property',
                             loadChildren: () =>
@@ -151,13 +113,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                                     'src/app/modules/pages/intellectureal-property/intellectureal-property.module'
                                 ).then((m) => m.IntellecturealPropertyModule),
                         },
-                    ],
-                },
-                //account
-                {
-                    path: '',
-                    component: AppLayoutComponent,
-                    children: [
+                        //account
                         {
                             path: 'account',
                             loadChildren: () =>
@@ -167,13 +123,7 @@ import { NotfoundComponent } from './partials/notfound/notfound.component';
                         },
                     ],
                 },
-                {
-                    path: 'auth',
-                    loadChildren: () =>
-                        import('./modules/auth/auth.module').then(
-                            (m) => m.AuthModule
-                        ),
-                },
+
                 { path: 'notfound', component: NotfoundComponent },
                 { path: '**', redirectTo: '/notfound' },
             ],

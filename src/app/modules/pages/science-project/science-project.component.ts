@@ -26,7 +26,7 @@ export class ScienceProjectComponent implements OnInit {
     codeSelected: any;
     authorsList: any;
     selectedAuthor: any;
-
+    authorName: any;
     visibleScienceProject: boolean = false;
     visibleUpdateScienceProject: boolean = false;
     createScienceProjectForm: FormGroup;
@@ -134,48 +134,34 @@ export class ScienceProjectComponent implements OnInit {
 
     ngOnInit() {
         this.items = [{ label: 'Đề tài nghiên cứu' }];
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: params['pageIndex']
-                    ? params['pageIndex']
-                    : this.config.paging.pageIndex,
-                pageSize: params['pageSize']
-                    ? params['pageSize']
-                    : this.config.paging.pageSize,
-            };
 
-            this.queryParameters = {
-                ...params,
-                status: params['status'] ? params['status'] : 0,
-                keyWord: params['keyWord'] ? params['keyWord'] : null,
-            };
-
-            this.getScience(request);
-            this.loadMembers();
-            this.loadProjectLeaders();
-            this.loadScienceProjectLevel();
-        });
+        this.getScience({});
+        this.loadMembers();
+        this.loadProjectLeaders();
+        this.loadScienceProjectLevel();
         this.loadAuthors();
     }
 
     loadProjectLeaders() {
-        this.userService.getPaging().subscribe((result: any) => {
-            if (result.status) {
-                this.projectLeaders = result.data.items;
-                console.log(this.projectLeaders);
-            }
-        });
+        this.userService
+            .getPaging({
+                pageSize: 1000,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.projectLeaders = result.data.items;
+                }
+            });
     }
 
     loadMembers() {
-        this.userService.getPaging().subscribe((result: any) => {
-            if (result.status) {
-                console.log(result.data.items);
-                this.members = this.formatUsers(result.data.items);
-                console.log(this.members);
-            }
-        });
+        this.userService
+            .getPaging({ pageSize: 1000 })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.members = this.formatUsers(result.data.items);
+                }
+            });
     }
 
     loadScienceProjectLevel() {
@@ -191,23 +177,6 @@ export class ScienceProjectComponent implements OnInit {
             .getPaging(request)
             .subscribe((result: any) => {
                 if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
-                        this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
-
-                            this.router.navigate([], {
-                                relativeTo: this.route,
-                                queryParams: request,
-                                queryParamsHandling: 'merge',
-                            });
-                        });
-                    }
                     this.scienceProjects = result.data.items;
                     this.scienceProjects = this.scienceProjects.map(
                         (item: any) => ({
@@ -217,8 +186,6 @@ export class ScienceProjectComponent implements OnInit {
                                 .join(', '),
                         })
                     );
-
-                    console.log(this.scienceProjects);
 
                     if (this.scienceProjects.length === 0) {
                         this.paging.pageIndex = 1;
@@ -330,7 +297,7 @@ export class ScienceProjectComponent implements OnInit {
         this.selectedMembersUpdate = this.selectedMembers.map((item: any) => ({
             userId: item.id,
         }));
-
+        console.log(this.createScienceProjectForm.value);
         this.scienceProjectService
             .create({
                 ...this.createScienceProjectForm.value,
@@ -340,6 +307,11 @@ export class ScienceProjectComponent implements OnInit {
                 projectManagerId:
                     this.createScienceProjectForm.value.projectLeader,
                 authorScienceProjects: authorScienceProjects,
+                memberCount: authorScienceProjects.length,
+                workHoursPerProject:
+                    this.createScienceProjectForm.value.scienceProjectLevelId
+                        .value *
+                    this.createScienceProjectForm.value.durationInYears,
             })
             .subscribe((result: any) => {
                 if (result.status) {
@@ -356,6 +328,7 @@ export class ScienceProjectComponent implements OnInit {
     }
 
     public handleUpdateItem() {
+        console.log(this.updateScienceProjectForm.value);
         this.scienceProjectService
             .updateBodyAndQueryParamsStatus(
                 { id: this.scienceProjectId.id },
@@ -369,6 +342,9 @@ export class ScienceProjectComponent implements OnInit {
                             : this.updateScienceProjectForm.value
                                   .scienceProjectLevelId,
 
+                    projectLeader: 'string',
+                    projectManagerId:
+                        this.updateScienceProjectForm.value.projectLeader,
                     authorScienceProjects: this.selectedMembersUpdate.map(
                         (item: any) => ({
                             userId: item.id,
@@ -383,7 +359,7 @@ export class ScienceProjectComponent implements OnInit {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Thành công',
-                        detail: 'Đã cập nhật hội thảo',
+                        detail: 'Đã cập nhật đề tài!',
                     });
                     this.getScience(this.queryParameters);
                 }
@@ -398,18 +374,16 @@ export class ScienceProjectComponent implements OnInit {
                 if (result.status) {
                     this.scienceProjectId = result.data;
                     const scienceProject = result.data;
-
-                    console.log(item);
                     this.updateScienceProjectForm = this.fb.group({
                         id: [item.id],
                         projectName: [item.projectName, Validators.required],
                         scienceProjectLevelId: [
-                            item.scienceProjectLevel?.id,
+                            item.scienceProjectLevel,
                             Validators.required,
                         ],
                         startYear: [new Date(item.startYear)],
                         endYear: [new Date(item.endYear)],
-                        projectLeader: [item.projectLeader?.id],
+                        projectLeader: [item.projectManager?.id],
                         memberCount: [item.memberCount],
                         projectCode: [item.projectCode],
                         durationInYears: [item.durationInYears],
@@ -427,8 +401,6 @@ export class ScienceProjectComponent implements OnInit {
                     this.selectedMembersUpdate = this.convertUserList(
                         scienceProject.authorScienceProjects
                     );
-                    console.log(this.members);
-                    console.log(this.selectedMembersUpdate);
                 }
             });
 
@@ -452,13 +424,11 @@ export class ScienceProjectComponent implements OnInit {
     loadAuthors() {}
 
     handleSearchAuthor(event: any) {
-        console.log(event.query);
         this.userService
-            .getPaging({ name: event.query })
+            .getPaging({ name: event.query, pageSize: 1000 })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.authorsList = result.data.items;
-                    console.log(this.authorsList);
                     // this.authorsList = this.authorsList.map((item: any) => ({
                     //     id: item.id,
                     //     name: item.name,
@@ -473,6 +443,8 @@ export class ScienceProjectComponent implements OnInit {
             AuthorIds: this.selectedAuthor
                 ? [this.selectedAuthor].map((author) => author?.id)
                 : null,
+
+            authorName: this.authorName,
         };
         this.getScience(payload);
     }

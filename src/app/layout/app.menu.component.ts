@@ -32,7 +32,7 @@ export class AppMenuComponent implements OnInit {
                     ])
                         ? [
                               {
-                                  label: 'Thống kê',
+                                  label: 'Tổng hợp giờ',
                                   icon: 'pi pi-fw pi-bookmark',
                                   routerLink: ['/statistic'],
                               },
@@ -40,52 +40,25 @@ export class AppMenuComponent implements OnInit {
                         : []),
                 ],
             },
+
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý cán bộ',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/officer'],
-                              },
-                          ]
-                        : []),
+                    {
+                        label: 'Quản lý hội thảo',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/seminar'],
+                    },
                 ],
             },
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý phòng ban',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/departments'],
-                              },
-                          ]
-                        : []),
-                ],
-            },
-            {
-                label: '',
-                items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
-                                  label: 'Quản lý hội thảo',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/seminar'],
-                              },
-                          ]
-                        : []),
+                    {
+                        label: 'Hướng dẫn sinh viên',
+                        icon: 'pi pi-fw pi-bookmark',
+                        routerLink: ['/student-guide'],
+                    },
                 ],
             },
             {
@@ -108,32 +81,17 @@ export class AppMenuComponent implements OnInit {
                 label: '',
                 items: [
                     // ...(this.hasPermissionHelper.hasPermissions([
-                    //     PermissionConstant.Admin,
+                    //     PermissionConstant.Teacher,
                     // ])
-                    //     ? [
+                    //     ?
+                    //     [
                     {
-                        label: 'Quản lý chức danh',
+                        label: 'Báo cáo khoa học',
                         icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/staff-position'],
+                        routerLink: ['/science-report'],
                     },
                     //   ]
                     // : []),
-                ],
-            },
-            {
-                label: '',
-                items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Teacher,
-                    ])
-                        ? [
-                              {
-                                  label: 'Báo cáo khoa học',
-                                  icon: 'pi pi-fw pi-bookmark',
-                                  routerLink: ['/science-report'],
-                              },
-                          ]
-                        : []),
                 ],
             },
             {
@@ -160,7 +118,7 @@ export class AppMenuComponent implements OnInit {
                     // ])
                     //     ? [
                     {
-                        label: 'Quản lý sở hữu trí tuệ',
+                        label: 'Sở hữu trí tuệ',
                         icon: 'pi pi-fw pi-bookmark',
                         routerLink: ['/intellectureal-property'],
                     },
@@ -171,17 +129,17 @@ export class AppMenuComponent implements OnInit {
             {
                 label: '',
                 items: [
-                    // ...(this.hasPermissionHelper.hasPermissions([
-                    //     PermissionConstant.Admin,
-                    // ])
-                    //     ? [
-                    {
-                        label: 'Tài khoản',
-                        icon: 'pi pi-fw pi-bookmark',
-                        routerLink: ['/account'],
-                    },
-                    //   ]
-                    // : []),
+                    ...(this.hasPermissionHelper.hasPermissions([
+                        PermissionConstant.Admin,
+                    ])
+                        ? [
+                              {
+                                  label: 'Tài khoản',
+                                  icon: 'pi pi-fw pi-bookmark',
+                                  routerLink: ['/account'],
+                              },
+                          ]
+                        : []),
                 ],
             },
         ];

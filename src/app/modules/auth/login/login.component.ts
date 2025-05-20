@@ -52,7 +52,6 @@ export class LoginComponent {
             };
             this.authService.login(formData).subscribe((res) => {
                 if (res.status === true) {
-                    console.log(res.data);
                     this.authService.setAuthTokenLocalStorage(res.data);
                     setTimeout(() => {
                         this.authService

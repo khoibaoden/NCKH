@@ -18,8 +18,6 @@ export class PermissionGuard implements CanActivate {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): boolean {
-        console.log('PermissionGuard: canActivate called');
-
         const requiredPermissions = route.data[
             'requiredPermissions'
         ] as string[];

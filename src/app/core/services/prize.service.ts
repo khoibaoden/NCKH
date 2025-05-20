@@ -8,18 +8,18 @@ import { Observable } from 'rxjs';
 export class PrizeService {
     constructor(private http: HttpLoadingService) {}
     getPaging(request: any = null): Observable<any> {
-        return this.http.get('articleproject/paging', request);
+        return this.http.get('prize/paging', request);
     }
 
     create(request: FormData): Observable<any> {
-        return this.http.postFormData('articleproject/create', request);
+        return this.http.postFormData('prize/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('articleproject/update', request);
+        return this.http.putFormData('prize/update', request);
     }
 
     delete(request: any): Observable<any> {
-        return this.http.put('articleproject/delete', request);
+        return this.http.put('prize/delete', request);
     }
 }

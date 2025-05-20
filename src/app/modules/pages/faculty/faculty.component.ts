@@ -97,7 +97,6 @@ export class FacultyComponent implements OnInit {
                 }
 
                 this.news = result.data.items;
-                console.log(this.Newss);
                 if (this.Newss.length === 0) {
                     this.paging.pageIndex = 1;
                 }

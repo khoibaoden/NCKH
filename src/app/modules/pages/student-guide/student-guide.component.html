@@ -1,3 +1,553 @@
-<p>
-  student-guide works!
-</p>
+<!-- Thông báo Toast -->
+<p-toast></p-toast>
+
+<div class="grid">
+    <div class="col-12">
+        <p-toolbar styleClass="mb-2">
+            <div class="">
+                <h3>Hướng dẫn sinh viên</h3>
+                <p-breadcrumb
+                    [model]="items"
+                    [home]="{ icon: 'pi pi-home' }"
+                ></p-breadcrumb>
+            </div>
+            <ng-template pTemplate="right">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-plus"
+                    label="Thêm mới"
+                    (click)="showDialogStudentGuide()"
+                ></button>
+            </ng-template>
+        </p-toolbar>
+        <div class="card">
+            <p-table
+                #dt
+                [value]="studentGuides"
+                responsiveLayout="scroll"
+                styleClass="p-datatable-striped"
+                [paginator]="false"
+                [rowHover]="true"
+            >
+                <ng-template pTemplate="caption">
+                    <div
+                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
+                    >
+                        <div class="flex flex-column">
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Tên sở hữu trí tuệ:</label
+                            >
+                            <span class="block mt-2 md:mt-0 p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input
+                                    pInputText
+                                    type="text"
+                                    [(ngModel)]="this.queryParameters.keyWord"
+                                    placeholder="Tìm theo tên sở hữu trí tuệ"
+                                    style="width: 350px"
+                                    class="sm:"
+                                />
+                            </span>
+                        </div>
+                        <button
+                            pButton
+                            pRipple
+                            label="Lọc"
+                            (click)="handleSearchStudentGuideProperty()"
+                        ></button>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên cán bộ</th>
+                        <th>Tên đề tài</th>
+                        <th>Ngày nghiệm thu</th>
+                        <th>Thành viên</th>
+                        <th>Số GVHD</th>
+                        <th>Mã số đề tài</th>
+                        <th>Cấp đề tài</th>
+                        <th>Giải thưởng</th>
+                        <th>Định mức</th>
+                        <th>Số giờ tính</th>
+                        <th>Ghi chú</th>
+                        <th>Hành động</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
+                    <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ item.user.name }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.acceptanceDate | date : "dd/MM/yyyy" }}</td>
+                        <td>{{ item.membersName }}</td>
+                        <td>{{ item.techerNumber }}</td>
+                        <td>{{ item.teamCode }}</td>
+                        <td>{{ item.studentGuideLevel?.key }}</td>
+                        <td>{{ item.prize.symbol }}</td>
+                        <td>{{ item.workHoursPerProject }}</td>
+                        <td>{{ item.hoursCalculated }}</td>
+                        <td>{{ item.note }}</td>
+                        <td>
+                            <div class="flex gap-2 justify-content-center">
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-info p-button-sm"
+                                    (click)="handleShowUpdateStudentGuide(item)"
+                                    pTooltip="Sửa"
+                                    tooltipPosition="top"
+                                ></button>
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm"
+                                    (click)="handleDeleteItem(item.id)"
+                                    pTooltip="Xóa"
+                                    tooltipPosition="top"
+                                ></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <div
+                class="flex align-items-center mt-3"
+                style="justify-content: space-between"
+            >
+                <p>
+                    <span style="font-weight: 500">{{
+                        1 + (paging.pageIndex - 1) * paging.pageSize
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        1 +
+                            (paging.pageIndex - 1) * paging.pageSize +
+                            (paging.pageSize - 1)
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
+                    }}</span>
+                    bản ghi
+                </p>
+                <div *ngIf="studentGuides?.length > 0">
+                    <p-paginator
+                        class="custum-paging"
+                        (onPageChange)="onPageChange($event)"
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    header="Thêm mới"
+    [modal]="true"
+    [(visible)]="visibleStudentGuide"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createStudentGuideForm" (ngSubmit)="handleCreateItem()">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <!-- Mã -->
+                <div class="field col mb-0">
+                    <label htmlFor="code">Cán bộ giáo viên</label>
+                    <p-autoComplete
+                        formControlName="userId"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập cán bộ giáo viên"
+                        (onSelect)="onSelectCanBo($event)"
+                    >
+                    </p-autoComplete>
+
+                    <div
+                        *ngIf="
+                            createStudentGuideForm.get('userId')?.invalid &&
+                            (createStudentGuideForm.get('userId')?.dirty ||
+                                createStudentGuideForm.get('userId')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createStudentGuideForm.get('userId')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập mã sở hữu trí tuệ
+                        </div>
+                        <div
+                            *ngIf="!createStudentGuideForm.get('userId')?.errors?.['required'] && createStudentGuideForm.get('code')?.errors?.['whitespace']"
+                            class="error-message"
+                        >
+                            Mã không được chứa khoảng trắng
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tên -->
+                <div class="field col mb-0">
+                    <label htmlFor="name">Tên đề tài NCKH</label>
+                    <input
+                        pInputText
+                        id="name"
+                        placeholder="Nhập tên đề tài nghiên cứu"
+                        formControlName="name"
+                        spellcheck="false"
+                        type="text"
+                    />
+                    <div
+                        *ngIf="
+                            createStudentGuideForm.get('name')?.invalid &&
+                            (createStudentGuideForm.get('name')?.dirty ||
+                                createStudentGuideForm.get('name')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createStudentGuideForm.get('name')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập tên sở hữu trí tuệ
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường mới -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <p-calendar
+                        id="acceptanceDate"
+                        formControlName="acceptanceDate"
+                        dateFormat="dd/mm/yy"
+                        showIcon="true"
+                        [placeholder]="'dd/mm/yyyy'"
+                        [showButtonBar]="true"
+                    ></p-calendar>
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="membersName">Tên các thành viên</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="membersName"
+                        formControlName="membersName"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="teamCode">Mã số đề tài</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="teamCode"
+                        formControlName="teamCode"
+                        placeholder="Nhập mã số đề tài"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="techerNumber">Số lượng GVHD</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="techerNumber"
+                        formControlName="techerNumber"
+                        placeholder="Nhập số lượng GVHD"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="studentGuideLevelId">Cấp NCKH</label>
+                    <p-dropdown
+                        [options]="studentGuideLevels"
+                        optionLabel="key"
+                        formControlName="studentGuideLevelId"
+                        placeholder="Chọn cấp"
+                        (onChange)="onLevelChange($event)"
+                        inputId="studentGuideLevelId"
+                    ></p-dropdown>
+                </div>
+                <div class="field col mb-0">
+                    <label for="prizeId">Giải thưởng</label>
+                    <p-dropdown
+                        [options]="prizes"
+                        optionLabel="symbol"
+                        formControlName="prizeId"
+                        placeholder="Chọn cấp"
+                        inputId="prizeId"
+                    ></p-dropdown>
+                </div>
+            </div>
+
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Giờ định mức theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="workHoursPerProject"
+                        placeholder="Nhập số giờ định mức"
+                    />
+                </div>
+                <!-- <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="hoursCalculated"
+                        formControlName="hoursCalculated"
+                        placeholder="Nhập số giờ được tính"
+                    />
+                </div> -->
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        pInputTextarea
+                        id="note"
+                        formControlName="note"
+                        rows="3"
+                        placeholder="Nhập ghi chú (nếu có)"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="p-dialog-footer flex justify-content-end gap-2">
+            <p-button
+                label="Hủy"
+                severity="secondary"
+                (onClick)="visibleStudentGuide = false"
+            ></p-button>
+            <p-button
+                icon="pi pi-plus"
+                label="Thêm mới"
+                type="submit"
+            ></p-button>
+        </div>
+    </form>
+</p-dialog>
+
+<!-- Sửa -->
+<p-dialog
+    header="Chỉnh sửa"
+    [modal]="true"
+    [(visible)]="visibleUpdateStudentGuide"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="updateStudentGuideForm" (ngSubmit)="handleUpdateItem()">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <!-- Mã -->
+                <div class="field col mb-0">
+                    <label htmlFor="code">Cán bộ giáo viên</label>
+                    <p-autoComplete
+                        formControlName="userId"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập cán bộ giáo viên"
+                        (onSelect)="onSelectCanBo($event)"
+                    >
+                    </p-autoComplete>
+
+                    <div
+                        *ngIf="
+                            createStudentGuideForm.get('userId')?.invalid &&
+                            (createStudentGuideForm.get('userId')?.dirty ||
+                                createStudentGuideForm.get('userId')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createStudentGuideForm.get('userId')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập mã sở hữu trí tuệ
+                        </div>
+                        <div
+                            *ngIf="!createStudentGuideForm.get('userId')?.errors?.['required'] && createStudentGuideForm.get('code')?.errors?.['whitespace']"
+                            class="error-message"
+                        >
+                            Mã không được chứa khoảng trắng
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tên -->
+                <div class="field col mb-0">
+                    <label htmlFor="name">Tên đề tài NCKH</label>
+                    <input
+                        pInputText
+                        id="name"
+                        placeholder="Nhập tên đề tài nghiên cứu"
+                        formControlName="name"
+                        spellcheck="false"
+                        type="text"
+                    />
+                    <div
+                        *ngIf="
+                            createStudentGuideForm.get('name')?.invalid &&
+                            (createStudentGuideForm.get('name')?.dirty ||
+                                createStudentGuideForm.get('name')?.touched)
+                        "
+                    >
+                        <div
+                            *ngIf="createStudentGuideForm.get('name')?.errors?.['required']"
+                            class="error-message"
+                        >
+                            Vui lòng nhập tên sở hữu trí tuệ
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường mới -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Ngày nghiệm thu</label>
+                    <p-calendar
+                        id="acceptanceDate"
+                        formControlName="acceptanceDate"
+                        dateFormat="dd/mm/yy"
+                        showIcon="true"
+                        [placeholder]="'dd/mm/yyyy'"
+                        [showButtonBar]="true"
+                    ></p-calendar>
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="membersName">Tên các thành viên</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="membersName"
+                        formControlName="membersName"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="teamCode">Mã số đề tài</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="teamCode"
+                        formControlName="teamCode"
+                        placeholder="Nhập mã số đề tài"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="techerNumber">Số lượng GVHD</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="techerNumber"
+                        formControlName="techerNumber"
+                        placeholder="Nhập số lượng GVHD"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="studentGuideLevelId">Cấp NCKH</label>
+                    <p-dropdown
+                        [options]="studentGuideLevels"
+                        optionLabel="key"
+                        formControlName="studentGuideLevelId"
+                        placeholder="Chọn cấp"
+                        (onChange)="onLevelChange($event)"
+                        inputId="studentGuideLevelId"
+                    ></p-dropdown>
+                </div>
+                <div class="field col mb-0">
+                    <label for="prizeId">Giải thưởng</label>
+                    <p-dropdown
+                        [options]="prizes"
+                        optionLabel="symbol"
+                        formControlName="prizeId"
+                        placeholder="Chọn cấp"
+                        (onChange)="onPrizeChange($event)"
+                        inputId="prizeId"
+                    ></p-dropdown>
+                </div>
+            </div>
+
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Giờ định mức theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="workHoursPerProject"
+                        placeholder="Nhập số giờ định mức"
+                    />
+                </div>
+                <!-- <div class="field col mb-0">
+                    <label for="hoursCalculated">Số giờ được tính</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="hoursCalculated"
+                        formControlName="hoursCalculated"
+                        placeholder="Nhập số giờ được tính"
+                    />
+                </div> -->
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        pInputTextarea
+                        id="note"
+                        formControlName="note"
+                        rows="3"
+                        placeholder="Nhập ghi chú (nếu có)"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="p-dialog-footer flex justify-content-end gap-2">
+            <p-button
+                label="Hủy"
+                severity="secondary"
+                (onClick)="visibleUpdateStudentGuide = false"
+            ></p-button>
+            <p-button
+                icon="pi pi-plus"
+                label="Câp nhật"
+                (click)="handleUpdateItem()"
+                type="submit"
+            ></p-button>
+        </div>
+    </form>
+</p-dialog>
+
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>

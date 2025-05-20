@@ -7,21 +7,35 @@ import { PermissionConstant } from '../constants/permission-constant';
 })
 export class HasPermissionHelper {
     constructor(private authService: AuthService) {}
+    // hasPermissions(permissions: string[]): boolean {
+    //     const userPermissions =
+    //         this.authService.getUserCurrent()?.roleNames || [];
+    //     console.log(userPermissions);
+    //     if (
+    //         userPermissions.includes(PermissionConstant.Admin) ||
+    //         userPermissions.includes(PermissionConstant.Master)
+    //     ) {
+    //         return true;
+    //     }
+    //     return permissions.every(
+    //         (permission) =>
+    //             userPermissions.includes(permission) ||
+    //             (permission.endsWith('.V') &&
+    //                 userPermissions.includes(permission.split('.V')[0]))
+    //     );
+    // }
+
     hasPermissions(permissions: string[]): boolean {
         const userPermissions =
             this.authService.getUserCurrent()?.roleNames || [];
-        if (
-            userPermissions.includes(PermissionConstant.Admin) ||
-            userPermissions.includes(PermissionConstant.Master)
-        ) {
-            return true;
-        }
-        return permissions.every(
-            (permission) =>
-                userPermissions.includes(permission) ||
-                (permission.endsWith('.V') &&
-                    userPermissions.includes(permission.split('.V')[0]))
-        );
+        const result = permissions.some((permission) => {
+            const hasExactMatch = userPermissions.includes(permission);
+            const hasVariantMatch =
+                permission.endsWith('.V') &&
+                userPermissions.includes(permission.split('.V')[0]);
+            return hasExactMatch || hasVariantMatch;
+        });
+        return result;
     }
 
     hasPermissionMain = (permission: string) => {

@@ -45,7 +45,7 @@
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
+                                    [(ngModel)]="this.queryParameters.keyWord"
                                     placeholder="Tìm theo tên sở hữu trí tuệ"
                                     style="width: 350px"
                                     class="sm:"
@@ -56,7 +56,7 @@
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="handleSearchIntellecturealProperty()"
                         ></button>
                     </div>
                 </ng-template>
@@ -271,6 +271,7 @@
                         optionValue="id"
                         formControlName="intellecturalPropertyLevelId"
                         placeholder="Chọn cấp"
+                        (onChange)="onLevelChange($event)"
                         inputId="intellecturalPropertyLevelId"
                     ></p-dropdown>
                 </div>
@@ -288,8 +289,7 @@
                         placeholder="Nhập số giờ định mức"
                     />
                 </div>
-
-                <div class="field col mb-0">
+                <!-- <div class="field col mb-0">
                     <label for="hoursCalculated">Số giờ được tính</label>
                     <input
                         type="number"
@@ -298,7 +298,7 @@
                         formControlName="hoursCalculated"
                         placeholder="Nhập số giờ được tính"
                     />
-                </div>
+                </div> -->
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
@@ -328,6 +328,7 @@
     </form>
 </p-dialog>
 
+<!-- Sửa -->
 <p-dialog
     header="Chỉnh sửa"
     [modal]="true"
@@ -442,6 +443,7 @@
                     <p-dropdown
                         [options]="intellectualPropertyLevels"
                         optionLabel="key"
+                        (onChange)="onEditLevelChange($event)"
                         optionValue="id"
                         formControlName="intellecturalPropertyLevelId"
                         placeholder="Chọn cấp"
@@ -463,7 +465,7 @@
                     />
                 </div>
 
-                <div class="field col mb-0">
+                <!-- <div class="field col mb-0">
                     <label for="hoursCalculated">Số giờ được tính</label>
                     <input
                         type="number"
@@ -472,7 +474,7 @@
                         formControlName="hoursCalculated"
                         placeholder="Nhập số giờ được tính"
                     />
-                </div>
+                </div> -->
             </div>
             <div class="p-formgrid grid">
                 <div class="field col mb-0">
@@ -491,7 +493,7 @@
             <p-button
                 label="Hủy"
                 severity="secondary"
-                (onClick)="visibleIntellectureal = false"
+                (onClick)="visibleUpdateIntellectureal = false"
             ></p-button>
             <p-button
                 icon="pi pi-plus"

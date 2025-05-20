@@ -104,7 +104,6 @@ export class ResearchTopicComponent implements OnInit {
                     }
 
                     this.ResearchTopics = result.data.items;
-                    console.log(this.ResearchTopics);
                     if (this.ResearchTopics.length === 0) {
                         this.paging.pageIndex = 1;
                     }

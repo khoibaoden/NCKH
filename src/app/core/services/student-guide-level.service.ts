@@ -8,18 +8,18 @@ import { HttpLoadingService } from '../https/http-loading.service';
 export class StudentGuideLevelService {
     constructor(private http: HttpLoadingService) {}
     getPaging(request: any = null): Observable<any> {
-        return this.http.get('staff-position/paging', request);
+        return this.http.get('studentguidelevel/paging', request);
     }
 
     create(request: FormData): Observable<any> {
-        return this.http.postFormData('staff-position/create', request);
+        return this.http.postFormData('studentguidelevel/create', request);
     }
 
     update(request: any): Observable<any> {
-        return this.http.putFormData('staff-position/update', request);
+        return this.http.putFormData('studentguidelevel/update', request);
     }
 
     delete(request: any): Observable<any> {
-        return this.http.put('staff-position/delete', request);
+        return this.http.put('studentguidelevel/delete', request);
     }
 }

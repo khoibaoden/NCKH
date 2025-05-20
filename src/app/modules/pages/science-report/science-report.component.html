@@ -13,7 +13,7 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Thêm"
+                    label="Thêm mới"
                     (click)="openAddDialog()"
                 ></button>
             </ng-template>
@@ -22,7 +22,8 @@
             <p-table
                 #dt
                 [value]="filteredReports"
-                responsiveLayout="scroll"
+                [scrollable]="true"
+                [tableStyle]="{ 'min-width': '1700px' }"
                 styleClass="p-datatable-gridlines p-datatable-striped"
                 [paginator]="true"
                 [rows]="paging.pageSize"
@@ -42,7 +43,7 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm báo cáo:</label
+                                >Tìm kiếm theo tên:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
@@ -51,7 +52,7 @@
                                     type="text"
                                     [(ngModel)]="searchText"
                                     placeholder="Tìm theo tên báo cáo"
-                                    style="width: 350px"
+                                    style="width: 250px"
                                     class="sm:"
                                 />
                             </span>
@@ -67,68 +68,120 @@
                 <!-- Header của bảng -->
                 <ng-template pTemplate="header">
                     <tr>
-                        <th
-                            class="text-center"
-                            pSortableColumn="reportName"
-                            style="width: 35%"
-                        >
-                            Tên báo cáo
-                            <p-sortIcon field="reportName"></p-sortIcon>
+                        <th class="text-center" pSortableColumn="reportName">
+                            STT
                         </th>
-                        <th
-                            class="text-center"
-                            pSortableColumn="memberCount"
-                            style="width: 10%"
-                        >
-                            Số tác giả
-                            <p-sortIcon field="memberCount"></p-sortIcon>
+                        <th class="text-center" pSortableColumn="reportName">
+                            Tên bài báo
                         </th>
-                        <th
-                            class="text-center"
-                            pSortableColumn="conferenceName"
-                            style="width: 20%"
-                        >
-                            Tên hội nghị
-                            <p-sortIcon field="conferenceName"></p-sortIcon>
+                        <th class="text-center" pSortableColumn="memberCount">
+                            Số thành viên
                         </th>
-                        <th
-                            class="text-center"
-                            pSortableColumn="publishYear"
-                            style="width: 15%"
-                        >
-                            Năm xuất bản
-                            <p-sortIcon field="publishYear"></p-sortIcon>
-                        </th>
-                        <th class="text-center" style="width: 20%">Thao tác</th>
+                        <th class="text-center">Phân loại</th>
+                        <th class="text-center">Định mức giờ</th>
+                        <th class="text-center">Số giờ được tính</th>
+                        <th class="text-center">Tác giả đứng đầu</th>
+                        <th class="text-center">Tên hội nghị</th>
+                        <th class="text-center">ISBN</th>
+                        <th class="text-center">Địa điểm</th>
+                        <th class="text-center">Tạp chí số</th>
+                        <th class="text-center">Số trang đầu cuối</th>
+                        <th class="text-center">Ngày tổ chức</th>
+                        <th class="text-center">Ghi chú</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                 </ng-template>
                 <!-- Body của bảng -->
-                <ng-template pTemplate="body" let-item>
+                <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
                     <tr>
+                        <!-- STT -->
+                        <td class="text-center">{{ rowIndex + 1 }}</td>
+
+                        <!-- Tên bài báo -->
                         <td
-                            style="width: 35%"
-                            class="truncate-text"
-                            title="{{ item.reportName }}"
+                            class="text-center truncate-text"
+                            [title]="item.reportName"
                         >
                             {{ item.reportName || "Chưa có thông tin" }}
                         </td>
-                        <td class="text-center" style="width: 10%">
-                            {{ item.memberCount || "0" }}
+
+                        <!-- Số thành viên -->
+                        <td class="text-center">
+                            {{ item.memberCount || 0 }}
                         </td>
+
+                        <!-- Phân loại -->
+                        <td class="text-center truncate-text">
+                            {{
+                                item.scienceReportLevel?.key ||
+                                    "Chưa có thông tin"
+                            }}
+                        </td>
+
+                        <!-- Định mức giờ -->
+                        <td class="text-center">
+                            {{ item.scienceReportLevel?.value || 0 }}
+                        </td>
+
+                        <!-- Số giờ được tính -->
+                        <td class="text-center">
+                            {{ item.hoursCalculated || 0 }}
+                        </td>
+
+                        <!-- Tác giả đứng đầu -->
                         <td
                             class="text-center truncate-text"
-                            style="width: 20%"
-                            title="{{ item.conferenceName }}"
+                            [title]="item.projectManager?.name"
+                        >
+                            {{
+                                item.projectManager?.name || "Chưa có thông tin"
+                            }}
+                        </td>
+
+                        <!-- Tên hội nghị -->
+                        <td
+                            class="text-center truncate-text"
+                            [title]="item.conferenceName"
                         >
                             {{ item.conferenceName || "Chưa có thông tin" }}
                         </td>
-                        <td class="text-center" style="width: 15%">
+
+                        <!-- ISBN -->
+                        <td class="text-center">
+                            {{ item.isbn || "Chưa có" }}
+                        </td>
+
+                        <!-- Địa điểm -->
+                        <td class="text-center">
+                            {{ item.address || "Chưa có" }}
+                        </td>
+
+                        <!-- Tạp chí số -->
+                        <td class="text-center">
+                            {{ item.volumeNo || "Chưa có" }}
+                        </td>
+
+                        <!-- Số trang đầu cuối -->
+                        <td class="text-center">
+                            {{ item.terminalPage || "Chưa có" }}
+                        </td>
+
+                        <!-- Ngày tổ chức -->
+                        <td class="text-center">
                             {{
                                 item.publishYear
-                                    | date : "yyyy" || "Chưa có thông tin"
+                                    ? (item.publishYear | date : "dd/MM/yyyy")
+                                    : "Chưa có"
                             }}
                         </td>
-                        <td style="width: 20%">
+
+                        <!-- Ghi chú -->
+                        <td class="text-center">
+                            {{ item.notes || "Không có" }}
+                        </td>
+
+                        <!-- Thao tác -->
+                        <td>
                             <div class="flex gap-2 justify-content-center">
                                 <button
                                     pButton
@@ -161,6 +214,7 @@
                         </td>
                     </tr>
                 </ng-template>
+
                 <!-- Thông báo khi không có dữ liệu -->
                 <ng-template pTemplate="emptymessage">
                     <tr>
@@ -294,7 +348,7 @@
             <div class="col-12 md:col-6">
                 <div class="field">
                     <label for="reportName"
-                        >Tên báo cáo <span class="text-danger">*</span></label
+                        >Tên báo cáo <span class="red-strick">*</span></label
                     >
                     <input
                         type="text"
@@ -307,7 +361,7 @@
                 </div>
                 <div class="field">
                     <label for="conferenceName"
-                        >Tên hội nghị <span class="text-danger">*</span></label
+                        >Tên hội nghị <span class="red-strick">*</span></label
                     >
                     <input
                         type="text"
@@ -319,7 +373,7 @@
                 </div>
                 <div class="field">
                     <label for="publishYear"
-                        >Năm xuất bản <span class="text-danger">*</span></label
+                        >Năm xuất bản <span class="red-strick">*</span></label
                     >
                     <p-calendar
                         id="publishYear"
@@ -339,12 +393,21 @@
                         [(ngModel)]="editingReport.address"
                     />
                 </div>
+                <div class="field">
+                    <label for="newAddress">Tạp chí số</label>
+                    <input
+                        type="text"
+                        pInputText
+                        placeholder="Nhập tạp chí số"
+                        id="newAddress"
+                        [(ngModel)]="editingReport.volumeNo"
+                    />
+                </div>
             </div>
             <div class="col-12 md:col-6">
                 <div class="field">
                     <label for="scienceReportLevelId"
-                        >Cấp độ báo cáo
-                        <span class="text-danger">*</span></label
+                        >Cấp độ báo cáo <span class="red-strick">*</span></label
                     >
                     <p-dropdown
                         id="scienceReportLevelId"
@@ -381,6 +444,16 @@
                         [(ngModel)]="editingReport.hoursCalculated"
                         [min]="0"
                     ></p-inputNumber>
+                </div>
+                <div class="field">
+                    <label for="newAddress">Số trang đầu cuối</label>
+                    <input
+                        type="text"
+                        pInputText
+                        placeholder="Nhập số trang đầu cuối"
+                        id="newAddress"
+                        [(ngModel)]="editingReport.terminalPage"
+                    />
                 </div>
             </div>
             <div class="col-12">
@@ -478,7 +551,7 @@
             pRipple
             label="Hủy"
             icon="pi pi-times"
-            class="p-button-text"
+            class="p-button-danger"
             (click)="hideEditDialog()"
         ></button>
         <button
@@ -486,7 +559,7 @@
             pRipple
             label="Lưu"
             icon="pi pi-check"
-            class="p-button-text"
+            class="p-button-primary"
             (click)="saveReport()"
         ></button>
     </ng-template>
@@ -505,7 +578,7 @@
             <div class="col-12 md:col-6">
                 <div class="field">
                     <label for="newReportName"
-                        >Tên báo cáo <span class="text-danger">*</span></label
+                        >Tên báo cáo<span class="red-strick">*</span></label
                     >
                     <input
                         type="text"
@@ -525,7 +598,7 @@
                 </div>
                 <div class="field">
                     <label for="newConferenceName"
-                        >Tên hội nghị <span class="text-danger">*</span></label
+                        >Tên hội nghị <span class="red-strick">*</span></label
                     >
                     <input
                         type="text"
@@ -544,13 +617,13 @@
                 </div>
                 <div class="field">
                     <label for="newPublishYear"
-                        >Năm xuất bản <span class="text-danger">*</span></label
+                        >Năm xuất bản <span class="red-strick">*</span></label
                     >
                     <p-calendar
                         id="newPublishYear"
                         [(ngModel)]="newReport.publishYear"
                         view="year"
-                        place
+                        placeholder="Chọn ngày xuất bản"
                         dateFormat="yy"
                         [showIcon]="true"
                     ></p-calendar>
@@ -571,21 +644,29 @@
                         [(ngModel)]="newReport.address"
                     />
                 </div>
+                <div class="field">
+                    <label for="newAddress">Tạp chí số</label>
+                    <input
+                        type="text"
+                        pInputText
+                        placeholder="Nhập tạp chí số"
+                        id="newAddress"
+                        [(ngModel)]="newReport.volumeNo"
+                    />
+                </div>
             </div>
             <div class="col-12 md:col-6">
                 <div class="field">
                     <label for="newScienceReportLevelId"
-                        >Cấp độ báo cáo
-                        <span class="text-danger">*</span></label
+                        >Cấp độ báo cáo <span class="red-strick">*</span></label
                     >
                     <p-dropdown
                         id="newScienceReportLevelId"
-                        [options]="reportLevels"
+                        [options]="scienceReportLevels"
                         [(ngModel)]="newReport.scienceReportLevelId"
                         placeholder="Nhập tên hội nghị"
-                        optionLabel="description"
+                        optionLabel="key"
                         appendTo="body"
-                        optionValue="id"
                         placeholder="Chọn cấp độ báo cáo"
                     ></p-dropdown>
                     <small
@@ -623,12 +704,23 @@
                         [min]="0"
                     ></p-inputNumber>
                 </div>
+                <div class="field">
+                    <label for="newAddress">Số trang đầu cuối</label>
+                    <input
+                        type="text"
+                        pInputText
+                        placeholder="Nhập số trang đầu cuối"
+                        id="newAddress"
+                        [(ngModel)]="newReport.terminalPage"
+                    />
+                </div>
             </div>
             <div class="col-12">
                 <div class="field">
                     <label for="newNotes">Ghi chú</label>
                     <textarea
                         id="newNotes"
+                        placeholder="Nhập ghi chú ..."
                         pInputTextarea
                         [(ngModel)]="newReport.notes"
                         rows="3"
@@ -644,8 +736,8 @@
                     >
                         <ng-template pTemplate="header">
                             <tr>
-                                <th style="width: 10%">#</th>
-                                <th style="width: 60%">Tên tác giả</th>
+                                <th style="width: 6%">#</th>
+                                <th style="width: 65%">Tên tác giả</th>
                                 <th style="width: 20%">Vai trò</th>
                                 <th style="width: 10%">Thao tác</th>
                             </tr>
@@ -668,17 +760,23 @@
                                     ></p-dropdown>
                                 </td>
                                 <td>
-                                    <p-radioButton
-                                        [value]="author.userId"
-                                        [(ngModel)]="newReport.projectManagerId"
-                                        [inputId]="'new_manager_' + i"
-                                    ></p-radioButton>
-                                    <label
-                                        [for]="'new_manager_' + i"
-                                        class="ml-2"
-                                        >Chủ nhiệm</label
-                                    >
+                                    <ng-container *ngIf="author.userId">
+                                        <p-radioButton
+                                            [value]="author.userId"
+                                            [(ngModel)]="
+                                                newReport.projectManagerId
+                                            "
+                                            [inputId]="'new_manager_' + i"
+                                        ></p-radioButton>
+                                        <label
+                                            [for]="'new_manager_' + i"
+                                            class="ml-2"
+                                        >
+                                            Chủ nhiệm
+                                        </label>
+                                    </ng-container>
                                 </td>
+
                                 <td>
                                     <button
                                         pButton
@@ -715,22 +813,23 @@
     </ng-template>
 
     <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
-            label="Hủy"
-            icon="pi pi-times"
-            class="p-button-text"
-            (click)="addDialogVisible = false; submitted = false"
-        ></button>
-        <button
-            pButton
-            pRipple
-            label="Thêm"
-            icon="pi pi-check"
-            class="p-button-text"
-            (click)="saveNewReport()"
-        ></button>
+        <div class="pt-2">
+            <button
+                pButton
+                pRipple
+                label="Hủy"
+                class="p-button-danger"
+                (click)="addDialogVisible = false; submitted = false"
+            ></button>
+            <button
+                pButton
+                pRipple
+                label="Thêm mới"
+                icon="pi pi-plus"
+                class="p-button-primary"
+                (click)="saveNewReport()"
+            ></button>
+        </div>
     </ng-template>
 </p-dialog>
 

@@ -79,7 +79,6 @@ export class AccountComponent implements OnInit {
 
     loadClass() {
         this.classService.getPaging().subscribe((response) => {
-            console.log('Classes:', response.data.items);
             this.classes = response.data.items;
         });
     }
@@ -100,7 +99,6 @@ export class AccountComponent implements OnInit {
 
         this.authService.getPagingUser(request).subscribe(
             (response) => {
-                console.log('API Response:', response);
                 this.accounts = response.data.items || [];
                 if (this.accounts.length === 0) {
                     this.paging.pageIndex = 1;

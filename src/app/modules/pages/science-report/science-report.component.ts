@@ -9,7 +9,9 @@ import pagingConfig, {
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
+import { ScienceReportLevelService } from 'src/app/core/services/science-report-level.service';
 import { ScienceReportService } from 'src/app/core/services/science-report.service';
+import { UserService } from 'src/app/core/services/user.service';
 
 @Component({
     selector: 'app-science-reports',
@@ -24,41 +26,7 @@ export class ScienceReportsComponent implements OnInit {
     viewDialogVisible: boolean = false;
     submitted: boolean = false;
     searchText: string = '';
-
-    // Mẫu data cho danh sách cấp độ báo cáo
-    reportLevels: any[] = [
-        {
-            id: 1,
-            key: 'HT1',
-            value: 1200,
-            description:
-                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế thuộc hệ thống ISI/Scopus',
-        },
-        {
-            id: 2,
-            key: 'HT2',
-            value: 800,
-            description:
-                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế có phản biện độc lập',
-        },
-        {
-            id: 3,
-            key: 'HT3',
-            value: 400,
-            description:
-                'Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc gia',
-        },
-    ];
-
-    // Mẫu data cho danh sách người dùng
-    users: any[] = [
-        { id: 1, name: 'Nguyễn Văn A' },
-        { id: 2, name: 'Phạm Ngọc Hưng' },
-        { id: 3, name: 'Nguyễn Văn Hậu' },
-        { id: 4, name: 'Phạm Minh Chuẩn' },
-        { id: 5, name: 'Trần Thị B' },
-    ];
-
+    users: any;
     editingReport: any = {};
     selectedReport: any = {};
 
@@ -72,8 +40,10 @@ export class ScienceReportsComponent implements OnInit {
         address: '',
         isbn: '',
         notes: '',
+        volumeNo: 'string',
+        terminalPage: 'string',
         projectManagerId: null,
-        authorScienceReports: [{ userId: null }],
+        authorScienceReports: [],
     };
 
     constructor(
@@ -81,7 +51,9 @@ export class ScienceReportsComponent implements OnInit {
         private router: Router,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
-        private scienceReportService: ScienceReportService
+        private scienceReportLevelService: ScienceReportLevelService,
+        private scienceReportService: ScienceReportService,
+        private userService: UserService
     ) {}
 
     public config: any = {
@@ -114,7 +86,7 @@ export class ScienceReportsComponent implements OnInit {
         status: 0,
         keyWord: '',
     };
-
+    scienceReportLevels: any;
     ngOnInit() {
         this.items = [{ label: 'Báo cáo khoa học' }];
         this.route.queryParams.subscribe((params) => {
@@ -134,16 +106,64 @@ export class ScienceReportsComponent implements OnInit {
             };
             this.getReports(request);
         });
+        this.loadScienceReportLevel();
+        this.loadUser();
+    }
+
+    loadScienceReportLevel() {
+        this.scienceReportLevelService.getPaging({}).subscribe((res) => {
+            this.scienceReportLevels = res.data.items;
+            console.log(this.scienceReportLevelService);
+        });
+    }
+
+    loadUser() {
+        this.userService.getPaging({ pageSize: 100 }).subscribe((res) => {
+            this.users = res.data.items;
+        });
     }
 
     saveNewReport() {
-        this.scienceReportService.create(this.newReport).subscribe({
+        console.log(this.newReport);
+        if (
+            this.newReport.authorScienceReports.some(
+                (author) => author.userId === null
+            )
+        ) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng chọn đầy đủ tác giả.',
+            });
+            return;
+        }
+
+        console.log(this.newReport.projectManagerId);
+        if (this.newReport.projectManagerId == null) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Cảnh báo',
+                detail: 'Vui lòng chọn chủ nhiệm.',
+            });
+            return;
+        }
+        const formData = {
+            ...this.newReport,
+            scienceReportLevelId: this.newReport.scienceReportLevelId?.id,
+            memberCount: this.newReport.authorScienceReports.length,
+        };
+        this.scienceReportService.create(formData).subscribe({
             next: (response) => {
-                console.log('Tạo báo cáo thành công:', response);
-                // có thể reset form hoặc điều hướng người dùng
+                this.addDialogVisible = false;
+                this.getReports({});
             },
             error: (error) => {
                 console.error('Lỗi khi tạo báo cáo:', error);
+                this.messageService.add({
+                    severity: 'warn',
+                    summary: 'Cảnh báo',
+                    detail: 'Vui lòng nhập đầy đủ thông tin',
+                });
                 // hiển thị thông báo lỗi nếu cần
             },
         });
@@ -239,24 +259,6 @@ export class ScienceReportsComponent implements OnInit {
             .getPaging(request)
             .subscribe((result: any) => {
                 if (result.status) {
-                    if (
-                        request.pageIndex !== 1 &&
-                        result.data.items.length === 0
-                    ) {
-                        this.route.queryParams.subscribe((params) => {
-                            const request = {
-                                ...params,
-                                pageIndex: 1,
-                            };
-
-                            this.router.navigate([], {
-                                relativeTo: this.route,
-                                queryParams: request,
-                                queryParamsHandling: 'merge',
-                            });
-                        });
-                    }
-                    console.log(result.data.items);
                     this.reports = result.data.items;
                     this.filteredReports = [...this.reports];
 
@@ -347,35 +349,26 @@ export class ScienceReportsComponent implements OnInit {
         return isValid;
     }
 
+    //validate
+
     saveReport() {
         if (!this.validateEditForm()) {
             return;
         }
 
-        // Trong thực tế, bạn sẽ gọi API để cập nhật báo cáo
-        setTimeout(() => {
-            // Mô phỏng response từ server
-            const result = {
-                status: true,
-                message: 'Cập nhật báo cáo khoa học thành công',
-            };
+        console.log(this.editingReport);
 
-            if (result.status) {
+        this.scienceReportService
+            .update({ id: this.editingReport.id }, this.editingReport)
+            .subscribe((res) => {
+                this.editDialogVisible = false;
+                this.getReports({});
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Thành công',
-                    detail: 'Cập nhật thông tin báo cáo khoa học thành công',
+                    detail: 'Cập nhật bài báo khoa học thành công',
                 });
-                this.hideEditDialog();
-                this.getReports(this.queryParameters);
-            } else {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Lỗi',
-                    detail: result.message || 'Cập nhật thất bại',
-                });
-            }
-        }, 500);
+            });
     }
 
     confirmDelete(report: any) {
@@ -385,8 +378,14 @@ export class ScienceReportsComponent implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Có',
             rejectLabel: 'Không',
+            acceptButtonStyleClass: 'p-button-danger', // Nút "Có" màu đỏ
+            rejectButtonStyleClass: 'p-button-secondary', // Nút "Không" màu xám
             accept: () => {
-                this.deleteReport(report.id);
+                this.scienceReportService
+                    .delete({ id: report.id }, {})
+                    .subscribe(() => {
+                        this.getReports({});
+                    });
             },
             reject: () => {
                 this.messageService.add({
@@ -396,32 +395,6 @@ export class ScienceReportsComponent implements OnInit {
                 });
             },
         });
-    }
-
-    deleteReport(id: number) {
-        // Trong thực tế, bạn sẽ gọi API để xóa báo cáo
-        setTimeout(() => {
-            // Mô phỏng xóa báo cáo thành công
-            const result = {
-                status: true,
-                message: 'Xóa báo cáo khoa học thành công',
-            };
-
-            if (result.status) {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Thành công',
-                    detail: 'Đã xóa báo cáo khoa học thành công',
-                });
-                this.getReports(this.queryParameters);
-            } else {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Lỗi',
-                    detail: result.message || 'Xóa báo cáo thất bại',
-                });
-            }
-        }, 500);
     }
 
     handleOnSortAndOrderChange(orderBy: string): void {

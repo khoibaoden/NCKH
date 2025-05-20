@@ -142,7 +142,7 @@ export class IntellecturealPropertyComponent implements OnInit {
 
     loadIntellecturealPropertyLevel() {
         this.intellecturalPropertyLevelService
-            .getPaging()
+            .getPaging({ pageSize: 1000 })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.intellectualPropertyLevels = result.data.items;
@@ -173,7 +173,25 @@ export class IntellecturealPropertyComponent implements OnInit {
         this.visibleIntellectureal = true;
     }
 
+    public handleSearchIntellecturealProperty() {
+        this.route.queryParams.subscribe((params) => {
+            const request = {
+                ...params,
+                keyWord: this.queryParameters.keyWord
+                    ? this.queryParameters.keyWord
+                    : '',
+            };
+
+            this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: request,
+                queryParamsHandling: 'merge',
+            });
+        });
+    }
+
     public getIntellecturealProperty(request: any): any {
+        console.log(request);
         this.intellecturealPropertyService
             .getPaging(request)
             .subscribe((result: any) => {
@@ -284,8 +302,37 @@ export class IntellecturealPropertyComponent implements OnInit {
         });
     }
 
+    public onLevelChange(event: any): void {
+        console.log(event);
+        const selectedId = event.value;
+        const selectedLevel = this.intellectualPropertyLevels.find(
+            (level) => level.id === selectedId
+        );
+
+        this.createIntellecturealForm.patchValue({
+            workHoursPerProject: selectedLevel.value,
+        });
+
+        console.log('Bạn đã chọn:', selectedLevel);
+    }
+
+    public onEditLevelChange(event: any): void {
+        console.log(event);
+        const selectedId = event.value;
+        const selectedLevel = this.intellectualPropertyLevels.find(
+            (level) => level.id === selectedId
+        );
+
+        this.updateIntellecturealForm.patchValue({
+            workHoursPerProject: selectedLevel.value,
+        });
+
+        console.log('Bạn đã chọn:', selectedLevel);
+    }
+
     public handleCreateItem() {
         console.log(this.createIntellecturealForm.value);
+
         this.intellecturealPropertyService
             .create({
                 ...this.createIntellecturealForm.value,
@@ -293,6 +340,9 @@ export class IntellecturealPropertyComponent implements OnInit {
                     this.createIntellecturealForm.value
                         .intellecturalPropertyLevelId,
 
+                hoursCalculated:
+                    this.createIntellecturealForm.value.workHoursPerProject /
+                    this.createIntellecturealForm.value.teamNumber,
                 userId: this.createIntellecturealForm.value.userId?.id,
             })
             .subscribe((result: any) => {
@@ -402,6 +452,10 @@ export class IntellecturealPropertyComponent implements OnInit {
                             .intellecturalPropertyLevelId,
 
                     userId: this.updateIntellecturealForm.value.userId,
+                    hoursCalculated:
+                        this.updateIntellecturealForm.value
+                            .workHoursPerProject /
+                        this.updateIntellecturealForm.value.teamNumber,
                 }
             )
             .subscribe((result: any) => {
@@ -411,7 +465,7 @@ export class IntellecturealPropertyComponent implements OnInit {
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Thành công',
-                        detail: 'Đã cập nhật hội thảo',
+                        detail: 'Cập nhật thành công',
                     });
                     this.getIntellecturealProperty(this.queryParameters);
                 }

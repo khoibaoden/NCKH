@@ -35,7 +35,7 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo tên sách:</label
+                                >Tìm kiếm theo tên:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
@@ -43,7 +43,7 @@
                                     pInputText
                                     type="text"
                                     [(ngModel)]="topicName"
-                                    placeholder="Tìm theo tên sách"
+                                    placeholder="Nhập tên đề tài"
                                     style="width: 350px"
                                     class="sm:"
                                 />
@@ -53,19 +53,15 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tác giả:</label
+                                >Chủ nhiệm đề tài:</label
                             >
-                            <!-- <input
-                                type="text"
+                            <input
                                 pInputText
-                                [(ngModel)]="codeSelected"
-                            /> -->
-                            <p-autoComplete
-                                [(ngModel)]="selectedAuthor"
-                                [suggestions]="authorsList"
-                                field="name"
-                                placeholder="Nhập tên tác giả"
-                                (completeMethod)="handleSearchAuthor($event)"
+                                type="text"
+                                [(ngModel)]="authorName"
+                                placeholder="Nhập tên chủ nhiệm"
+                                style="width: 200px"
+                                class="sm:"
                             />
                         </div>
                         <button
@@ -79,12 +75,14 @@
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Mã số</th>
-                        <th>Tên đề tài</th>
                         <th>Chủ nhiệm đề tài</th>
+                        <th>Tên đề tài</th>
+                        <th>Cấp</th>
+                        <th>Thời gian</th>
                         <th>Số thành viên</th>
                         <th style="width: 15%">Tác giả thực hiện</th>
-                        <th>Thời gian thực hiện</th>
-                        <th>Giờ định mức</th>
+                        <th>Định mức</th>
+                        <th>Số giờ tính</th>
                         <th>Ghi chú</th>
                         <th style="text-align: center">Thao tác</th>
                     </tr>
@@ -92,15 +90,20 @@
                 <ng-template pTemplate="body" let-project>
                     <tr>
                         <td>{{ project.projectCode }}</td>
-                        <td>{{ project.projectName }}</td>
                         <td>{{ project?.projectManager?.name }}</td>
-                        <td>{{ project.memberCount }}</td>
-                        <td>{{ project.authorScienceProjects }}</td>
+                        <td>{{ project.projectName }}</td>
+                        <td>{{ project.scienceProjectLevel?.key }}</td>
                         <td>
-                            {{ project.startYear | date : "dd/MM/yyyy" }} -
-                            {{ project.endYear | date : "dd/MM/yyyy" }}
+                            {{ project.startYear | date : "yyyy" }} -
+                            {{ project.endYear | date : "yyyy" }}
                         </td>
+                        <td style="text-align: center">
+                            {{ project.memberCount }}
+                        </td>
+                        <td>{{ project.authorScienceProjects }}</td>
+
                         <td>{{ project.workHoursPerProject }}</td>
+                        <td>{{ project.hoursCalculated }}</td>
                         <td>
                             <span class="truncate-2">{{ project.notes }}</span>
                         </td>
@@ -166,6 +169,7 @@
     </div>
 </div>
 
+<!-- Thêm mới -->
 <p-dialog
     header="Thêm mới"
     [modal]="true"
@@ -206,17 +210,25 @@
                         [showIcon]="true"
                         placeholder="Chọn năm bắt đầu"
                         [showButtonBar]="true"
-                    />
+                        view="year"
+                        dateFormat="yy"
+                        [yearNavigator]="true"
+                        yearRange="2000:2030"
+                    ></p-calendar>
                 </div>
                 <div class="field col mb-0">
                     <label for="endYear">Năm kết thúc</label>
                     <p-calendar
-                        id="startYear"
+                        id="endYear"
                         formControlName="endYear"
                         [showIcon]="true"
-                        placeholder="Chọn năm bắt đầu"
+                        placeholder="Chọn năm kết thúc"
                         [showButtonBar]="true"
-                    />
+                        view="year"
+                        dateFormat="yy"
+                        [yearNavigator]="true"
+                        yearRange="2000:2030"
+                    ></p-calendar>
                 </div>
             </div>
 
@@ -232,33 +244,14 @@
                         placeholder="Chọn chủ nhiệm"
                     ></p-dropdown>
                 </div>
-
-                <div class="field col mb-0">
-                    <label for="memberCount">Số lượng thành viên</label>
-                    <input
-                        type="number"
-                        id="memberCount"
-                        pInputText
-                        formControlName="memberCount"
-                    />
-                </div>
             </div>
             <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="projectCode">Mã số đề tài</label>
-                    <input
-                        type="text"
-                        id="projectCode"
-                        pInputText
-                        formControlName="projectCode"
-                    />
-                </div>
-
                 <div class="field col mb-0">
                     <label for="durationInYears">Số năm thực hiện</label>
                     <input
                         type="number"
                         id="durationInYears"
+                        placeholder="Nhập số năm thực hiện"
                         pInputText
                         formControlName="durationInYears"
                         step="0.1"
@@ -273,19 +266,9 @@
                     <input
                         type="number"
                         id="workHoursPerProject"
+                        placeholder="Nhập định mức giờ theo công trình"
                         pInputText
                         formControlName="workHoursPerProject"
-                        step="0.1"
-                    />
-                </div>
-
-                <div class="field col mb-0">
-                    <label for="hoursCalculated">Số giờ được tính</label>
-                    <input
-                        type="number"
-                        id="hoursCalculated"
-                        pInputText
-                        formControlName="hoursCalculated"
                         step="0.1"
                     />
                 </div>
@@ -296,18 +279,9 @@
                     <input
                         type="text"
                         id="managingAgency"
+                        placeholder="Nhập cơ quan quản lý"
                         pInputText
                         formControlName="managingAgency"
-                    />
-                </div>
-                <div class="field col mb-0">
-                    <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <p-calendar
-                        id="startYear"
-                        formControlName="acceptanceDate"
-                        [showIcon]="true"
-                        placeholder="Chọn năm bắt đầu"
-                        [showButtonBar]="true"
                     />
                 </div>
             </div>
@@ -324,18 +298,19 @@
 
                 <div class="field col mb-0">
                     <label for="notes">Ghi chú</label>
-                    <textarea
+                    <input
+                        type="text"
                         id="notes"
-                        rows="3"
-                        pInputTextarea
+                        placeholder="Nhập ghi chú"
+                        pInputText
                         formControlName="notes"
-                    ></textarea>
+                    />
                 </div>
             </div>
         </div>
     </form>
     <div class="p-formgrid grid">
-        <div class="field col mb-0">
+        <div class="field col mb-0 flex flex-column">
             <label for="membersName">Tên các thành viên</label>
             <p-multiSelect
                 id="membersName"
@@ -343,6 +318,7 @@
                 [(ngModel)]="selectedMembers"
                 name="membersName"
                 appendTo="body"
+                style="width: 100%"
                 optionLabel="name"
                 placeholder="Chọn các thành viên"
                 display="chip"
@@ -363,6 +339,7 @@
     </div>
 </p-dialog>
 
+<!-- Sửa -->
 <p-dialog
     header="Chỉnh sửa"
     [modal]="true"
@@ -387,7 +364,6 @@
                     <p-dropdown
                         [options]="scienceProjectLevels"
                         optionLabel="key"
-                        optionValue="id"
                         formControlName="scienceProjectLevelId"
                         placeholder="Chọn cấp"
                         inputId="scienceProjectLevelId"
@@ -404,17 +380,25 @@
                         [showIcon]="true"
                         placeholder="Chọn năm bắt đầu"
                         [showButtonBar]="true"
-                    />
+                        view="year"
+                        dateFormat="yy"
+                        [yearNavigator]="true"
+                        yearRange="2000:2030"
+                    ></p-calendar>
                 </div>
                 <div class="field col mb-0">
                     <label for="endYear">Năm kết thúc</label>
                     <p-calendar
-                        id="startYear"
+                        id="endYear"
                         formControlName="endYear"
                         [showIcon]="true"
-                        placeholder="Chọn năm bắt đầu"
+                        placeholder="Chọn năm kết thúc"
                         [showButtonBar]="true"
-                    />
+                        view="year"
+                        dateFormat="yy"
+                        [yearNavigator]="true"
+                        yearRange="2000:2030"
+                    ></p-calendar>
                 </div>
             </div>
 
@@ -424,38 +408,20 @@
                     <p-dropdown
                         id="projectLeader"
                         [options]="projectLeaders"
-                        formControlName="projectManagerId"
+                        formControlName="projectLeader"
                         optionLabel="name"
                         optionValue="id"
                         placeholder="Chọn chủ nhiệm"
                     ></p-dropdown>
                 </div>
-
-                <div class="field col mb-0">
-                    <label for="memberCount">Số lượng thành viên</label>
-                    <input
-                        type="number"
-                        id="memberCount"
-                        pInputText
-                        formControlName="memberCount"
-                    />
-                </div>
             </div>
             <div class="p-formgrid grid">
-                <div class="field col mb-0">
-                    <label for="projectCode">Mã số đề tài</label>
-                    <input
-                        type="text"
-                        id="projectCode"
-                        pInputText
-                        formControlName="projectCode"
-                    />
-                </div>
                 <div class="field col mb-0">
                     <label for="durationInYears">Số năm thực hiện</label>
                     <input
                         type="number"
                         id="durationInYears"
+                        placeholder="Nhập số năm thực hiện"
                         pInputText
                         formControlName="durationInYears"
                         step="0.1"
@@ -470,19 +436,9 @@
                     <input
                         type="number"
                         id="workHoursPerProject"
+                        placeholder="Nhập định mức giờ theo công trình"
                         pInputText
                         formControlName="workHoursPerProject"
-                        step="0.1"
-                    />
-                </div>
-
-                <div class="field col mb-0">
-                    <label for="hoursCalculated">Số giờ được tính</label>
-                    <input
-                        type="number"
-                        id="hoursCalculated"
-                        pInputText
-                        formControlName="hoursCalculated"
                         step="0.1"
                     />
                 </div>
@@ -493,18 +449,9 @@
                     <input
                         type="text"
                         id="managingAgency"
+                        placeholder="Nhập cơ quan quản lý"
                         pInputText
                         formControlName="managingAgency"
-                    />
-                </div>
-                <div class="field col mb-0">
-                    <label for="acceptanceDate">Ngày nghiệm thu</label>
-                    <p-calendar
-                        id="startYear"
-                        formControlName="acceptanceDate"
-                        [showIcon]="true"
-                        placeholder="Chọn năm bắt đầu"
-                        [showButtonBar]="true"
                     />
                 </div>
             </div>
@@ -521,12 +468,13 @@
 
                 <div class="field col mb-0">
                     <label for="notes">Ghi chú</label>
-                    <textarea
+                    <input
+                        type="text"
                         id="notes"
-                        rows="3"
-                        pInputTextarea
+                        placeholder="Nhập ghi chú"
+                        pInputText
                         formControlName="notes"
-                    ></textarea>
+                    />
                 </div>
             </div>
         </div>

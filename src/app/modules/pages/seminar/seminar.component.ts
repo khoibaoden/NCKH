@@ -22,18 +22,19 @@ export class SeminarComponent implements OnInit {
     items: any;
     editDialogVisible: boolean = false;
     editingSeminar: any = {};
+    objects: any;
     seminarLevels: any[] = [];
     code: string = '';
-    deadlineRange: any;
     addDialogVisible: boolean = false;
     formatdate: string = 'dd/mm/yy';
     submitted: boolean = false;
-    bomon: any;
+
+    subjects: any[] = [];
 
     newSeminar: any = {
         seminarName: '',
         user: { name: '' },
-        eventDate: null,
+        eventDate: new Date(),
         hourCalculated: null,
         note: '',
         seminarLevel: null,
@@ -43,6 +44,10 @@ export class SeminarComponent implements OnInit {
     selectedUser: any;
     Bomon: any[] = [];
     selectedBomon: any;
+
+    //Loc
+    keyWord: any;
+    deadlineRange: any;
 
     constructor(
         private route: ActivatedRoute,
@@ -58,6 +63,8 @@ export class SeminarComponent implements OnInit {
         perPageOptions: DEFAULT_PER_PAGE_OPTIONS,
         pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     };
+
+    public math = Math;
 
     public constant: any = {
         class: classConstant,
@@ -78,34 +85,11 @@ export class SeminarComponent implements OnInit {
 
     public selectedclass: any = [];
 
-    public queryParameters: any = {
-        ...this.config.paging,
-        status: 0,
-        keyWord: '',
-    };
-
     ngOnInit() {
-        this.items = [{ label: 'Vị trí nhân sự' }];
-        this.route.queryParams.subscribe((params) => {
-            const request = {
-                ...params,
-                pageIndex: params['pageIndex']
-                    ? params['pageIndex']
-                    : this.config.paging.pageIndex,
-                pageSize: params['pageSize']
-                    ? params['pageSize']
-                    : this.config.paging.pageSize,
-            };
-            this.queryParameters = {
-                ...params,
-                status: params['status'] ? params['status'] : 0,
-                keyWord: params['keyWord'] ? params['keyWord'] : null,
-            };
-            this.getSeminar(request);
-        });
-
+        this.items = [{ label: 'Danh sách hội thảo' }];
+        this.getSeminar();
         this.getUserInfor();
-        this.getBomon();
+        this.loadBomon();
     }
 
     getUserInfor() {
@@ -115,18 +99,6 @@ export class SeminarComponent implements OnInit {
                     label: item.name,
                     value: item.id,
                 }));
-            }
-        });
-    }
-
-    getBomon() {
-        this.seminarService.getPaingBM({}).subscribe((response: any) => {
-            if (response.status && response.data) {
-                this.Bomon = response.data.items.map((item: any) => ({
-                    label: item.name,
-                    value: item.id,
-                }));
-                this.bomon = this.Bomon;
             }
         });
     }
@@ -142,6 +114,13 @@ export class SeminarComponent implements OnInit {
         this.selectedUser = null;
         this.selectedBomon = null;
         this.addDialogVisible = true;
+    }
+
+    onPageChange(event: any) {
+        console.log(event);
+        this.paging.pageIndex = event.page + 1;
+        this.paging.pageSize = event.rows;
+        this.getSeminar();
     }
 
     validateSeminarForm(): boolean {
@@ -170,7 +149,7 @@ export class SeminarComponent implements OnInit {
             });
             isValid = false;
         }
-        if (!this.selectedBomon) {
+        if (!this.newSeminar.seminarLevel) {
             this.messageService.add({
                 severity: 'warn',
                 summary: 'Cảnh báo',
@@ -179,6 +158,26 @@ export class SeminarComponent implements OnInit {
             isValid = false;
         }
         return isValid;
+    }
+
+    onSubjectChange(event: any) {
+        console.log(event);
+        this.newSeminar.hourCalculated = this.newSeminar.seminarLevel.value;
+    }
+
+    onEditSubjectChange(event: any) {
+        console.log(event);
+
+        console.log(this.editingSeminar.seminarLevel);
+        this.editingSeminar.hourCalculated =
+            this.editingSeminar.seminarLevel.value;
+    }
+
+    loadBomon() {
+        this.seminarService.getPaingBM().subscribe((res: any) => {
+            this.objects = res.data.items;
+            console.log(this.objects);
+        });
     }
 
     saveNewSeminar() {
@@ -192,8 +191,9 @@ export class SeminarComponent implements OnInit {
             hourCalculated: this.newSeminar.hourCalculated,
             note: this.newSeminar.note || null,
             userId: this.selectedUser || null,
-            seminarLevelId: this.selectedBomon,
+            seminarLevelId: this.newSeminar.seminarLevel.id,
         };
+
         this.seminarService.create(jsonRequest).subscribe(
             (result: any) => {
                 if (result.status) {
@@ -204,7 +204,7 @@ export class SeminarComponent implements OnInit {
                     });
                     this.addDialogVisible = false;
                     this.submitted = false;
-                    this.getSeminar(this.queryParameters);
+                    this.getSeminar();
                 } else {
                     this.messageService.add({
                         severity: 'error',
@@ -224,31 +224,31 @@ export class SeminarComponent implements OnInit {
         );
     }
 
-    public getSeminar(request: any): any {
-        this.seminarService.getPaging(request).subscribe((result: any) => {
-            if (result.status) {
-                if (request.pageIndex !== 1 && result.data.items.length === 0) {
-                    this.route.queryParams.subscribe((params) => {
-                        const request = { ...params, pageIndex: 1 };
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
-                        });
-                    });
+    public getSeminar(): any {
+        this.seminarService
+            .getPaging({
+                keyWord: this.keyWord || null,
+                date: this.deadlineRange
+                    ? new Date(
+                          this.deadlineRange.getTime() + 7 * 60 * 60 * 1000
+                      ).toISOString()
+                    : null,
+                pageIndex: this.paging.pageIndex,
+                pageSize: this.paging.pageSize,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.seminars = result.data.items;
+                    // this.filteredSeminars = [...this.seminars];
+                    if (this.seminars.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                    // this.paging.totalRecords = this.filteredSeminars.length;
+                    this.selectedclass = [];
                 }
-                this.seminars = result.data.items;
-                this.filteredSeminars = [...this.seminars];
-                console.log(this.seminars);
-                if (this.seminars.length === 0) {
-                    this.paging.pageIndex = 1;
-                }
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-                this.paging.totalRecords = this.filteredSeminars.length;
-                this.selectedclass = [];
-            }
-        });
+            });
     }
 
     openEditDialog(seminar: any) {
@@ -265,9 +265,18 @@ export class SeminarComponent implements OnInit {
         this.editingSeminar.seminarName = seminar.seminarName || '';
         this.editingSeminar.hourCalculated = seminar.hourCalculated || 0;
         this.editingSeminar.note = seminar.note || '';
+        this.editingSeminar.note = seminar.note || '';
         this.selectedUser = seminar.user?.id || null; // Dùng cho dropdown người tạo
-        this.selectedBomon = seminar.seminarLevel?.id || null; // Dùng cho dropdown mức độ
+        this.editingSeminar.seminarLevel = {
+            id: seminar.seminarLevel.id,
+            name: seminar.seminarLevel.name,
+            value: seminar.seminarLevel.value,
+            description: seminar.seminarLevel.description,
+        };
+        // seminar.seminarLevel || null; // Dùng cho dropdown mức độ
 
+        console.log(this.objects);
+        console.log(seminar.seminarLevel);
         // Hiển thị dialog
         this.editDialogVisible = true;
     }
@@ -285,7 +294,7 @@ export class SeminarComponent implements OnInit {
                 hourCalculated: this.editingSeminar.hourCalculated,
                 note: this.editingSeminar.note || null,
                 userId: this.selectedUser || null,
-                seminarLevelId: this.selectedBomon || null,
+                seminarLevelId: this.editingSeminar.seminarLevel.id || null,
             };
             this.seminarService.update(updateRequest).subscribe(
                 (result: any) => {
@@ -296,7 +305,7 @@ export class SeminarComponent implements OnInit {
                             detail: 'Cập nhật thông tin hội thảo thành công',
                         });
                         this.hideEditDialog();
-                        this.getSeminar(this.queryParameters);
+                        this.getSeminar();
                     } else {
                         this.messageService.add({
                             severity: 'error',
@@ -351,7 +360,7 @@ export class SeminarComponent implements OnInit {
                         summary: 'Thành công',
                         detail: 'Đã xóa hội thảo thành công',
                     });
-                    this.getSeminar(this.queryParameters);
+                    this.getSeminar();
                 } else {
                     this.messageService.add({
                         severity: 'error',
@@ -424,57 +433,16 @@ export class SeminarComponent implements OnInit {
         this.applyFilter();
     }
 
-    onPageChange(event: any) {
-        this.paging.pageIndex = event.page + 1;
-        this.paging.pageSize = event.rows;
-    }
-
     blurDateRange() {}
 
-    EvenFilter() {
-        this.applyFilter();
-    }
+    // EvenFilter() {
+    //     this.applyFilter();
+    // }
 
-    private applyFilter() {
-        this.filteredSeminars = [...this.seminars];
-
-        if (this.code) {
-            this.filteredSeminars = this.filteredSeminars.filter(
-                (seminar: any) =>
-                    seminar.user?.name
-                        ?.toLowerCase()
-                        .includes(this.code.toLowerCase())
-            );
-        }
-
-        if (
-            this.deadlineRange &&
-            (this.deadlineRange[0] || this.deadlineRange[1])
-        ) {
-            const fromDate = this.deadlineRange[0]
-                ? new Date(this.deadlineRange[0])
-                : null;
-            const toDate = this.deadlineRange[1]
-                ? new Date(this.deadlineRange[1])
-                : null;
-
-            this.filteredSeminars = this.filteredSeminars.filter(
-                (seminar: any) => {
-                    const seminarDate = new Date(seminar.date);
-                    if (fromDate && toDate) {
-                        return seminarDate >= fromDate && seminarDate <= toDate;
-                    } else if (fromDate) {
-                        return seminarDate >= fromDate;
-                    } else if (toDate) {
-                        return seminarDate <= toDate;
-                    }
-                    return true;
-                }
-            );
-        }
-
+    public applyFilter() {
         this.paging.totalRecords = this.filteredSeminars.length;
         this.paging.pageIndex = 1;
+        this.getSeminar();
     }
 
     formatDate(date: Date): string {

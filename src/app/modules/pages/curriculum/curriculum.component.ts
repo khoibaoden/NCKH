@@ -102,6 +102,7 @@ export class CurriculumComponent implements OnInit {
     public queryParameters: any = {
         ...this.config.paging,
         keyWord: '',
+        authorName: '',
     };
 
     ngOnInit() {
@@ -193,9 +194,9 @@ export class CurriculumComponent implements OnInit {
                         userId: [result.data.userId],
                         name: [result.data.name],
                         publishYear: [result.data.publishYear],
-                        isAuthor: [false],
+                        isAuthor: [result.data.isAuthor],
                         memberNumber: [result.data.memberNumber],
-                        isAuthorWrite: [false],
+                        isAuthorWrite: [result.data.isAuthorWrite],
                         isbn: [result.data.isbn],
                         publishingHouse: [result.data.publishingHouse],
                         curriculumLevelId: [result.data.curriculumLevelId],
@@ -219,7 +220,32 @@ export class CurriculumComponent implements OnInit {
 
     //Thêm
     public handleCreateItem() {
-        console.log(this.createCurriculumForm.value);
+        const formValue = this.createCurriculumForm.value;
+        console.log(formValue);
+
+        const isAuthorWrite = formValue.isAuthorWrite;
+        const memberNumber = Number(formValue.memberNumber);
+        const workHoursPerProject = Number(formValue.workHoursPerProject);
+
+        // Nếu không đủ dữ liệu cần thiết thì không tính
+        if (!memberNumber || !workHoursPerProject) {
+            formValue.hoursCalculated = 0;
+            console.warn('Thiếu dữ liệu cần thiết để tính giờ');
+        } else {
+            // Nếu là chủ biên có tham gia viết thì G = 1, ngược lại G = 0
+            const G = isAuthorWrite ? 1 : 0;
+
+            if (G === 0) {
+                formValue.hoursCalculated = 0;
+                console.warn('Không phải chủ biên có viết, không tính giờ');
+            } else {
+                const H = memberNumber;
+                const L = workHoursPerProject;
+
+                const calculatedHours = (1 / 5) * (H * G + (1 / G + 1) * L);
+                formValue.hoursCalculated = Math.round(calculatedHours); // Làm tròn nếu cần
+            }
+        }
         this.curriculumService
             .create({
                 ...this.createCurriculumForm.value,
@@ -240,7 +266,7 @@ export class CurriculumComponent implements OnInit {
 
     public loadCanbos(event: any = null): void {
         this.userService
-            .getPaging({ name: this.search })
+            .getPaging({ name: this.search, pageSize: 100 })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
@@ -274,21 +300,47 @@ export class CurriculumComponent implements OnInit {
     }
 
     onSelectCanBo(event: any) {
-        console.log(event);
         this.createCurriculumForm.get('userId')?.setValue(event.value.id);
     }
 
     loadCurriculumLevel() {
-        this.curriculumLevelService.getPaging({}).subscribe((result: any) => {
-            if (result.status) {
-                this.curriculumLevels = result.data.items;
-            }
-        });
+        this.curriculumLevelService
+            .getPaging({ pageSize: 1000 })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.curriculumLevels = result.data.items;
+                }
+            });
     }
 
+    onCurriculumLevelChange(event: any): void {
+        console.log(event);
+        const selectedId = event.value;
+        const selectedLevel = this.curriculumLevels.find(
+            (level) => level.id === selectedId
+        );
+
+        this.createCurriculumForm.patchValue({
+            workHoursPerProject: selectedLevel.value,
+        });
+
+        console.log('Bạn đã chọn:', selectedLevel);
+    }
+    onEditCurriculumLevelChange(event: any): void {
+        console.log(event);
+        const selectedId = event.value;
+        const selectedLevel = this.curriculumLevels.find(
+            (level) => level.id === selectedId
+        );
+
+        this.updateCurriculumForm.patchValue({
+            workHoursPerProject: selectedLevel.value,
+        });
+
+        console.log('Bạn đã chọn:', selectedLevel);
+    }
     //Xóa
     handleDeleteItem(id: number) {
-        console.log(id);
         this.confirmationService.confirm({
             message: 'Bạn có chắc chắn muốn xóa bản ghi này?',
             header: 'Xác nhận',
@@ -344,6 +396,9 @@ export class CurriculumComponent implements OnInit {
                 ...params,
                 keyWord: this.queryParameters.keyWord
                     ? this.queryParameters.keyWord
+                    : '',
+                authorName: this.queryParameters.authorName
+                    ? this.queryParameters.authorName
                     : '',
             };
 

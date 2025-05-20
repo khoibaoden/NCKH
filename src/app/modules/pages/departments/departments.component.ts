@@ -169,7 +169,6 @@ export class DepartmentComponent implements OnInit {
                 }
                 this.departments = result.data.items;
                 this.filteredDepartments = [...this.departments];
-                console.log(this.departments);
                 if (this.departments.length === 0) {
                     this.paging.pageIndex = 1;
                 }

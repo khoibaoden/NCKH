@@ -51,7 +51,6 @@ export class AuthService {
     public userCurrent = this.currentUserSubject.asObservable();
 
     getUserCurrent() {
-        console.log(this.currentUserSubject.value);
         return this.currentUserSubject.value;
     }
 

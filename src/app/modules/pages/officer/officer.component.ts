@@ -15,7 +15,7 @@ import { OfficerService } from 'src/app/core/services/officer.service';
     selector: 'app-officer',
     templateUrl: './officer.component.html',
     styleUrl: './officer.component.scss',
-    providers: [MessageService, ConfirmationService]
+    providers: [MessageService, ConfirmationService],
 })
 export class OfficerComponent implements OnInit {
     items: any;
@@ -106,7 +106,6 @@ export class OfficerComponent implements OnInit {
                 }
                 this.staff = result.data.items;
                 this.filteredstaff = [...this.staff];
-                console.log(this.staff);
                 if (this.staff.length === 0) {
                     this.paging.pageIndex = 1;
                 }
