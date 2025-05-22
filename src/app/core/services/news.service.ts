@@ -11,6 +11,17 @@ export class NewsService {
         return this.http.get('articleproject/paging', request);
     }
 
+    updateBodyAndQueryParamsStatus(
+        dataQueryParams: any,
+        dataBody: any
+    ): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'articleproject/update',
+            dataQueryParams,
+            dataBody
+        );
+    }
+
     create(request: FormData): Observable<any> {
         return this.http.postFormData('articleproject/create', request);
     }
@@ -19,7 +30,14 @@ export class NewsService {
         return this.http.putFormData('articleproject/update', request);
     }
 
-    delete(request: any): Observable<any> {
-        return this.http.put('articleproject/delete', request);
+    getById(request: any = null): Observable<any> {
+        return this.http.get('articleproject/get-by-id', request);
+    }
+    delete(request: any, request2: any): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'articleproject/delete',
+            request,
+            request2
+        );
     }
 }

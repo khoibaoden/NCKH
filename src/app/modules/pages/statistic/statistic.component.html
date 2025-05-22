@@ -26,52 +26,6 @@
                 [paginator]="false"
                 [rowHover]="true"
             >
-                <ng-template pTemplate="caption">
-                    <div
-                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
-                    >
-                        <div class="flex flex-column">
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
-                            >
-                            <span class="block mt-2 md:mt-0 p-input-icon-left">
-                                <i class="pi pi-search"></i>
-                                <input
-                                    pInputText
-                                    type="text"
-                                    [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
-                                    style="width: 350px"
-                                    class="sm:"
-                                />
-                            </span>
-                        </div>
-                        <div class="flex flex-column">
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
-                            >
-                            <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
-                                [(ngModel)]="deadlineRange"
-                                selectionMode="range"
-                                [showIcon]="true"
-                                [showClearButton]="true"
-                                (onBlur)="blurDateRange()"
-                                [dateFormat]="this.formatdate"
-                            ></p-calendar>
-                        </div>
-                        <button
-                            pButton
-                            pRipple
-                            label="Lọc"
-                            (click)="EvenFilter()"
-                        ></button>
-                    </div>
-                </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
                         <th>STT</th>
