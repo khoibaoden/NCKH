@@ -9,6 +9,7 @@ import pagingConfig, {
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { OfficerService } from 'src/app/core/services/officer.service';
 
 @Component({
@@ -36,7 +37,8 @@ export class OfficerComponent implements OnInit {
         private router: Router,
         private officerService: OfficerService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
     ) {}
 
     public config: any = {

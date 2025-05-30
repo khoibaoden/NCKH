@@ -14,6 +14,7 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import { ClassService } from 'src/app/core/services/class.service';
 import { ScienceProjectLevelService } from 'src/app/core/services/science-project-level.service';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 
 @Component({
     selector: 'app-science-project',
@@ -61,7 +62,8 @@ export class ScienceProjectComponent implements OnInit {
         private messageService: MessageService,
         private scienceProjectLevelService: ScienceProjectLevelService,
         private userService: UserService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
     ) {
         this.createScienceProjectForm = this.fb.group({
             projectName: ['', Validators.required],
@@ -131,10 +133,12 @@ export class ScienceProjectComponent implements OnInit {
         keyWord: '',
         codeName: '',
     };
-
+    userCurrent: any;
     ngOnInit() {
         this.items = [{ label: 'Đề tài nghiên cứu' }];
-
+        this.authService.userCurrent.subscribe((user) => {
+            this.userCurrent = user;
+        });
         this.getScience({});
         this.loadMembers();
         this.loadProjectLeaders();
@@ -174,7 +178,10 @@ export class ScienceProjectComponent implements OnInit {
 
     public getScience(request: any): any {
         this.scienceProjectService
-            .getPaging(request)
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.scienceProjects = result.data.items;

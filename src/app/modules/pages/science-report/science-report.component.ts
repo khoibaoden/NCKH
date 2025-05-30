@@ -9,6 +9,7 @@ import pagingConfig, {
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { ScienceReportLevelService } from 'src/app/core/services/science-report-level.service';
 import { ScienceReportService } from 'src/app/core/services/science-report.service';
 import { UserService } from 'src/app/core/services/user.service';
@@ -53,7 +54,8 @@ export class ScienceReportsComponent implements OnInit {
         private confirmationService: ConfirmationService,
         private scienceReportLevelService: ScienceReportLevelService,
         private scienceReportService: ScienceReportService,
-        private userService: UserService
+        private userService: UserService,
+        private authService: AuthService
     ) {}
 
     public config: any = {
@@ -78,7 +80,7 @@ export class ScienceReportsComponent implements OnInit {
         totalRecords: 0,
         totalPages: 0,
     };
-
+    userCurrent: any;
     public selectedReports: any = [];
 
     public queryParameters: any = {
@@ -89,6 +91,10 @@ export class ScienceReportsComponent implements OnInit {
     scienceReportLevels: any;
     ngOnInit() {
         this.items = [{ label: 'Báo cáo khoa học' }];
+        this.authService.userCurrent.subscribe((user) => {
+            console.log(user);
+            this.userCurrent = user;
+        });
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -256,7 +262,10 @@ export class ScienceReportsComponent implements OnInit {
 
     public getReports(request: any): any {
         this.scienceReportService
-            .getPaging(request)
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.reports = result.data.items;

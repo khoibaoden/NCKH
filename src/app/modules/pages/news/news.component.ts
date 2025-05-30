@@ -15,6 +15,7 @@ import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
 import { NewsService } from 'src/app/core/services/news.service';
 import { ArticleProjectLevelService } from 'src/app/core/services/article-project-level.service';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 
 @Component({
     selector: 'app-news',
@@ -38,6 +39,7 @@ export class NewsComponent implements OnInit {
     newsId: any;
     selectedMembersUpdate: any[] = [];
     visibleUpdateNews: boolean = false;
+    userCurrent: any;
     constructor(
         private route: ActivatedRoute,
         private router: Router,
@@ -46,7 +48,8 @@ export class NewsComponent implements OnInit {
         private fb: FormBuilder,
         private messageService: MessageService,
         private userService: UserService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
     ) {
         this.createNewsForm = this.fb.group({
             userId: [''],
@@ -120,6 +123,10 @@ export class NewsComponent implements OnInit {
 
     ngOnInit() {
         this.items = [{ label: 'Danh sách bài báo' }];
+        this.authService.userCurrent.subscribe((user) => {
+            console.log(user);
+            this.userCurrent = user;
+        });
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -138,6 +145,7 @@ export class NewsComponent implements OnInit {
             };
             this.getNews(request);
         });
+
         this.loadArticleLevels();
         this.loadMembers();
     }
@@ -201,7 +209,7 @@ export class NewsComponent implements OnInit {
 
     public handleOnSearch(event: any = null): void {
         this.userService
-            .getPaging({ name: this.search })
+            .getPaging({ name: event.query })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.users = result.data.items;
@@ -210,42 +218,50 @@ export class NewsComponent implements OnInit {
     }
 
     public getNews(request: any): any {
-        this.newsService.getPaging(request).subscribe((result: any) => {
-            if (result.status) {
-                if (request.pageIndex !== 1 && result.data.items.length === 0) {
-                    this.route.queryParams.subscribe((params) => {
-                        const request = {
-                            ...params,
-                            pageIndex: 1,
-                        };
+        this.newsService
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
+                        this.route.queryParams.subscribe((params) => {
+                            const request = {
+                                ...params,
+                                pageIndex: 1,
+                            };
 
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
+                            this.router.navigate([], {
+                                relativeTo: this.route,
+                                queryParams: request,
+                                queryParamsHandling: 'merge',
+                            });
                         });
+                    }
+
+                    this.news = result.data.items.map((item) => {
+                        return {
+                            ...item,
+                            authorNames: item.authorArticleProjects.map(
+                                (a) => a.user.name
+                            ),
+                        };
                     });
+                    console.log(this.news);
+                    if (this.news.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
+
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+
+                    this.selectedclass = [];
                 }
-
-                this.news = result.data.items.map((item) => {
-                    return {
-                        ...item,
-                        authorNames: item.authorArticleProjects.map(
-                            (a) => a.user.name
-                        ),
-                    };
-                });
-                console.log(this.news);
-                if (this.news.length === 0) {
-                    this.paging.pageIndex = 1;
-                }
-
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-
-                this.selectedclass = [];
-            }
-        });
+            });
     }
     public selectAllclasss(event: any): void {
         if (event.target.checked) {

@@ -226,14 +226,12 @@
         </div>
         <div class="field">
             <label for="user">Người tạo</label>
-            <p-dropdown
-                id="user"
-                [options]="Userinfo"
+            <p-autoComplete
                 [(ngModel)]="selectedUser"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Chọn người tạo"
-            ></p-dropdown>
+                placeholder="Nhập tên người tạo"
+                [suggestions]="Userinfo"
+                (completeMethod)="handleSearchUser($event)"
+            />
         </div>
         <div class="field">
             <label for="date">Ngày tổ chức</label>
@@ -322,12 +320,11 @@
         </div>
         <div class="field">
             <label for="name">Người tạo<span class="text-danger"></span></label>
-            <p-dropdown
-                [options]="Userinfo"
+            <p-autoComplete
                 [(ngModel)]="selectedUser"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Chọn người tạo"
+                placeholder="Nhập tên người tạo"
+                [suggestions]="Userinfo"
+                (completeMethod)="handleSearchUser($event)"
             />
         </div>
 

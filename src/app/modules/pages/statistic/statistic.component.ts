@@ -42,6 +42,8 @@ export class StatisticComponent implements OnInit {
         ...this.config.paging,
         status: 0,
         keyWord: '',
+        startDate: null,
+        endDate: null,
     };
 
     constructor(
@@ -55,9 +57,14 @@ export class StatisticComponent implements OnInit {
         this.getStatistic(this.queryParameters);
     }
 
+    filterByDateRange() {}
     public getStatistic(request: any): any {
         this.statisticService
-            .getStatisticTotalHours({ pageSize: 1000 })
+            .getStatisticTotalHours({
+                ...request,
+                startDate: this.queryParameters?.startDate?.toISOString(),
+                endDate: this.queryParameters?.endDate?.toISOString(),
+            })
             .subscribe((result: any) => {
                 if (result.status) {
                     if (
