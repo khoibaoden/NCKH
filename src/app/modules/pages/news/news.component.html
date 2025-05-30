@@ -13,8 +13,8 @@
                     pButton
                     pRipple
                     icon="pi pi-plus"
-                    label="Nhập kho"
-                    [routerLink]="['/pages/warehouse/stock-in/create']"
+                    label="Thêm mới"
+                    (click)="visibleNews = true"
                 ></button>
             </ng-template>
         </p-toolbar>
@@ -23,6 +23,7 @@
                 #dt
                 [value]="news"
                 responsiveLayout="scroll"
+                [tableStyle]="{ 'min-width': '1700px' }"
                 styleClass="p-datatable-striped"
                 [paginator]="false"
                 [rowHover]="true"
@@ -35,113 +36,510 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo người tạo:</label
+                                >Tìm kiếm theo tên dự án:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
                                 <input
                                     pInputText
                                     type="text"
-                                    [(ngModel)]="code"
-                                    placeholder="Tìm theo người tạo"
+                                    [(ngModel)]="this.queryParameters.keyWord"
+                                    placeholder="Nhập tên dự án"
                                     style="width: 350px"
                                     class="sm:"
                                 />
                             </span>
                         </div>
-                        <div class="flex flex-column">
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Ngày nhập kho:</label
-                            >
-                            <p-calendar
-                                placeholder="Từ ngày - Đến ngày"
-                                [(ngModel)]="deadlineRange"
-                                selectionMode="range"
-                                [showIcon]="true"
-                                [showClearButton]="true"
-                                (onBlur)="blurDateRange()"
-                                [dateFormat]="this.formatdate"
-                            ></p-calendar>
-                        </div>
+
                         <button
                             pButton
                             pRipple
                             label="Lọc"
-                            (click)="EvenFilter()"
+                            (click)="handleSearchNews()"
                         ></button>
                     </div>
                 </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width: 15%">Tên bài báo</th>
-                        <th style="width: 15%">Số lượng thành viên</th>
-                        <th style="width: 5%">Định mức</th>
-                        <th style="width: 5%">Số giờ được tính</th>
-                        <th style="width: 6%">Tên tạp chí</th>
-                        <th style="width: 40%">Mã ISSN</th>
-                        <th style="width: 40%">Tạp chí số</th>
-                        <th style="width: 40%">Số trang đầu cuối</th>
-                        <th style="width: 40%">Năm xuất bản</th>
-                        <th style="width: 40%">Ghi chú</th>
+                        <th>STT</th>
+                        <th>Tên cán bộ</th>
+                        <th>Tên bài báo</th>
+                        <th>Số lượng thành viên</th>
+                        <th>Đồng tác giả</th>
+                        <th>Tác giả đứng đầu</th>
+                        <th>Định mức</th>
+                        <th>Số giờ được tính</th>
+                        <th>Tên tạp chí</th>
+                        <th>Mã ISSN</th>
+                        <th>Tạp chí số</th>
+                        <th>Số trang đầu cuối</th>
+                        <th>Năm xuất bản</th>
+                        <th>Ghi chú</th>
+                        <th>Thao tác</th>
                     </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let-item>
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
                     <tr>
-                        <td style="width: 5%; min-width: 10rem" class="code">
-                            {{ item.ProjectName }}
+                        <td>
+                            {{ i + 1 }}
                         </td>
-                        <td style="width: 15%; min-width: 10rem">
-                            {{ item.MemberCount }}
+                        <td class="code">
+                            {{ item.user.name }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.WorkHoursPerProject }}
+                        <td class="code">
+                            {{ item.projectName }}
                         </td>
-                        <td style="width: 14%; min-width: 8rem">
-                            {{ item.HoursCalculated }}
+                        <td>
+                            {{ item.memberCount }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.MagazineName }}
+
+                        <td>
+                            {{ item.authorNames }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.iSSN }}
+                        <td>
+                            {{ item.projectManager.name }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.VolumeNo }}
+                        <td>
+                            {{ item.workHoursPerProject }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.TerminalPage }}
+                        <td>
+                            {{ item.hoursCalculated }}
                         </td>
-                        <td style="width: 14%; min-width: 10rem">
-                            {{ item.Notes }}
+                        <td>
+                            {{ item.magazineName }}
+                        </td>
+                        <td>
+                            {{ item.issn }}
+                        </td>
+                        <td>
+                            {{ item.volumeNo }}
+                        </td>
+                        <td>
+                            {{ item.terminalPage }}
+                        </td>
+                        <td>
+                            {{ item.publishYear | date : "dd/MM/yyyy" }}
+                        </td>
+                        <td>
+                            {{ item.notes }}
+                        </td>
+                        <td class="flex gap-2 justify-center">
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-pencil"
+                                class="p-button-rounded p-button-info p-button-sm"
+                                (click)="handleShowUpdateNews(item)"
+                                pTooltip="Sửa"
+                                tooltipPosition="top"
+                            ></button>
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-sm"
+                                (click)="handleDeleteItem(item.id)"
+                                pTooltip="Xóa"
+                                tooltipPosition="top"
+                            ></button>
                         </td>
                     </tr>
                 </ng-template>
             </p-table>
             <div
-                class="flex align-items-center"
+                class="flex align-items-center mt-3"
                 style="justify-content: space-between"
             >
-                <!-- <p>
-                    <span style="font-weight: 500">{{ startRecord }}</span> -
-                    <span style="font-weight: 500">{{ endRecord }}</span> trong
+                <p>
                     <span style="font-weight: 500">{{
-                        totalRecordsCount
+                        1 + (paging.pageIndex - 1) * paging.pageSize
+                    }}</span>
+                    -
+                    <span style="font-weight: 500">{{
+                        1 +
+                            (paging.pageIndex - 1) * paging.pageSize +
+                            (paging.pageSize - 1)
+                    }}</span>
+                    trong
+                    <span style="font-weight: 500">{{
+                        paging.totalRecords
                     }}</span>
                     bản ghi
-                </p> -->
+                </p>
                 <div *ngIf="news?.length > 0">
                     <p-paginator
-                        [rows]="pageSize"
+                        class="custum-paging"
                         (onPageChange)="onPageChange($event)"
-                        [totalRecords]="
-                            totalRecordsCount > 0 ? totalRecordsCount : 1
-                        "
-                        [rowsPerPageOptions]="[10, 20, 30]"
-                    ></p-paginator>
+                        [first]="(paging.pageIndex - 1) * paging.pageSize"
+                        [rows]="paging.pageSize"
+                        [totalRecords]="paging.totalRecords"
+                        [rowsPerPageOptions]="config.pageSizeOptions"
+                    />
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<p-dialog
+    header="Thêm mới"
+    [modal]="true"
+    [(visible)]="visibleNews"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="createNewsForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <!-- Mã -->
+                <div class="field col mb-0">
+                    <label htmlFor="code">Cán bộ giáo viên</label>
+                    <p-autoComplete
+                        formControlName="userId"
+                        [suggestions]="users"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        placeholder="Nhập tên cán bộ giáo viên"
+                    >
+                    </p-autoComplete>
+                </div>
+
+                <!-- Tên -->
+                <div class="field col mb-0">
+                    <label htmlFor="name">Tên bài báo</label>
+                    <input
+                        pInputText
+                        id="name"
+                        placeholder="Nhập tên đề tài nghiên cứu"
+                        formControlName="projectName"
+                        spellcheck="false"
+                        type="text"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường mới -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Tên tạp chí</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="magazineName"
+                        placeholder="Nhập tên tạp chí"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="issn">ISSN</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="issn"
+                        formControlName="issn"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="volumeNo">Tập, số tạp chí</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="volumeNo"
+                        formControlName="volumeNo"
+                        placeholder="Nhập tập số tạp chí"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="terminalPage">Số trang đầu cuối</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="terminalPage"
+                        formControlName="terminalPage"
+                        placeholder="Nhập số trang đầu cuối"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="articleProjectLevelId">Phân loại tạp chí</label>
+                    <p-dropdown
+                        [options]="articleLevels"
+                        optionLabel="key"
+                        formControlName="articleProjectLevelId"
+                        placeholder="Chọn cấp"
+                        (onChange)="onLevelChange($event)"
+                        inputId="articleProjectLevelId"
+                    ></p-dropdown>
+                </div>
+                <div class="field col mb-0">
+                    <label htmlFor="code">Tác giả đứng đầu</label>
+                    <p-autoComplete
+                        formControlName="projectManagerId"
+                        [suggestions]="users"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập tên cán bộ giáo viên"
+                    >
+                    </p-autoComplete>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Giờ định mức theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="workHoursPerProject"
+                        placeholder="Nhập số giờ định mức"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="publishYear">Năm xuất bản</label>
+                    <p-calendar
+                        id="acceptanceDate"
+                        formControlName="publishYear"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Chọn năm xuất bản"
+                        showIcon="true"
+                        [showButtonBar]="true"
+                    ></p-calendar>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        pInputTextarea
+                        id="note"
+                        formControlName="notes"
+                        rows="3"
+                        placeholder="Nhập ghi chú (nếu có)"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="p-formgrid grid">
+        <div class="field col mb-0 flex flex-column">
+            <label for="membersName">Tên các thành viên</label>
+            <p-multiSelect
+                id="membersName"
+                [options]="members"
+                [(ngModel)]="selectedMembers"
+                name="membersName"
+                appendTo="body"
+                style="width: 100%"
+                optionLabel="name"
+                placeholder="Chọn các thành viên"
+                display="chip"
+            ></p-multiSelect>
+        </div>
+    </div>
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleNews = false"
+        ></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Thêm mới"
+            type="button"
+            (click)="handleCreateItem()"
+        ></p-button>
+    </div>
+</p-dialog>
+
+<!-- Sửa -->
+<p-dialog
+    header="Chỉnh sửa"
+    [modal]="true"
+    [(visible)]="visibleUpdateNews"
+    [style]="{ width: '60rem' }"
+>
+    <form [formGroup]="updateNewsForm">
+        <div class="p-fluid">
+            <div class="p-formgrid grid">
+                <!-- Mã -->
+                <div class="field col mb-0">
+                    <label htmlFor="code">Cán bộ giáo viên</label>
+                    <p-autoComplete
+                        formControlName="userId"
+                        [suggestions]="users"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        placeholder="Nhập tên cán bộ giáo viên"
+                    >
+                    </p-autoComplete>
+                </div>
+
+                <!-- Tên -->
+                <div class="field col mb-0">
+                    <label htmlFor="name">Tên bài báo</label>
+                    <input
+                        pInputText
+                        id="name"
+                        placeholder="Nhập tên đề tài nghiên cứu"
+                        formControlName="projectName"
+                        spellcheck="false"
+                        type="text"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <!-- Các trường mới -->
+                <div class="field col mb-0">
+                    <label for="acceptanceDate">Tên tạp chí</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="magazineName"
+                        placeholder="Nhập tên tạp chí"
+                    />
+                </div>
+
+                <div class="field col mb-0">
+                    <label for="issn">ISSN</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="issn"
+                        formControlName="issn"
+                        placeholder="Nhập tên các thành viên"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="volumeNo">Tập, số tạp chí</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="volumeNo"
+                        formControlName="volumeNo"
+                        placeholder="Nhập tập số tạp chí"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="terminalPage">Số trang đầu cuối</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="terminalPage"
+                        formControlName="terminalPage"
+                        placeholder="Nhập số trang đầu cuối"
+                    />
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="articleProjectLevelId">Phân loại tạp chí</label>
+                    <p-dropdown
+                        [options]="articleLevels"
+                        optionLabel="key"
+                        formControlName="articleProjectLevelId"
+                        placeholder="Chọn cấp"
+                        (onChange)="onLevelChange($event)"
+                        inputId="articleProjectLevelId"
+                    ></p-dropdown>
+                </div>
+                <div class="field col mb-0">
+                    <label htmlFor="code">Tác giả đứng đầu</label>
+                    <p-autoComplete
+                        formControlName="projectManagerId"
+                        [suggestions]="users"
+                        (completeMethod)="handleOnSearch($event)"
+                        field="name"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập tên cán bộ giáo viên"
+                    >
+                    </p-autoComplete>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="workHoursPerProject"
+                        >Giờ định mức theo công trình</label
+                    >
+                    <input
+                        type="number"
+                        pInputText
+                        id="workHoursPerProject"
+                        formControlName="workHoursPerProject"
+                        placeholder="Nhập số giờ định mức"
+                    />
+                </div>
+                <div class="field col mb-0">
+                    <label for="publishYear">Năm xuất bản</label>
+                    <p-calendar
+                        id="acceptanceDate"
+                        formControlName="publishYear"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Chọn năm xuất bản"
+                        showIcon="true"
+                        [showButtonBar]="true"
+                    ></p-calendar>
+                </div>
+            </div>
+            <div class="p-formgrid grid">
+                <div class="field col mb-0">
+                    <label for="note">Ghi chú</label>
+                    <textarea
+                        pInputTextarea
+                        id="note"
+                        formControlName="notes"
+                        rows="3"
+                        placeholder="Nhập ghi chú (nếu có)"
+                    ></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="p-formgrid grid">
+        <div class="field col mb-0 flex flex-column">
+            <label for="membersName">Tên các thành viên</label>
+            <p-multiSelect
+                id="membersName"
+                [options]="members"
+                [(ngModel)]="selectedMembersUpdate"
+                name="membersName"
+                appendTo="body"
+                style="width: 100%"
+                optionLabel="name"
+                placeholder="Chọn các thành viên"
+                display="chip"
+            ></p-multiSelect>
+        </div>
+    </div>
+    <div class="p-dialog-footer flex justify-content-end gap-2">
+        <p-button
+            label="Hủy"
+            severity="secondary"
+            (onClick)="visibleUpdateNews = false"
+        ></p-button>
+        <p-button
+            icon="pi pi-plus"
+            label="Cập nhật"
+            type="button"
+            (click)="handleUpdateItem()"
+        ></p-button>
+    </div>
+</p-dialog>
+<p-toast />
+<p-confirmDialog
+    [style]="{ width: '450px' }"
+    header="Xác nhận"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>

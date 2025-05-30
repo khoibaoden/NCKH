@@ -57,7 +57,7 @@ export class StatisticComponent implements OnInit {
 
     public getStatistic(request: any): any {
         this.statisticService
-            .getStatisticTotalHours()
+            .getStatisticTotalHours({ pageSize: 1000 })
             .subscribe((result: any) => {
                 if (result.status) {
                     if (
