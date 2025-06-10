@@ -12,6 +12,7 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import classConstant from 'src/app/core/constants/staff-position.constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { UserService } from 'src/app/core/services/identity/user.service';
 import { IntellecturalPropertyLevelService } from 'src/app/core/services/intellectural-property-level.service';
 import { IntellecturealPropertyService } from 'src/app/core/services/intellectureal-property.service';
@@ -48,7 +49,8 @@ export class IntellecturealPropertyComponent implements OnInit {
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private intellecturealPropertyService: IntellecturealPropertyService,
-        private intellecturalPropertyLevelService: IntellecturalPropertyLevelService
+        private intellecturalPropertyLevelService: IntellecturalPropertyLevelService,
+        private authService: AuthService
     ) {
         this.createIntellecturealForm = this.formBuilder.group({
             userId: [null, [Validators.required]],
@@ -109,9 +111,13 @@ export class IntellecturealPropertyComponent implements OnInit {
     };
     canbos: any;
     visibleIntellectureal: boolean = false;
-
+    userCurrent: any;
     ngOnInit() {
         this.items = [{ label: 'Danh sách sở hữu trí tuệ' }];
+        this.authService.userCurrent.subscribe((user) => {
+            console.log(user);
+            this.userCurrent = user;
+        });
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -193,7 +199,10 @@ export class IntellecturealPropertyComponent implements OnInit {
     public getIntellecturealProperty(request: any): any {
         console.log(request);
         this.intellecturealPropertyService
-            .getPaging(request)
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
             .subscribe((result: any) => {
                 if (result.status) {
                     if (

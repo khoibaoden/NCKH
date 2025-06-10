@@ -1,3 +1,4 @@
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -54,7 +55,8 @@ export class SeminarComponent implements OnInit {
         private router: Router,
         private seminarService: SeminarService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
     ) {}
 
     public config: any = {
@@ -70,7 +72,7 @@ export class SeminarComponent implements OnInit {
         class: classConstant,
         sort: sortConstant,
     };
-
+    userCurrent: any;
     public seminars: any = [];
     public filteredSeminars: any = [];
 
@@ -87,20 +89,39 @@ export class SeminarComponent implements OnInit {
 
     ngOnInit() {
         this.items = [{ label: 'Danh sách hội thảo' }];
+        this.authService.userCurrent.subscribe((user) => {
+            console.log(user);
+            this.userCurrent = user;
+        });
         this.getSeminar();
         this.getUserInfor();
         this.loadBomon();
     }
 
     getUserInfor() {
-        this.seminarService.getPaingProcess({}).subscribe((response: any) => {
-            if (response.status && response.data) {
-                this.Userinfo = response.data.items.map((item: any) => ({
-                    label: item.name,
-                    value: item.id,
-                }));
-            }
-        });
+        this.seminarService
+            .getPaingProcess({ pageSize: 1000 })
+            .subscribe((response: any) => {
+                if (response.status && response.data) {
+                    this.Userinfo = response.data.items.map((item: any) => ({
+                        label: item.name,
+                        value: item.id,
+                    }));
+                }
+            });
+    }
+
+    handleSearchUser(event: any) {
+        this.seminarService
+            .getPaingProcess({ name: event?.query })
+            .subscribe((response: any) => {
+                if (response.status && response.data) {
+                    this.Userinfo = response.data.items.map((item: any) => ({
+                        label: item.name,
+                        value: item.id,
+                    }));
+                }
+            });
     }
 
     openAddDialog() {
@@ -185,12 +206,14 @@ export class SeminarComponent implements OnInit {
         if (!this.validateSeminarForm()) {
             return;
         }
+
+        console.log(this.selectedUser);
         const jsonRequest = {
             seminarName: this.newSeminar.seminarName,
             date: this.formatDateForApi(this.newSeminar.eventDate),
             hourCalculated: this.newSeminar.hourCalculated,
             note: this.newSeminar.note || null,
-            userId: this.selectedUser || null,
+            userId: this.selectedUser.value || null,
             seminarLevelId: this.newSeminar.seminarLevel.id,
         };
 
@@ -235,6 +258,7 @@ export class SeminarComponent implements OnInit {
                     : null,
                 pageIndex: this.paging.pageIndex,
                 pageSize: this.paging.pageSize,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
             })
             .subscribe((result: any) => {
                 if (result.status) {
@@ -266,7 +290,10 @@ export class SeminarComponent implements OnInit {
         this.editingSeminar.hourCalculated = seminar.hourCalculated || 0;
         this.editingSeminar.note = seminar.note || '';
         this.editingSeminar.note = seminar.note || '';
-        this.selectedUser = seminar.user?.id || null; // Dùng cho dropdown người tạo
+        this.selectedUser = {
+            label: seminar.user.name,
+            value: seminar.user.id,
+        }; // Dùng cho dropdown người tạo
         this.editingSeminar.seminarLevel = {
             id: seminar.seminarLevel.id,
             name: seminar.seminarLevel.name,
@@ -293,7 +320,7 @@ export class SeminarComponent implements OnInit {
                 date: this.formatDateForApi(this.editingSeminar.date),
                 hourCalculated: this.editingSeminar.hourCalculated,
                 note: this.editingSeminar.note || null,
-                userId: this.selectedUser || null,
+                userId: this.selectedUser.value || null,
                 seminarLevelId: this.editingSeminar.seminarLevel.id || null,
             };
             this.seminarService.update(updateRequest).subscribe(

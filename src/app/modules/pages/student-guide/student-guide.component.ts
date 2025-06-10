@@ -13,6 +13,7 @@ import pagingConfig, {
 import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import { ClassService } from 'src/app/core/services/class.service';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { UserService } from 'src/app/core/services/identity/user.service';
 import { IntellecturalPropertyLevelService } from 'src/app/core/services/intellectural-property-level.service';
 import { StudentGuideService } from 'src/app/core/services/student-guide.service';
@@ -51,7 +52,8 @@ export class StudentGuideComponent implements OnInit {
         private confirmationService: ConfirmationService,
         private studentGuideService: StudentGuideService,
         private studentGuideLevelService: StudentGuideLevelService,
-        private prizeService: PrizeService
+        private prizeService: PrizeService,
+        private authService: AuthService
     ) {
         this.createStudentGuideForm = this.formBuilder.group({
             userId: [null, [Validators.required]],
@@ -111,9 +113,12 @@ export class StudentGuideComponent implements OnInit {
     };
     canbos: any;
     visibleStudentGuide: boolean = false;
-
+    userCurrent: any;
     ngOnInit() {
         this.items = [{ label: 'Danh sách sở hữu trí tuệ' }];
+        this.authService.userCurrent.subscribe((user) => {
+            this.userCurrent = user;
+        });
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -132,8 +137,6 @@ export class StudentGuideComponent implements OnInit {
             };
             this.getStudentGuide(request);
         });
-
-        // this.loadUser();
         this.loadCanbos();
         this.loadStudentGuideLevel();
         this.loadPrize();
@@ -165,7 +168,7 @@ export class StudentGuideComponent implements OnInit {
 
     public handleOnSearch(event: any = null): void {
         this.userService
-            .getPaging({ name: this.search })
+            .getPaging({ name: event.query, pageSize: 100 })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;
@@ -204,35 +207,43 @@ export class StudentGuideComponent implements OnInit {
     }
 
     public getStudentGuide(request: any): any {
-        this.studentGuideService.getPaging(request).subscribe((result: any) => {
-            if (result.status) {
-                if (request.pageIndex !== 1 && result.data.items.length === 0) {
-                    this.route.queryParams.subscribe((params) => {
-                        const request = {
-                            ...params,
-                            pageIndex: 1,
-                        };
+        this.studentGuideService
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
+                        this.route.queryParams.subscribe((params) => {
+                            const request = {
+                                ...params,
+                                pageIndex: 1,
+                            };
 
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
+                            this.router.navigate([], {
+                                relativeTo: this.route,
+                                queryParams: request,
+                                queryParamsHandling: 'merge',
+                            });
                         });
-                    });
+                    }
+
+                    this.studentGuides = result.data.items;
+                    this.totalRecordsCount = result.data.totalRecords;
+                    if (this.studentGuides.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
+
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+
+                    this.selectedclass = [];
                 }
-
-                this.studentGuides = result.data.items;
-                this.totalRecordsCount = result.data.totalRecords;
-                if (this.studentGuides.length === 0) {
-                    this.paging.pageIndex = 1;
-                }
-
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-
-                this.selectedclass = [];
-            }
-        });
+            });
     }
 
     public selectAllclasss(event: any): void {

@@ -13,6 +13,7 @@ import systemConfig from 'src/app/core/configs/system.config';
 import sortConstant from 'src/app/core/constants/sort.Constant';
 import { ClassService } from 'src/app/core/services/class.service';
 import { CurriculumService } from 'src/app/core/services/curriculum.service';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
 import { ScienceProjectService } from 'src/app/core/services/science-project.service';
 import { ScienceReportService } from 'src/app/core/services/science-report.service';
 import { UserService } from 'src/app/core/services/user.service';
@@ -36,7 +37,6 @@ export class CurriculumComponent implements OnInit {
     search: string = '';
     keyWord: any;
     selectedAuthor: any;
-
     curriculumLevels: any;
     constructor(
         private route: ActivatedRoute,
@@ -48,7 +48,8 @@ export class CurriculumComponent implements OnInit {
         private fb: FormBuilder,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
-        private userService: UserService
+        private userService: UserService,
+        private authService: AuthService
     ) {
         this.createCurriculumForm = this.fb.group({
             userId: [null],
@@ -104,9 +105,12 @@ export class CurriculumComponent implements OnInit {
         keyWord: '',
         authorName: '',
     };
-
+    userCurrent: any;
     ngOnInit() {
         this.items = [{ label: 'Quản lý viết sách' }];
+        this.authService.userCurrent.subscribe((result: any) => {
+            this.userCurrent = result;
+        });
         this.route.queryParams.subscribe((params) => {
             const request = {
                 ...params,
@@ -131,32 +135,40 @@ export class CurriculumComponent implements OnInit {
     }
 
     public getCurriculum(request: any): any {
-        this.curriculumService.getPaging(request).subscribe((result: any) => {
-            if (result.status) {
-                if (request.pageIndex !== 1 && result.data.items.length === 0) {
-                    this.route.queryParams.subscribe((params) => {
-                        const request = {
-                            ...params,
-                            pageIndex: 1,
-                        };
-                        this.router.navigate([], {
-                            relativeTo: this.route,
-                            queryParams: request,
-                            queryParamsHandling: 'merge',
+        this.curriculumService
+            .getPaging({
+                ...request,
+                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
+                        this.route.queryParams.subscribe((params) => {
+                            const request = {
+                                ...params,
+                                pageIndex: 1,
+                            };
+                            this.router.navigate([], {
+                                relativeTo: this.route,
+                                queryParams: request,
+                                queryParamsHandling: 'merge',
+                            });
                         });
-                    });
-                }
+                    }
 
-                this.curriculums = result.data.items;
-                if (this.curriculums.length === 0) {
-                    this.paging.pageIndex = 1;
-                }
+                    this.curriculums = result.data.items;
+                    if (this.curriculums.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
 
-                const { items, ...paging } = result.data;
-                this.paging = paging;
-                this.selectedScienceReport = [];
-            }
-        });
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                    this.selectedScienceReport = [];
+                }
+            });
     }
 
     public selectAllScience(event: any): void {

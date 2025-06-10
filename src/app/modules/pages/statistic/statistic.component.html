@@ -26,6 +26,49 @@
                 [paginator]="false"
                 [rowHover]="true"
             >
+                <ng-template pTemplate="caption">
+                    <div
+                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
+                    >
+                        <div
+                            class="flex flex-column"
+                            style="margin-left: -12px"
+                        >
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Từ ngày:</label
+                            >
+                            <p-calendar
+                                id="endDate"
+                                [(ngModel)]="queryParameters.startDate"
+                                dateFormat="dd/mm/yy"
+                                placeholder="Nhập ngày bắt đầu"
+                                showIcon="true"
+                            ></p-calendar>
+                        </div>
+                        <div class="flex flex-column">
+                            <label
+                                for="email1"
+                                class="block text-900 text-large font-weight mb-2"
+                                >Đến ngày:</label
+                            >
+                            <p-calendar
+                                id="endDate"
+                                [(ngModel)]="queryParameters.endDate"
+                                dateFormat="dd/mm/yy"
+                                placeholder="Nhập ngày kết thúc"
+                                showIcon="true"
+                            ></p-calendar>
+                        </div>
+                        <button
+                            pButton
+                            pRipple
+                            label="Lọc"
+                            (click)="getStatistic(queryParameters)"
+                        ></button>
+                    </div>
+                </ng-template>
                 <ng-template pTemplate="header">
                     <tr>
                         <th>STT</th>
