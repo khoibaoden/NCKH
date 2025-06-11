@@ -3,66 +3,29 @@
         <p-toolbar styleClass="mb-2">
             <div class="">
                 <h3>Danh sách báo cáo khoa học</h3>
-                <p-breadcrumb
-                    [model]="items"
-                    [home]="{ icon: 'pi pi-home' }"
-                ></p-breadcrumb>
+                <p-breadcrumb [model]="items" [home]="{ icon: 'pi pi-home' }"></p-breadcrumb>
             </div>
             <ng-template pTemplate="right">
-                <button
-                    pButton
-                    pRipple
-                    icon="pi pi-plus"
-                    label="Thêm mới"
-                    (click)="openAddDialog()"
-                ></button>
+                <button pButton pRipple icon="pi pi-plus" label="Thêm mới" (click)="openAddDialog()"></button>
             </ng-template>
         </p-toolbar>
         <div class="card">
-            <p-table
-                #dt
-                [value]="filteredReports"
-                [scrollable]="true"
-                [tableStyle]="{ 'min-width': '1700px' }"
-                styleClass="p-datatable-gridlines p-datatable-striped"
-                [paginator]="true"
-                [rows]="paging.pageSize"
-                [totalRecords]="paging.totalRecords"
-                [rowsPerPageOptions]="config.pageSizeOptions"
-                (onPage)="onPageChange($event)"
-                [rowHover]="true"
-            >
+            <p-table #dt [value]="filteredReports" [scrollable]="true" [tableStyle]="{ 'min-width': '1700px' }"
+                styleClass="p-datatable-gridlines p-datatable-striped" [paginator]="true" [rows]="paging.pageSize"
+                [totalRecords]="paging.totalRecords" [rowsPerPageOptions]="config.pageSizeOptions"
+                (onPage)="onPageChange($event)" [rowHover]="true">
                 <ng-template pTemplate="caption">
-                    <div
-                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
-                    >
-                        <div
-                            class="flex flex-column"
-                            style="margin-left: -12px"
-                        >
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Tìm kiếm theo tên:</label
-                            >
+                    <div class="flex flex-column gap-3 align-items-end md:flex-row md:">
+                        <div class="flex flex-column" style="margin-left: -12px">
+                            <label for="email1" class="block text-900 text-large font-weight mb-2">Tìm kiếm theo
+                                tên:</label>
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
-                                <input
-                                    pInputText
-                                    type="text"
-                                    [(ngModel)]="searchText"
-                                    placeholder="Tìm theo tên báo cáo"
-                                    style="width: 250px"
-                                    class="sm:"
-                                />
+                                <input pInputText type="text" [(ngModel)]="searchText"
+                                    placeholder="Tìm theo tên báo cáo" style="width: 250px" class="sm:" />
                             </span>
                         </div>
-                        <button
-                            pButton
-                            pRipple
-                            label="Lọc"
-                            (click)="applyFilter()"
-                        ></button>
+                        <button pButton pRipple label="Lọc" (click)="applyFilter()"></button>
                     </div>
                 </ng-template>
                 <!-- Header của bảng -->
@@ -77,6 +40,9 @@
                         <th class="text-center" pSortableColumn="memberCount">
                             Số thành viên
                         </th>
+                        <th class="text-center">
+                            Tên các thành viên
+                        </th>
                         <th class="text-center">Phân loại</th>
                         <th class="text-center">Định mức giờ</th>
                         <th class="text-center">Số giờ được tính</th>
@@ -88,6 +54,7 @@
                         <th class="text-center">Số trang đầu cuối</th>
                         <th class="text-center">Ngày tổ chức</th>
                         <th class="text-center">Ghi chú</th>
+                        <th>Trạng thái</th>
                         <th class="text-center">Thao tác</th>
                     </tr>
                 </ng-template>
@@ -98,10 +65,7 @@
                         <td class="text-center">{{ rowIndex + 1 }}</td>
 
                         <!-- Tên bài báo -->
-                        <td
-                            class="text-center truncate-text"
-                            [title]="item.reportName"
-                        >
+                        <td class="text-center truncate-text" [title]="item.reportName">
                             {{ item.reportName || "Chưa có thông tin" }}
                         </td>
 
@@ -109,12 +73,14 @@
                         <td class="text-center">
                             {{ item.memberCount || 0 }}
                         </td>
-
+                        <td class="text-center">
+                            {{item.authorScienceReports}}
+                        </td>
                         <!-- Phân loại -->
                         <td class="text-center truncate-text">
                             {{
-                                item.scienceReportLevel?.key ||
-                                    "Chưa có thông tin"
+                            item.scienceReportLevel?.key ||
+                            "Chưa có thông tin"
                             }}
                         </td>
 
@@ -124,25 +90,44 @@
                         </td>
 
                         <!-- Số giờ được tính -->
-                        <td class="text-center">
-                            {{ item.hoursCalculated || 0 }}
+                        <!-- <td class="text-left">
+                            <div *ngFor="let item1 of item.authorScienceReportHours; let i = index">
+                                {{ item1.user?.name }} ({{ (item1.hoursCalculated + 0.9999) | number:'1.0-0' }}
+                                giờ)<span *ngIf="i < item.authorScienceReportHours.length - 1">, </span>
+                            </div>
+
+                        </td> -->
+                        <td class="text-left">
+                            <!-- Trường hợp userCurrent.id === 1: hiển thị tất cả -->
+                            <ng-container *ngIf="userCurrent.id === 1; else showOneAuthor">
+                                <div *ngFor="let item1 of item.authorScienceReportHours; let i = index">
+                                    {{ item1.user?.name }} ({{ (item1.hoursCalculated + 0.9999) | number:'1.0-0' }} giờ)
+                                    <span *ngIf="i < item.authorScienceReportHours.length - 1">, </span>
+                                </div>
+                            </ng-container>
+
+                            <!-- Trường hợp user khác 1: chỉ hiển thị author trùng userCurrent.id -->
+                            <ng-template #showOneAuthor>
+                                <ng-container *ngFor="let item1 of item.authorScienceReportHours">
+                                    <div *ngIf="item1.userId === userCurrent.id">
+                                        {{ item1.user?.name }} ({{ (item1.hoursCalculated + 0.9999) | number:'1.0-0' }}
+                                        giờ)
+                                    </div>
+                                </ng-container>
+                            </ng-template>
                         </td>
 
+
+
                         <!-- Tác giả đứng đầu -->
-                        <td
-                            class="text-center truncate-text"
-                            [title]="item.projectManager?.name"
-                        >
+                        <td class="text-center truncate-text" [title]="item.projectManager?.name">
                             {{
-                                item.projectManager?.name || "Chưa có thông tin"
+                            item.projectManager?.name || "Chưa có thông tin"
                             }}
                         </td>
 
                         <!-- Tên hội nghị -->
-                        <td
-                            class="text-center truncate-text"
-                            [title]="item.conferenceName"
-                        >
+                        <td class="text-center truncate-text" [title]="item.conferenceName">
                             {{ item.conferenceName || "Chưa có thông tin" }}
                         </td>
 
@@ -169,47 +154,37 @@
                         <!-- Ngày tổ chức -->
                         <td class="text-center">
                             {{
-                                item.publishYear
-                                    ? (item.publishYear | date : "dd/MM/yyyy")
-                                    : "Chưa có"
+                            item.publishYear
+                            ? (item.publishYear | date : "dd/MM/yyyy")
+                            : "Chưa có"
                             }}
                         </td>
 
                         <!-- Ghi chú -->
-                        <td class="text-center">
+                        <!-- <td class="text-center">
                             {{ item.notes || "Không có" }}
-                        </td>
+                        </td> -->
+                        <td class="text-center" [innerHTML]="item.notes || 'Không có'"></td>
 
+                        <td>
+                            {{item.statusApprove==null?'Đang chờ duyệt':item.statusApprove==0?'Đang chờ duyệt':item.statusApprove==1?'Đã duyệt':'Bị hủy'}}
+                        </td>
                         <!-- Thao tác -->
                         <td>
                             <div class="flex gap-2 justify-content-center">
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-eye"
-                                    class="p-button-rounded p-button-info p-button-sm"
-                                    (click)="viewReportDetails(item)"
-                                    pTooltip="Xem chi tiết"
-                                    tooltipPosition="top"
-                                ></button>
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-pencil"
-                                    class="p-button-rounded p-button-success p-button-sm"
-                                    (click)="openEditDialog(item)"
-                                    pTooltip="Sửa"
-                                    tooltipPosition="top"
-                                ></button>
-                                <button
-                                    pButton
-                                    pRipple
-                                    icon="pi pi-trash"
-                                    class="p-button-rounded p-button-danger p-button-sm"
-                                    (click)="confirmDelete(item)"
-                                    pTooltip="Xóa"
-                                    tooltipPosition="top"
-                                ></button>
+                                <button pButton pRipple icon="pi pi-eye"
+                                    class="p-button-rounded p-button-info p-button-sm" (click)="viewReportDetails(item)"
+                                    pTooltip="Xem chi tiết" tooltipPosition="top"></button>
+                                <button pButton pRipple icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-success p-button-sm" (click)="openEditDialog(item)"
+                                    pTooltip="Sửa" tooltipPosition="top"></button>
+                                <button pButton pRipple icon="pi pi-trash"
+                                    class="p-button-rounded p-button-danger p-button-sm" (click)="confirmDelete(item)"
+                                    pTooltip="Xóa" tooltipPosition="top"></button>
+                                <div *ngIf="userCurrent.id==1 && (item.statusApprove!=1 && item.statusApprove!=2)">
+                                    <button pButton (click)="updateStatus(item.id,1)" pRipple>Duyệt</button>
+                                    <button pButton (click)="updateStatus(item.id,2)" pRipple>Hủy</button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -229,13 +204,8 @@
 </div>
 
 <!-- Dialog xem chi tiết báo cáo -->
-<p-dialog
-    [(visible)]="viewDialogVisible"
-    [style]="{ width: '70%' }"
-    header="Chi tiết báo cáo khoa học"
-    [modal]="true"
-    styleClass="p-fluid"
->
+<p-dialog [(visible)]="viewDialogVisible" [style]="{ width: '70%' }" header="Chi tiết báo cáo khoa học" [modal]="true"
+    styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="grid">
             <div class="col-12 md:col-6">
@@ -265,8 +235,8 @@
                     <label class="font-bold">Cấp độ báo cáo:</label>
                     <div>
                         {{
-                            selectedReport.scienceReportLevel?.description ||
-                                "Chưa có thông tin"
+                        selectedReport.scienceReportLevel?.description ||
+                        "Chưa có thông tin"
                         }}
                     </div>
                 </div>
@@ -287,10 +257,7 @@
             </div>
             <div class="col-12">
                 <label class="font-bold">Danh sách tác giả:</label>
-                <p-table
-                    [value]="selectedReport.authorScienceReports"
-                    styleClass="mt-2"
-                >
+                <p-table [value]="selectedReport.authorScienceReports" styleClass="mt-2">
                     <ng-template pTemplate="header">
                         <tr>
                             <th style="width: 10%">#</th>
@@ -304,10 +271,10 @@
                             <td>{{ author.user?.name }}</td>
                             <td>
                                 {{
-                                    author.userId ===
-                                    selectedReport.projectManagerId
-                                        ? "Chủ nhiệm"
-                                        : "Thành viên"
+                                author.userId ===
+                                selectedReport.projectManagerId
+                                ? "Chủ nhiệm"
+                                : "Thành viên"
                                 }}
                             </td>
                         </tr>
@@ -324,156 +291,78 @@
     </ng-template>
 
     <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
-            label="Đóng"
-            icon="pi pi-times"
-            class="p-button-text"
-            (click)="viewDialogVisible = false"
-        ></button>
+        <button pButton pRipple label="Đóng" icon="pi pi-times" class="p-button-text"
+            (click)="viewDialogVisible = false"></button>
     </ng-template>
 </p-dialog>
 
 <!-- Dialog để sửa thông tin báo cáo -->
-<p-dialog
-    [(visible)]="editDialogVisible"
-    [style]="{ width: '70%' }"
-    header="Chỉnh sửa báo cáo khoa học"
-    [modal]="true"
-    styleClass="p-fluid"
->
+<p-dialog [(visible)]="editDialogVisible" [style]="{ width: '70%' }" header="Chỉnh sửa báo cáo khoa học" [modal]="true"
+    styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="grid">
             <div class="col-12 md:col-6">
                 <div class="field">
-                    <label for="reportName"
-                        >Tên báo cáo <span class="red-strick">*</span></label
-                    >
-                    <input
-                        type="text"
-                        pInputText
-                        id="reportName"
-                        [(ngModel)]="editingReport.reportName"
-                        required
-                        autofocus
-                    />
+                    <label for="reportName">Tên báo cáo <span class="red-strick">*</span></label>
+                    <input type="text" pInputText id="reportName" [(ngModel)]="editingReport.reportName" required
+                        autofocus />
                 </div>
                 <div class="field">
-                    <label for="conferenceName"
-                        >Tên hội nghị <span class="red-strick">*</span></label
-                    >
-                    <input
-                        type="text"
-                        pInputText
-                        id="conferenceName"
-                        [(ngModel)]="editingReport.conferenceName"
-                        required
-                    />
+                    <label for="conferenceName">Tên hội nghị <span class="red-strick">*</span></label>
+                    <input type="text" pInputText id="conferenceName" [(ngModel)]="editingReport.conferenceName"
+                        required />
                 </div>
                 <div class="field">
-                    <label for="publishYear"
-                        >Năm xuất bản <span class="red-strick">*</span></label
-                    >
-                    <p-calendar
-                        id="publishYear"
-                        [(ngModel)]="editingReport.publishYear"
-                        view="year"
-                        placeholder="Chọn năm xuất bản"
-                        dateFormat="yy"
-                        [showIcon]="true"
-                    ></p-calendar>
+                    <label for="publishYear">Năm xuất bản <span class="red-strick">*</span></label>
+                    <p-calendar id="publishYear" [(ngModel)]="editingReport.publishYear" view="year"
+                        placeholder="Chọn năm xuất bản" dateFormat="yy" [showIcon]="true"></p-calendar>
                 </div>
                 <div class="field">
                     <label for="address">Địa chỉ</label>
-                    <input
-                        type="text"
-                        pInputText
-                        id="address"
-                        [(ngModel)]="editingReport.address"
-                    />
+                    <input type="text" pInputText id="address" [(ngModel)]="editingReport.address" />
                 </div>
                 <div class="field">
                     <label for="newAddress">Tạp chí số</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập tạp chí số"
-                        id="newAddress"
-                        [(ngModel)]="editingReport.volumeNo"
-                    />
+                    <input type="text" pInputText placeholder="Nhập tạp chí số" id="newAddress"
+                        [(ngModel)]="editingReport.volumeNo" />
                 </div>
             </div>
             <div class="col-12 md:col-6">
                 <div class="field">
-                    <label for="scienceReportLevelId"
-                        >Cấp độ báo cáo <span class="red-strick">*</span></label
-                    >
-                    <p-dropdown
-                        id="scienceReportLevelId"
-                        [options]="reportLevels"
-                        [(ngModel)]="editingReport.scienceReportLevelId"
-                        optionLabel="description"
-                        optionValue="id"
-                        placeholder="Chọn cấp độ báo cáo"
-                    ></p-dropdown>
+                    <label for="scienceReportLevelId">Cấp độ báo cáo <span class="red-strick">*</span></label>
+                    <p-dropdown id="scienceReportLevelId" [options]="reportLevels"
+                        [(ngModel)]="editingReport.scienceReportLevelId" optionLabel="description" optionValue="id" ,
+                        (onChange)="calculateHours()" placeholder="Chọn cấp độ báo cáo"></p-dropdown>
                 </div>
                 <div class="field">
                     <label for="isbn">ISBN</label>
-                    <input
-                        type="text"
-                        pInputText
-                        id="isbn"
-                        [(ngModel)]="editingReport.isbn"
-                    />
+                    <input type="text" pInputText id="isbn" [(ngModel)]="editingReport.isbn" />
                 </div>
                 <div class="field">
-                    <label for="workHoursPerProject"
-                        >Tổng số giờ theo dự án</label
-                    >
-                    <p-inputNumber
-                        id="workHoursPerProject"
-                        [(ngModel)]="editingReport.workHoursPerProject"
-                        [min]="0"
-                    ></p-inputNumber>
+                    <label for="workHoursPerProject">Tổng số giờ theo dự án</label>
+                    <p-inputNumber id="workHoursPerProject" [(ngModel)]="editingReport.workHoursPerProject" [min]="0"
+                        (ngModelChange)="calculateHours()"></p-inputNumber>
                 </div>
                 <div class="field">
                     <label for="hoursCalculated">Số giờ đã tính</label>
-                    <p-inputNumber
-                        id="hoursCalculated"
-                        [(ngModel)]="editingReport.hoursCalculated"
-                        [min]="0"
-                    ></p-inputNumber>
+                    <p-inputNumber id="hoursCalculated" [(ngModel)]="editingReport.hoursCalculated"
+                        [min]="0"></p-inputNumber>
                 </div>
                 <div class="field">
                     <label for="newAddress">Số trang đầu cuối</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập số trang đầu cuối"
-                        id="newAddress"
-                        [(ngModel)]="editingReport.terminalPage"
-                    />
+                    <input type="text" pInputText placeholder="Nhập số trang đầu cuối" id="newAddress"
+                        [(ngModel)]="editingReport.terminalPage" />
                 </div>
             </div>
             <div class="col-12">
                 <div class="field">
                     <label for="notes">Ghi chú</label>
-                    <textarea
-                        id="notes"
-                        pInputTextarea
-                        [(ngModel)]="editingReport.notes"
-                        rows="3"
-                    ></textarea>
+                    <textarea id="notes" pInputTextarea [(ngModel)]="editingReport.notes" rows="3"></textarea>
                 </div>
             </div>
             <div class="col-12">
                 <p-panel header="Danh sách tác giả">
-                    <p-table
-                        [value]="editingReport.authorScienceReports"
-                        styleClass="mt-2"
-                        [editable]="true"
-                    >
+                    <p-table [value]="editingReport.authorScienceReports" styleClass="mt-2" [editable]="true">
                         <ng-template pTemplate="header">
                             <tr>
                                 <th style="width: 10%">#</th>
@@ -482,60 +371,34 @@
                                 <th style="width: 10%">Thao tác</th>
                             </tr>
                         </ng-template>
-                        <ng-template
-                            pTemplate="body"
-                            let-author
-                            let-i="rowIndex"
-                        >
+                        <ng-template pTemplate="body" let-author let-i="rowIndex">
                             <tr>
                                 <td>{{ i + 1 }}</td>
                                 <td>
-                                    <p-dropdown
-                                        [options]="users"
-                                        [(ngModel)]="author.userId"
-                                        optionLabel="name"
-                                        optionValue="id"
-                                        placeholder="Chọn tác giả"
-                                    ></p-dropdown>
+                                    <p-dropdown [options]="users" [(ngModel)]="author.userId" optionLabel="name"
+                                        optionValue="id" placeholder="Chọn tác giả"></p-dropdown>
                                 </td>
                                 <td>
-                                    <p-radioButton
-                                        [value]="author.userId"
-                                        [(ngModel)]="
+                                    <p-radioButton [value]="author.userId" [(ngModel)]="
                                             editingReport.projectManagerId
-                                        "
-                                        [inputId]="'manager_' + i"
-                                    ></p-radioButton>
-                                    <label [for]="'manager_' + i" class="ml-2"
-                                        >Chủ nhiệm</label
-                                    >
+                                        " [inputId]="'manager_' + i"></p-radioButton>
+                                    <label [for]="'manager_' + i" class="ml-2">Chủ nhiệm</label>
                                 </td>
                                 <td>
-                                    <button
-                                        pButton
-                                        pRipple
-                                        icon="pi pi-trash"
-                                        class="p-button-rounded p-button-danger p-button-sm"
-                                        (click)="removeAuthor(i)"
+                                    <button pButton pRipple icon="pi pi-trash"
+                                        class="p-button-rounded p-button-danger p-button-sm" (click)="removeAuthor(i)"
                                         *ngIf="
                                             editingReport.authorScienceReports
                                                 .length > 1
-                                        "
-                                    ></button>
+                                        "></button>
                                 </td>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="footer">
                             <tr>
                                 <td colspan="4">
-                                    <button
-                                        pButton
-                                        pRipple
-                                        icon="pi pi-plus"
-                                        label="Thêm tác giả"
-                                        class="p-button-sm"
-                                        (click)="addAuthor()"
-                                    ></button>
+                                    <button pButton pRipple icon="pi pi-plus" label="Thêm tác giả" class="p-button-sm"
+                                        (click)="addAuthor()"></button>
                                 </td>
                             </tr>
                         </ng-template>
@@ -546,263 +409,176 @@
     </ng-template>
 
     <ng-template pTemplate="footer">
-        <button
-            pButton
-            pRipple
-            label="Hủy"
-            icon="pi pi-times"
-            class="p-button-danger"
-            (click)="hideEditDialog()"
-        ></button>
-        <button
-            pButton
-            pRipple
-            label="Lưu"
-            icon="pi pi-check"
-            class="p-button-primary"
-            (click)="saveReport()"
-        ></button>
+        <button pButton pRipple label="Hủy" icon="pi pi-times" class="p-button-danger"
+            (click)="hideEditDialog()"></button>
+        <button pButton pRipple label="Lưu" icon="pi pi-check" class="p-button-primary" (click)="saveReport()"></button>
     </ng-template>
 </p-dialog>
 
 <!-- Dialog thêm mới báo cáo -->
-<p-dialog
-    [(visible)]="addDialogVisible"
-    [style]="{ width: '70%' }"
-    header="Thêm báo cáo khoa học mới"
-    [modal]="true"
-    styleClass="p-fluid"
->
+<p-dialog [(visible)]="addDialogVisible" [style]="{ width: '70%' }" header="Thêm báo cáo khoa học mới" [modal]="true"
+    styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="grid">
             <div class="col-12 md:col-6">
                 <div class="field">
-                    <label for="newReportName"
-                        >Tên báo cáo<span class="red-strick">*</span></label
-                    >
-                    <input
-                        type="text"
-                        pInputText
-                        id="newReportName"
-                        [(ngModel)]="newReport.reportName"
-                        placeholder="Nhập tên báo cáo"
-                        required
-                        autofocus
-                    />
-                    <small
-                        *ngIf="submitted && !newReport.reportName"
-                        class="p-error"
-                    >
+                    <label for="newReportName">Tên báo cáo<span class="red-strick">*</span></label>
+                    <input type="text" pInputText id="newReportName" [(ngModel)]="newReport.reportName"
+                        placeholder="Nhập tên báo cáo" required autofocus />
+                    <small *ngIf="submitted && !newReport.reportName" class="p-error">
                         Tên báo cáo là bắt buộc
                     </small>
                 </div>
                 <div class="field">
-                    <label for="newConferenceName"
-                        >Tên hội nghị <span class="red-strick">*</span></label
-                    >
-                    <input
-                        type="text"
-                        pInputText
-                        id="newConferenceName"
-                        placeholder="Nhập tên hội nghị"
-                        [(ngModel)]="newReport.conferenceName"
-                        required
-                    />
-                    <small
-                        *ngIf="submitted && !newReport.conferenceName"
-                        class="p-error"
-                    >
+                    <label for="newConferenceName">Tên hội nghị <span class="red-strick">*</span></label>
+                    <input type="text" pInputText id="newConferenceName" placeholder="Nhập tên hội nghị"
+                        [(ngModel)]="newReport.conferenceName" required />
+                    <small *ngIf="submitted && !newReport.conferenceName" class="p-error">
                         Tên hội nghị là bắt buộc
                     </small>
                 </div>
                 <div class="field">
-                    <label for="newPublishYear"
-                        >Năm xuất bản <span class="red-strick">*</span></label
-                    >
-                    <p-calendar
-                        id="newPublishYear"
-                        [(ngModel)]="newReport.publishYear"
-                        view="year"
-                        placeholder="Chọn ngày xuất bản"
-                        dateFormat="yy"
-                        [showIcon]="true"
-                    ></p-calendar>
-                    <small
-                        *ngIf="submitted && !newReport.publishYear"
-                        class="p-error"
-                    >
+                    <label for="newPublishYear">Năm xuất bản <span class="red-strick">*</span></label>
+                    <p-calendar id="newPublishYear" [(ngModel)]="newReport.publishYear" view="year"
+                        placeholder="Chọn ngày xuất bản" dateFormat="yy" [showIcon]="true"></p-calendar>
+                    <small *ngIf="submitted && !newReport.publishYear" class="p-error">
                         Năm xuất bản là bắt buộc
                     </small>
                 </div>
+                <div class="field col mb-0">
+                    <label for="memberCount">Số thành viên tham gia</label>
+                    <input type="number" pInputText id="memberCount" [(ngModel)]="newReport.memberCount"
+                        placeholder="Nhập số thành viên tham gia" />
+                </div>
                 <div class="field">
                     <label for="newAddress">Địa chỉ</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập địa chỉ"
-                        id="newAddress"
-                        [(ngModel)]="newReport.address"
-                    />
+                    <input type="text" pInputText placeholder="Nhập địa chỉ" id="newAddress"
+                        [(ngModel)]="newReport.address" />
                 </div>
                 <div class="field">
                     <label for="newAddress">Tạp chí số</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập tạp chí số"
-                        id="newAddress"
-                        [(ngModel)]="newReport.volumeNo"
-                    />
+                    <input type="text" pInputText placeholder="Nhập tạp chí số" id="newAddress"
+                        [(ngModel)]="newReport.volumeNo" />
                 </div>
             </div>
             <div class="col-12 md:col-6">
                 <div class="field">
-                    <label for="newScienceReportLevelId"
-                        >Cấp độ báo cáo <span class="red-strick">*</span></label
-                    >
-                    <p-dropdown
-                        id="newScienceReportLevelId"
-                        [options]="scienceReportLevels"
-                        [(ngModel)]="newReport.scienceReportLevelId"
-                        placeholder="Nhập tên hội nghị"
-                        optionLabel="key"
-                        appendTo="body"
-                        placeholder="Chọn cấp độ báo cáo"
-                    ></p-dropdown>
-                    <small
-                        *ngIf="submitted && !newReport.scienceReportLevelId"
-                        class="p-error"
-                    >
+                    <label for="newScienceReportLevelId">Cấp độ báo cáo <span class="red-strick">*</span></label>
+                    <p-dropdown id="newScienceReportLevelId" [options]="scienceReportLevels"
+                        [(ngModel)]="newReport.scienceReportLevelId" placeholder="Nhập tên hội nghị" optionLabel="key"
+                        appendTo="body" placeholder="Chọn cấp độ báo cáo"
+                        (onChange)="onScienceReportLevelChange($event)"></p-dropdown>
+                    <small *ngIf="submitted && !newReport.scienceReportLevelId" class="p-error">
                         Cấp độ báo cáo là bắt buộc
                     </small>
                 </div>
                 <div class="field">
                     <label for="newIsbn">ISBN</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập tên báo cáo"
-                        id="newIsbn"
-                        [(ngModel)]="newReport.isbn"
-                    />
+                    <input type="text" pInputText placeholder="Nhập tên báo cáo" id="newIsbn"
+                        [(ngModel)]="newReport.isbn" />
                 </div>
                 <div class="field">
-                    <label for="newWorkHoursPerProject"
-                        >Tổng số giờ theo dự án</label
-                    >
-                    <p-inputNumber
-                        id="newWorkHoursPerProject"
-                        [(ngModel)]="newReport.workHoursPerProject"
-                        [min]="0"
-                    ></p-inputNumber>
+                    <label for="newWorkHoursPerProject">Tổng số giờ theo dự án</label>
+                    <p-inputNumber id="newWorkHoursPerProject" [(ngModel)]="newReport.workHoursPerProject"
+                        [min]="0"></p-inputNumber>
                 </div>
                 <div class="field">
                     <label for="newHoursCalculated">Số giờ đã tính</label>
-                    <p-inputNumber
-                        id="newHoursCalculated"
-                        [(ngModel)]="newReport.hoursCalculated"
-                        [min]="0"
-                    ></p-inputNumber>
+                    <p-inputNumber id="newHoursCalculated" [(ngModel)]="newReport.hoursCalculated"
+                        [min]="0"></p-inputNumber>
                 </div>
                 <div class="field">
                     <label for="newAddress">Số trang đầu cuối</label>
-                    <input
-                        type="text"
-                        pInputText
-                        placeholder="Nhập số trang đầu cuối"
-                        id="newAddress"
-                        [(ngModel)]="newReport.terminalPage"
-                    />
+                    <input type="text" pInputText placeholder="Nhập số trang đầu cuối" id="newAddress"
+                        [(ngModel)]="newReport.terminalPage" />
                 </div>
+                <div>
+                    HTI
+                    1200 giờ
+                    Đăng toàn văn trong tuyển tập công trình khoa học tại hội nghị hội thảo quốc tế thuộc hệ thống
+                    ISI/Scopus
+                    <br>
+                    HT2
+                    900 giờ
+                    Đăng toàn văn trong tuyển tập công trình tại hội nghị hội thảo quốc tế có phản biện
+                    <br>
+                    HT3
+                    600 giờ
+                    Đăng toản văn trong tuyên tập công trình tại hội nghị hội thảo quốc gia có phản biện
+                    <br>
+                    HT4
+                    300 giờ
+                    Đăng toàn văn trong tuyển tập công trình tại hội nghị hội thảo cấp tỉnh bộ và tương đương
+                    <br>
+                    HT5
+                    150 giờ
+                    Đăng không có kỷ yếu toàn vân tại hội nghị hồi tháo cấp tỉnh, bộ, quốc gia và quốc tế
+                    <br>
+                    HT6
+                    200 giờ
+                    Đăng toản văn trong tuyển tập công trình tại hội nghị hội thảo cấp cơ sở trường và tương đương có
+                    phản biện
+                    <br>
+                    HT7
+                    100 giờ
+                    Đăng không có kỷ yếu trong tuyển tập công trình tại hội nghị hội thảo cấp cơ sở trường và tương
+                    đương có </div>
             </div>
             <div class="col-12">
                 <div class="field">
                     <label for="newNotes">Ghi chú</label>
-                    <textarea
-                        id="newNotes"
-                        placeholder="Nhập ghi chú ..."
-                        pInputTextarea
-                        [(ngModel)]="newReport.notes"
-                        rows="3"
-                    ></textarea>
+                    <textarea id="newNotes" placeholder="Nhập ghi chú ..." pInputTextarea [(ngModel)]="newReport.notes"
+                        rows="3"></textarea>
                 </div>
             </div>
             <div class="col-12">
                 <p-panel header="Danh sách tác giả">
-                    <p-table
-                        [value]="newReport.authorScienceReports"
-                        styleClass="mt-2"
-                        [editable]="true"
-                    >
+                    <p-table [value]="newReport.authorScienceReports" styleClass="mt-2" [editable]="true">
                         <ng-template pTemplate="header">
                             <tr>
                                 <th style="width: 6%">#</th>
                                 <th style="width: 65%">Tên tác giả</th>
                                 <th style="width: 20%">Vai trò</th>
+                                <th style="width: 15%">Số giờ đã tính</th>
                                 <th style="width: 10%">Thao tác</th>
                             </tr>
                         </ng-template>
-                        <ng-template
-                            pTemplate="body"
-                            let-author
-                            let-i="rowIndex"
-                        >
+                        <ng-template pTemplate="body" let-author let-i="rowIndex">
                             <tr>
                                 <td>{{ i + 1 }}</td>
                                 <td>
-                                    <p-dropdown
-                                        [options]="users"
-                                        [(ngModel)]="author.userId"
-                                        optionLabel="name"
-                                        optionValue="id"
-                                        appendTo="body"
-                                        placeholder="Chọn tác giả"
-                                    ></p-dropdown>
+                                    <p-dropdown [options]="users" [(ngModel)]="author.userId"
+                                        (onChange)="calculateHours()" optionLabel="name" optionValue="id"
+                                        appendTo="body" placeholder="Chọn tác giả"></p-dropdown>
                                 </td>
                                 <td>
                                     <ng-container *ngIf="author.userId">
-                                        <p-radioButton
-                                            [value]="author.userId"
-                                            [(ngModel)]="
+                                        <p-radioButton [value]="author.userId" [(ngModel)]="
                                                 newReport.projectManagerId
-                                            "
-                                            [inputId]="'new_manager_' + i"
-                                        ></p-radioButton>
-                                        <label
-                                            [for]="'new_manager_' + i"
-                                            class="ml-2"
-                                        >
+                                            " [inputId]="'new_manager_' + i"
+                                            (onClick)="calculateHours()"></p-radioButton>
+                                        <label [for]="'new_manager_' + i" class="ml-2">
                                             Chủ nhiệm
                                         </label>
                                     </ng-container>
                                 </td>
+                                <td>{{ author.hoursCalculated | number: '1.2-2' }}</td>
 
                                 <td>
-                                    <button
-                                        pButton
-                                        pRipple
-                                        icon="pi pi-trash"
+                                    <button pButton pRipple icon="pi pi-trash"
                                         class="p-button-rounded p-button-danger p-button-sm"
-                                        (click)="removeNewAuthor(i)"
-                                        *ngIf="
+                                        (click)="removeNewAuthor(i)" *ngIf="
                                             newReport.authorScienceReports
                                                 .length > 1
-                                        "
-                                    ></button>
+                                        "></button>
                                 </td>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="footer">
                             <tr>
                                 <td colspan="4">
-                                    <button
-                                        pButton
-                                        pRipple
-                                        icon="pi pi-plus"
-                                        label="Thêm tác giả"
-                                        class="p-button-sm"
-                                        (click)="addNewAuthor()"
-                                    ></button>
+                                    <button pButton pRipple icon="pi pi-plus" label="Thêm tác giả" class="p-button-sm"
+                                        (click)="addNewAuthor()"></button>
                                 </td>
                             </tr>
                         </ng-template>
@@ -814,31 +590,16 @@
 
     <ng-template pTemplate="footer">
         <div class="pt-2">
-            <button
-                pButton
-                pRipple
-                label="Hủy"
-                class="p-button-danger"
-                (click)="addDialogVisible = false; submitted = false"
-            ></button>
-            <button
-                pButton
-                pRipple
-                label="Thêm mới"
-                icon="pi pi-plus"
-                class="p-button-primary"
-                (click)="saveNewReport()"
-            ></button>
+            <button pButton pRipple label="Hủy" class="p-button-danger"
+                (click)="addDialogVisible = false; submitted = false"></button>
+            <button pButton pRipple label="Thêm mới" icon="pi pi-plus" class="p-button-primary"
+                (click)="saveNewReport()"></button>
         </div>
     </ng-template>
 </p-dialog>
 
 <!-- Dialog xác nhận xóa -->
-<p-confirmDialog
-    [style]="{ width: '450px' }"
-    header="Xác nhận"
-    icon="pi pi-exclamation-triangle"
-></p-confirmDialog>
+<p-confirmDialog [style]="{ width: '450px' }" header="Xác nhận" icon="pi pi-exclamation-triangle"></p-confirmDialog>
 
 <!-- Thông báo Toast -->
 <p-toast></p-toast>

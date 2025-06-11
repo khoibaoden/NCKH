@@ -53,6 +53,7 @@ export class CurriculumComponent implements OnInit {
     ) {
         this.createCurriculumForm = this.fb.group({
             userId: [null],
+            userName:[null],
             name: [''],
             publishYear: [null],
             isAuthor: [false],
@@ -235,29 +236,44 @@ export class CurriculumComponent implements OnInit {
         const formValue = this.createCurriculumForm.value;
         console.log(formValue);
 
-        const isAuthorWrite = formValue.isAuthorWrite;
-        const memberNumber = Number(formValue.memberNumber);
-        const workHoursPerProject = Number(formValue.workHoursPerProject);
+        const isChiefAuthor = formValue.isAuthor; // Có phải chủ biên?
+        const isAuthorWrite = formValue.isAuthorWrite; // Có tham gia viết?
+        const memberNumber = Number(formValue.memberNumber); // Số lượng tác giả
+        const workHoursPerProject = Number(formValue.workHoursPerProject); // Định mức giờ
 
-        // Nếu không đủ dữ liệu cần thiết thì không tính
-        if (!memberNumber || !workHoursPerProject) {
-            formValue.hoursCalculated = 0;
-            console.warn('Thiếu dữ liệu cần thiết để tính giờ');
+        let calculatedHours = 0;
+
+        // Nếu không đủ dữ liệu thì không tính
+        if ( !isChiefAuthor ||!memberNumber || !workHoursPerProject) {
+            calculatedHours = 0;
+            console.warn('Thiếu dữ liệu cần thiết hoặc không phải chủ biên');
+            console.log("cho chet "+isChiefAuthor+"meochet"+memberNumber+"gahcet"+workHoursPerProject)
         } else {
-            // Nếu là chủ biên có tham gia viết thì G = 1, ngược lại G = 0
-            const G = isAuthorWrite ? 1 : 0;
+            const L = workHoursPerProject;
+            const H = memberNumber;
 
-            if (G === 0) {
-                formValue.hoursCalculated = 0;
-                console.warn('Không phải chủ biên có viết, không tính giờ');
+            console.log(isChiefAuthor)
+            console.log(L)
+            console.log(H)
+            if (isAuthorWrite) {
+                // Là chủ biên và có viết
+                calculatedHours = (1 / 5) * L + ((1 / H) * (4 / 5) * L);
             } else {
-                const H = memberNumber;
-                const L = workHoursPerProject;
-
-                const calculatedHours = (1 / 5) * (H * G + (1 / G + 1) * L);
-                formValue.hoursCalculated = Math.round(calculatedHours); // Làm tròn nếu cần
+                calculatedHours = ((1 / H) * (4 / 5) * L);
+                // không phải là chủ biên nhưng chủ biên nhưng có viết
             }
         }
+        if(isChiefAuthor==false){
+             const L = workHoursPerProject;
+            const H = memberNumber;
+
+            calculatedHours = (1 / H) * ((4/5)*L);
+        }
+
+        // Làm tròn kết quả
+
+
+        formValue.hoursCalculated = Math.round(calculatedHours);
         this.curriculumService
             .create({
                 ...this.createCurriculumForm.value,
@@ -311,8 +327,14 @@ export class CurriculumComponent implements OnInit {
             });
     }
 
+    // onSelectCanBo(event: any) {
+    //     this.createCurriculumForm.get('userId')?.setValue(event.value.id);
+    // }
+
     onSelectCanBo(event: any) {
         this.createCurriculumForm.get('userId')?.setValue(event.value.id);
+        this.createCurriculumForm.get('userName')?.setValue(event.value);
+
     }
 
     loadCurriculumLevel() {
@@ -324,7 +346,6 @@ export class CurriculumComponent implements OnInit {
                 }
             });
     }
-
     onCurriculumLevelChange(event: any): void {
         console.log(event);
         const selectedId = event.value;
@@ -372,9 +393,18 @@ export class CurriculumComponent implements OnInit {
         });
     }
 
+    // public handleOnSearch(event: any = null): void {
+    //     this.userService
+    //         .getPaging({ name: this.search })
+    //         .subscribe((result: any) => {
+    //             if (result.status) {
+    //                 this.canbos = result.data.items;
+    //             }
+    //         });
+    // }
     public handleOnSearch(event: any = null): void {
         this.userService
-            .getPaging({ name: this.search })
+            .getPaging({ name: event.query, pageSize: 100 })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.canbos = result.data.items;

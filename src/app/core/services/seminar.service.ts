@@ -20,6 +20,11 @@ export class SeminarService {
         return this.http.put(`seminar/update/${seminarId}`, request);
     }
 
+     updateStatus(request: any): Observable<any> {
+        const seminarId = request.id;
+        return this.http.put(`seminar/update-status/${seminarId}`, request);
+    }
+
     delete(id: number): Observable<any> {
         return this.http.put('seminar/delete?id=' + id, null);
     }

@@ -75,6 +75,7 @@
                         <th>Số trang đầu cuối</th>
                         <th>Năm xuất bản</th>
                         <th>Ghi chú</th>
+                        <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
                 </ng-template>
@@ -97,7 +98,7 @@
                             {{ item.authorNames }}
                         </td>
                         <td>
-                            {{ item.projectManager.name }}
+                            {{ item.projectManager?.name }}
                         </td>
                         <td>
                             {{ item.workHoursPerProject }}
@@ -123,6 +124,9 @@
                         <td>
                             {{ item.notes }}
                         </td>
+                        <td>
+                            {{item.statusApprove==null?'Đang chờ duyệt':item.statusApprove==0?'Đang chờ duyệt':item.statusApprove==1?'Đã duyệt':'Bị hủy'}}
+                        </td>
                         <td class="flex gap-2 justify-center">
                             <button
                                 pButton
@@ -142,6 +146,12 @@
                                 pTooltip="Xóa"
                                 tooltipPosition="top"
                             ></button>
+                            <div *ngIf="userCurrent.id==1 && (item.statusApprove!=1 && item.statusApprove!=2)">
+                                <button  pButton (click)="updateStatus(item.id,1)"
+                                pRipple>Duyệt</button>
+                                <button  pButton (click)="updateStatus(item.id,2)"
+                                pRipple>Hủy</button>
+                            </div>
                         </td>
                     </tr>
                 </ng-template>
@@ -227,6 +237,16 @@
                         id="workHoursPerProject"
                         formControlName="magazineName"
                         placeholder="Nhập tên tạp chí"
+                    />
+                </div>
+                  <div class="field col mb-0">
+                    <label for="memberCount">Số thành viên tham gia</label>
+                    <input
+                        type="number"
+                        pInputText
+                        id="memberCount"
+                        formControlName="memberCount"
+                        placeholder="Nhập số thành viên tham gia"
                     />
                 </div>
 

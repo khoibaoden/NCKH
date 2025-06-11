@@ -56,7 +56,7 @@ export class ScienceReportsComponent implements OnInit {
         private scienceReportService: ScienceReportService,
         private userService: UserService,
         private authService: AuthService
-    ) {}
+    ) { }
 
     public config: any = {
         paging: pagingConfig.default,
@@ -119,7 +119,7 @@ export class ScienceReportsComponent implements OnInit {
     loadScienceReportLevel() {
         this.scienceReportLevelService.getPaging({}).subscribe((res) => {
             this.scienceReportLevels = res.data.items;
-            console.log(this.scienceReportLevelService);
+            console.log(this.scienceReportLevels);
         });
     }
 
@@ -129,6 +129,14 @@ export class ScienceReportsComponent implements OnInit {
         });
     }
 
+    onScienceReportLevelChange(event: any) {
+        // event.value là đối tượng được chọn
+        console.log(event);
+        if (event && event.value) {
+            this.newReport.workHoursPerProject = event.value.value;
+            this.calculateHours();
+        }
+    }
     saveNewReport() {
         console.log(this.newReport);
         if (
@@ -156,7 +164,7 @@ export class ScienceReportsComponent implements OnInit {
         const formData = {
             ...this.newReport,
             scienceReportLevelId: this.newReport.scienceReportLevelId?.id,
-            memberCount: this.newReport.authorScienceReports.length,
+            // memberCount: this.newReport.authorScienceReports.length,
         };
         this.scienceReportService.create(formData).subscribe({
             next: (response) => {
@@ -176,8 +184,29 @@ export class ScienceReportsComponent implements OnInit {
     }
 
     addNewAuthor() {
-        this.newReport.authorScienceReports.push({ userId: null });
+        this.newReport.authorScienceReports.push({ userId: null, hoursCalculated: 0 });
+        this.calculateHours();
+
     }
+    calculateHours() {
+        const authors = this.newReport.authorScienceReports;
+        const totalHours = this.newReport.workHoursPerProject || 0; // togGio
+        const projectManagerId = this.newReport.projectManagerId;
+        // const authorCount = authors.length || 1;
+
+        const oneThird = totalHours / 3;
+        const twoThirdShared = (2 * totalHours) / 3;
+
+        authors.forEach(author => {
+            if (author.userId === projectManagerId) {
+                author.hoursCalculated = oneThird + twoThirdShared / this.newReport.memberCount;
+            } else {
+                author.hoursCalculated = twoThirdShared / this.newReport.memberCount;
+            }
+        });
+    }
+
+
 
     openAddDialog() {
         this.submitted = false;
@@ -264,11 +293,21 @@ export class ScienceReportsComponent implements OnInit {
         this.scienceReportService
             .getPaging({
                 ...request,
-                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                // userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                authorIds: this.userCurrent.id == 1 ? null : [this.userCurrent.id]
             })
             .subscribe((result: any) => {
                 if (result.status) {
                     this.reports = result.data.items;
+                    this.reports = this.reports.map((item) => {
+                        return {
+                            ...item,
+                            authorScienceReportHours:item.authorScienceReports,
+                            authorScienceReports: item.authorScienceReports
+                                .map((item) => item.user.name)
+                                .join(', '),
+                        };
+                    });
                     this.filteredReports = [...this.reports];
 
                     if (this.reports.length === 0) {
@@ -364,7 +403,7 @@ export class ScienceReportsComponent implements OnInit {
         if (!this.validateEditForm()) {
             return;
         }
-
+        // HoursCalculated
         console.log(this.editingReport);
 
         this.scienceReportService
@@ -380,6 +419,19 @@ export class ScienceReportsComponent implements OnInit {
             });
     }
 
+    updateStatus(id: any, status: any) {
+        this.scienceReportService
+            .updateStatus({ id: id }, { statusApprove: status })
+            .subscribe((res) => {
+                this.editDialogVisible = false;
+                this.getReports({});
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Thành công',
+                    detail: 'Cập nhật bài báo khoa học thành công',
+                });
+            });
+    }
     confirmDelete(report: any) {
         this.confirmationService.confirm({
             message: `Bạn có chắc muốn xóa báo cáo "${report.reportName}" không?`,

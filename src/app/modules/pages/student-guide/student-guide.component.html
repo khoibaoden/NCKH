@@ -39,7 +39,7 @@
                             <label
                                 for="email1"
                                 class="block text-900 text-large font-weight mb-2"
-                                >Tên sở hữu trí tuệ:</label
+                                >Tên hướng dẫn sinh viên:</label
                             >
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search"></i>
@@ -47,7 +47,7 @@
                                     pInputText
                                     type="text"
                                     [(ngModel)]="this.queryParameters.keyWord"
-                                    placeholder="Tìm theo tên sở hữu trí tuệ"
+                                    placeholder="Tìm theo tên hướng dẫn sinh viên"
                                     style="width: 350px"
                                     class="sm:"
                                 />
@@ -417,7 +417,7 @@
                             *ngIf="createStudentGuideForm.get('name')?.errors?.['required']"
                             class="error-message"
                         >
-                            Vui lòng nhập tên sở hữu trí tuệ
+                            Vui lòng nhập tên hướng dẫn sinh viên
                         </div>
                     </div>
                 </div>

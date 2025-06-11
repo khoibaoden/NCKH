@@ -180,7 +180,10 @@ export class ScienceProjectComponent implements OnInit {
         this.scienceProjectService
             .getPaging({
                 ...request,
-                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                // userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                // authorIds:[this.userCurrent.id]
+                authorIds: this.userCurrent.id == 1 ? null : [this.userCurrent.id]
+
             })
             .subscribe((result: any) => {
                 if (result.status) {

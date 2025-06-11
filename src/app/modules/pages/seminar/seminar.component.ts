@@ -308,6 +308,40 @@ export class SeminarComponent implements OnInit {
         this.editDialogVisible = true;
     }
 
+      updateStatus(id: any, status: any) {
+        const updateRequest = {
+                id: id,
+                statusApprove:status
+              
+            };
+            this.seminarService.updateStatus(updateRequest).subscribe(
+                (result: any) => {
+                    if (result.status) {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Thành công',
+                            detail: 'Cập nhật thông tin hội thảo thành công',
+                        });
+                        this.hideEditDialog();
+                        this.getSeminar();
+                    } else {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Lỗi',
+                            detail: result.message || 'Cập nhật thất bại',
+                        });
+                    }
+                },
+                (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Lỗi',
+                        detail: 'Có lỗi xảy ra khi cập nhật',
+                    });
+                }
+            );
+    }
+
     hideEditDialog() {
         this.editDialogVisible = false;
     }

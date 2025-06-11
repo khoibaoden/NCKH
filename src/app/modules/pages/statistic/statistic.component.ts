@@ -9,6 +9,9 @@ import pagingConfig, {
     DEFAULT_PER_PAGE_OPTIONS,
 } from 'src/app/core/configs/paging.config';
 import systemConfig from 'src/app/core/configs/system.config';
+import { AuthService } from 'src/app/core/services/identity/auth.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { el } from '@fullcalendar/core/internal-common';
 
 @Component({
     selector: 'app-statistic',
@@ -19,7 +22,6 @@ import systemConfig from 'src/app/core/configs/system.config';
 export class StatisticComponent implements OnInit {
     items: any;
     statistics: any;
-
     public config: any = {
         paging: pagingConfig.default,
         baseUrl: systemConfig.baseFileSystemUrl,
@@ -29,7 +31,7 @@ export class StatisticComponent implements OnInit {
 
     public paging: any = {
         pageIndex: DEFAULT_PAGE_INDEX,
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize: DEFAULT_PAGE_SIZE * 100,
         sortBy: '',
         orderBy: '',
         totalRecords: 0,
@@ -44,21 +46,83 @@ export class StatisticComponent implements OnInit {
         keyWord: '',
         startDate: null,
         endDate: null,
+        pageSize: 100
     };
+    userCurrent: any = {};
 
     constructor(
         private statisticService: StatisticService,
         private route: ActivatedRoute,
-        private router: Router
-    ) {}
+        private router: Router,
+        private authService: AuthService,
+        private http: HttpClient
+    ) {
+        this.authService.userCurrent.subscribe((user) => {
+            console.log(user);
+            this.userCurrent = user;
+        });
+    }
 
     ngOnInit() {
         this.items = [{ label: 'Thống kê' }];
-        this.getStatistic(this.queryParameters);
+
+        this.getStatistic();
+    }
+    reLoad() {
+        this.queryParameters.startDate=undefined;
+        this.queryParameters.endDate=undefined;
+        // this.getStatistic();
+         const request = {
+            pageIndex: 1,
+            pageSize: 100,
+            userId: this.userCurrent?.id == 1 ? undefined : this.userCurrent.id
+        }
+        this.statisticService
+            .getStatisticTotalHours({
+                ...request,
+                // startDate: this.queryParameters?.startDate?.toISOString(),
+                // endDate: this.queryParameters?.endDate?.toISOString(),
+            })
+            .subscribe((result: any) => {
+                if (result.status) {
+                    if (
+                        request.pageIndex !== 1 &&
+                        result.data.items.length === 0
+                    ) {
+                        this.route.queryParams.subscribe((params) => {
+                            const request = {
+                                ...params,
+                                pageIndex: 1,
+                            };
+
+                            this.router.navigate([], {
+                                relativeTo: this.route,
+                                queryParams: request,
+                                queryParamsHandling: 'merge',
+                            });
+                        });
+                    }
+
+                    this.statistics = result.data;
+                    if (this.statistics.length === 0) {
+                        this.paging.pageIndex = 1;
+                    }
+
+                    const { items, ...paging } = result.data;
+                    this.paging = paging;
+                }
+            });
+
     }
 
-    filterByDateRange() {}
-    public getStatistic(request: any): any {
+
+    filterByDateRange() { }
+    public getStatistic(): any {
+        const request = {
+            pageIndex: 1,
+            pageSize: 100,
+            userId: this.userCurrent?.id == 1 ? undefined : this.userCurrent.id
+        }
         this.statisticService
             .getStatisticTotalHours({
                 ...request,
@@ -94,5 +158,48 @@ export class StatisticComponent implements OnInit {
                     this.paging = paging;
                 }
             });
+
+
     }
+    export() {
+        var request = {};
+        if (this.userCurrent.id === 1) {
+            request = {
+                pageIndex: 1,
+                pageSize: 100,
+                // userId: this.userCurrent?.id === 1 ? null : this.userCurrent.id,
+                startDate: this.queryParameters?.startDate?.toISOString()?this.queryParameters?.startDate?.toISOString():'',
+                endDate: this.queryParameters?.endDate?.toISOString()?this.queryParameters?.endDate?.toISOString():''
+            }
+        }
+         else {
+                request = {
+                    pageIndex: 1,
+                    pageSize: 100,
+                    userId: this.userCurrent?.id === 1 ? null : this.userCurrent.id,
+                    startDate: this.queryParameters?.startDate?.toISOString()?this.queryParameters?.startDate?.toISOString():'',
+                     endDate: this.queryParameters?.endDate?.toISOString()?this.queryParameters?.endDate?.toISOString():''   
+                };
+            }
+
+        
+
+        const params = new HttpParams({ fromObject: request });
+
+        this.http.get('https://localhost:7115/api/statistic/export-excel', {
+            params,
+            responseType: 'blob'
+        }).subscribe(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'teacher_statistics.xlsx';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    }
+
+
+
+
 }

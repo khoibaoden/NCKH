@@ -108,7 +108,6 @@ export class AppLayoutComponent implements OnDestroy {
             'p-ripple-disabled': !this.layoutService.config().ripple
         }
     }
-
     ngOnDestroy() {
         if (this.overlayMenuOpenSubscription) {
             this.overlayMenuOpenSubscription.unsubscribe();

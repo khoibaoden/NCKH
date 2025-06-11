@@ -221,7 +221,9 @@ export class NewsComponent implements OnInit {
         this.newsService
             .getPaging({
                 ...request,
-                userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                // userId: this.userCurrent.id != 1 ? this.userCurrent.id : null,
+                // authorIds:[this.userCurrent.id]
+                authorIds: this.userCurrent.id != 1 ? [this.userCurrent.id] : null
             })
             .subscribe((result: any) => {
                 if (result.status) {
@@ -386,7 +388,9 @@ export class NewsComponent implements OnInit {
         const formValue = this.createNewsForm.value;
 
         const projectManagerId = formValue.projectManagerId.id;
-        const memberCount = this.selectedMembers.length;
+        // const memberCount = this.selectedMembers.length;
+        const memberCount = formValue.memberCount;
+
         const workHours = formValue.articleProjectLevelId.value;
 
         // Tìm xem người đang tạo bài báo có phải là project manager không
@@ -399,7 +403,7 @@ export class NewsComponent implements OnInit {
                 hoursCalculated =
                     workHours / 3 + (2 * (workHours / 3)) / memberCount;
             } else {
-                hoursCalculated = (2 * (workHours / 3)) / memberCount;
+                hoursCalculated = ((2 * (workHours / 3)) / memberCount);
             }
         }
 
@@ -409,7 +413,7 @@ export class NewsComponent implements OnInit {
             projectManagerId: projectManagerId,
             userId: formValue.userId.id,
             authorArticleProjects: this.selectedMembers,
-            memberCount: memberCount,
+            // memberCount: memberCount,
             hoursCalculated: Math.round(hoursCalculated), // làm tròn nếu cần
         };
 
@@ -464,11 +468,33 @@ export class NewsComponent implements OnInit {
         });
     }
 
+    updateStatus(id: any, status: any) {
+        this.newsService
+            .updateBodyAndQueryParamsStatusStatus(
+                { id: id },
+                {
+                   statusApprove:status
+                }
+            )
+            .subscribe((result: any) => {
+                if (result.status) {
+                    this.visibleUpdateNews = false;
+                    this.updateNewsForm.reset();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Thành công',
+                        detail: 'Cập nhật thành công',
+                    });
+                    this.getNews(this.queryParameters);
+                }
+            });
+    }
+
     handleUpdateItem() {
         console.log(this.updateNewsForm.value);
         const formValue = this.updateNewsForm.value;
         const projectManagerId = formValue.projectManagerId.id;
-        const memberCount = this.selectedMembersUpdate.length;
+        const memberCount = formValue.memberCount;
         const workHours = formValue.articleProjectLevelId.value;
 
         // Tìm xem người đang tạo bài báo có phải là project manager không
@@ -479,9 +505,9 @@ export class NewsComponent implements OnInit {
         if (memberCount > 0) {
             if (isMainAuthor) {
                 hoursCalculated =
-                    workHours / 3 + (2 * (workHours / 3)) / memberCount;
+                    workHours / 3 + ((2 * (workHours / 3)) / memberCount);
             } else {
-                hoursCalculated = (2 * (workHours / 3)) / memberCount;
+                hoursCalculated = ((2 * (workHours / 3)) / memberCount);
             }
         }
         console.log(

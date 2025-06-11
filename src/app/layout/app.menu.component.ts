@@ -27,17 +27,22 @@ export class AppMenuComponent implements OnInit {
             {
                 label: '',
                 items: [
-                    ...(this.hasPermissionHelper.hasPermissions([
-                        PermissionConstant.Admin,
-                    ])
-                        ? [
-                              {
+                    // ...(this.hasPermissionHelper.hasPermissions([
+                    //     PermissionConstant.Admin,
+                    // ])
+                    //     ? [
+                    //           {
+                    //               label: 'Tổng hợp giờ',
+                    //               icon: 'pi pi-fw pi-bookmark',
+                    //               routerLink: ['/statistic'],
+                    //           },
+                    //       ]
+                    //     : []),
+                     {
                                   label: 'Tổng hợp giờ',
                                   icon: 'pi pi-fw pi-bookmark',
                                   routerLink: ['/statistic'],
                               },
-                          ]
-                        : []),
                 ],
             },
 

@@ -204,13 +204,26 @@
                 <!-- Bổ sung các trường mới -->
                 <div class="field col mb-0">
                     <label for="userId">Cán bộ/Giáo viên</label>
-                    <p-dropdown
+                    <!-- <p-dropdown
                         formControlName="userId"
                         [options]="canbos"
                         optionLabel="name"
                         optionValue="id"
                         placeholder="Chọn cán bộ giáo viên"
-                    ></p-dropdown>
+                    ></p-dropdown> -->
+                    <p-autoComplete
+                        formControlName="userName"
+                        [suggestions]="canbos"
+                        (completeMethod)="handleOnSearch($event)"
+                        optionLabel="name"
+                        optionValue="id"
+                        [dropdown]="true"
+                        [minLength]="1"
+                        placeholder="Nhập cán bộ giáo viên"
+                        (onSelect)="onSelectCanBo($event)"
+                    >
+                    </p-autoComplete>
+
                 </div>
 
                 <div class="field col mb-0">

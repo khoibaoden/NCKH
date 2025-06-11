@@ -92,6 +92,7 @@
                         <th class="text-center" style="width: 12%">Số giờ</th>
                         <th class="text-center" style="width: 15%">Ghi chú</th>
                         <th class="text-center" style="width: 10%">Mức độ</th>
+                        <th>Trạng thái</th>
                         <th class="text-center" style="width: 12%">Thao tác</th>
                     </tr>
                 </ng-template>
@@ -129,6 +130,9 @@
                         <td style="width: 10%" class="text-center">
                             {{ item.seminarLevel?.name || "Chưa có thông tin" }}
                         </td>
+                        <td>
+                            {{item.statusApprove==null?'Đang chờ duyệt':item.statusApprove==0?'Đang chờ duyệt':item.statusApprove==1?'Đã duyệt':'Bị hủy'}}
+                        </td>
                         <td style="width: 12%">
                             <div class="flex gap-2 justify-content-center">
                                 <button
@@ -148,7 +152,14 @@
                                     (click)="confirmDelete(item)"
                                     pTooltip="Xóa"
                                     tooltipPosition="top"
-                                ></button>
+                                >
+                            </button>
+                                 <div *ngIf="userCurrent.id==1 && (item.statusApprove!=1 && item.statusApprove!=2)">
+                                <button  pButton (click)="updateStatus(item.id,1)"
+                                pRipple>Duyệt</button>
+                                <button  pButton (click)="updateStatus(item.id,2)"
+                                pRipple>Hủy</button>
+                            </div>
                             </div>
                         </td>
                     </tr>

@@ -21,6 +21,16 @@ export class NewsService {
             dataBody
         );
     }
+      updateBodyAndQueryParamsStatusStatus(
+        dataQueryParams: any,
+        dataBody: any
+    ): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'articleproject/update-status',
+            dataQueryParams,
+            dataBody
+        );
+    }
 
     create(request: FormData): Observable<any> {
         return this.http.postFormData('articleproject/create', request);

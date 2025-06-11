@@ -21,6 +21,13 @@ export class ScienceReportService {
             request2
         );
     }
+     updateStatus(request: any, request2: any): Observable<any> {
+        return this.http.putBodyAndQueryParams(
+            'sciencereport/update-status',
+            request,
+            request2
+        );
+    }
 
     delete(request: any, request2: any): Observable<any> {
         return this.http.putBodyAndQueryParams(

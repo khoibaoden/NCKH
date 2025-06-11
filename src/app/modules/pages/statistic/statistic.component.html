@@ -3,12 +3,9 @@
         <p-toolbar styleClass="mb-2">
             <div class="">
                 <h3>Thống kê</h3>
-                <p-breadcrumb
-                    [model]="items"
-                    [home]="{ icon: 'pi pi-home' }"
-                ></p-breadcrumb>
+                <p-breadcrumb [model]="items" [home]="{ icon: 'pi pi-home' }"></p-breadcrumb>
             </div>
-            <ng-template pTemplate="right">
+            <!-- <ng-template pTemplate="right">
                 <button
                     pButton
                     pRipple
@@ -16,57 +13,28 @@
                     label="Thêm mới"
                     (click)="visibleScienceProject = true"
                 ></button>
-            </ng-template>
+            </ng-template> -->
         </p-toolbar>
         <div class="card">
-            <p-table
-                [value]="statistics"
-                responsiveLayout="scroll"
-                styleClass="p-datatable-striped"
-                [paginator]="false"
-                [rowHover]="true"
-            >
+            <p-table [value]="statistics" responsiveLayout="scroll" styleClass="p-datatable-striped" [paginator]="false"
+                [rowHover]="true">
                 <ng-template pTemplate="caption">
-                    <div
-                        class="flex flex-column gap-3 align-items-end md:flex-row md:"
-                    >
-                        <div
-                            class="flex flex-column"
-                            style="margin-left: -12px"
-                        >
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Từ ngày:</label
-                            >
-                            <p-calendar
-                                id="endDate"
-                                [(ngModel)]="queryParameters.startDate"
-                                dateFormat="dd/mm/yy"
-                                placeholder="Nhập ngày bắt đầu"
-                                showIcon="true"
-                            ></p-calendar>
+                    <div class="flex flex-column gap-3 align-items-end md:flex-row md:">
+                        <div class="flex flex-column" style="margin-left: -12px">
+                            <label for="email1" class="block text-900 text-large font-weight mb-2">Từ ngày:</label>
+                            <p-calendar id="endDate" [(ngModel)]="queryParameters.startDate" dateFormat="dd/mm/yy"
+                                placeholder="Nhập ngày bắt đầu" showIcon="true"></p-calendar>
                         </div>
                         <div class="flex flex-column">
-                            <label
-                                for="email1"
-                                class="block text-900 text-large font-weight mb-2"
-                                >Đến ngày:</label
-                            >
-                            <p-calendar
-                                id="endDate"
-                                [(ngModel)]="queryParameters.endDate"
-                                dateFormat="dd/mm/yy"
-                                placeholder="Nhập ngày kết thúc"
-                                showIcon="true"
-                            ></p-calendar>
+                            <label for="email1" class="block text-900 text-large font-weight mb-2">Đến ngày:</label>
+                            <p-calendar id="endDate" [(ngModel)]="queryParameters.endDate" dateFormat="dd/mm/yy"
+                                placeholder="Nhập ngày kết thúc" showIcon="true"></p-calendar>
                         </div>
-                        <button
-                            pButton
-                            pRipple
-                            label="Lọc"
-                            (click)="getStatistic(queryParameters)"
-                        ></button>
+                        <button pButton pRipple label="Lọc" (click)="getStatistic(queryParameters)"></button>
+                        <button pButton pRipple label="Tải lại trang" (click)="reLoad()"></button>
+                        <button pButton pRipple label="Xuất excel" (click)="export()"></button>
+                        
+
                     </div>
                 </ng-template>
                 <ng-template pTemplate="header">
@@ -75,6 +43,14 @@
                         <th>Tên giảng viên</th>
                         <th>Chức vụ</th>
                         <th>Khoa</th>
+                        <th>Giờ quản lý hội thảo</th>
+                        <th>Giờ biên soạn giáo trình</th>
+                        <th>Giờ sở hữu trí tuệ</th>
+                        <th>Giờ bài báo</th>
+                        <th>Giờ hướng dẫn sinh viên</th>
+                        <th>Giờ dề tài nghiên cứu</th>
+                        <th>Giờ báo cáo khoa học</th>
+                        <th>Giờ viết sách</th>
                         <th>Định mức năm</th>
                         <th>Tổng giờ thực hiện</th>
                         <th>Tổng giờ thừa</th>
@@ -86,8 +62,16 @@
                         <td>{{ teacher.name }}</td>
                         <td>{{ teacher.staffPosition?.name }}</td>
                         <td>{{ teacher.faculty?.name }}</td>
-                        <td>{{ teacher.annualNorm }}</td>
-                        <td>{{ teacher.totalHours }}</td>
+                        <td>{{ teacher.seminarHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.curriculumHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.intellecturalPropertyHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.articlesHours  }}</td>
+                        <td>{{ teacher.studentGuideHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.scienceProjectManagerHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.managerScienceReportHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.articlesHours | number:'1.0-0' }}</td>
+                        <td>{{ teacher.annualNorm | number:'1.0-0'  }}</td>
+                        <td>{{ teacher.totalHours}}</td>
                         <td>{{ teacher.totalHoursExcess }}</td>
                     </tr>
                 </ng-template>
